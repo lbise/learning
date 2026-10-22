@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 4: A third-person camera</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 4 · Third-person feel</p>
+<h1>A third-person camera</h1>
+<p class="subtitle">Mouse-orbit camera, movement relative to the camera, and a character that turns to face where it walks. The first step toward Valheim.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Design and build a third-person controller from a spec, not from steps.</dd>
+  <dt>Time</dt><dd>45–60 minutes, plus 10 minutes of reading</dd>
+  <dt>The win</dt><dd>Your coin game now plays like a real third-person game</dd>
+  <dt>Format</dt><dd><strong>New: there are no step-by-step instructions.</strong> You get the concepts and a spec. Hints and a full solution are hidden at the end. Get as far as you can before opening them. Struggling a bit is what makes this stick.</dd>
+  <dt>Links</dt><dd>Links in the text are citations and optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">Write the line that connects a coin's <code>collected</code> signal to a function <code>_on_coin_collected</code>.</p>
+  <details><summary>Show answer</summary><code>coin.collected.connect(_on_coin_collected)</code></details>
+</div>
+<div class="recall">
+  <p class="q">Node vs resource: one sentence each, with two examples each.</p>
+  <details><summary>Show answer</summary>A node does something and lives in the scene tree (<code>Camera3D</code>, <code>CollisionShape3D</code>). A resource is a data container that nodes use (<code>BoxMesh</code>, <code>StandardMaterial3D</code>).</details>
+</div>
+
+<h2>The concepts you need</h2>
+
+<h3>1. One axis per node</h3>
+<p>A third-person camera turns left and right (<em>yaw</em>, around Y) and tilts up and down (<em>pitch</em>, around X). The standard trick is to give each axis <strong>its own node</strong>: a parent that only yaws and a child that only pitches. Nesting them combines the rotations in the right order for free, the same way the orbiting cube rode along on its parent in Lesson 1.</p>
+<p>Second rule: <strong>don't rotate the <code>CharacterBody3D</code> to face movement.</strong> Anything parented to it, including the camera rig, would spin along with it. Rotate a child <code>Model</code> node that holds only the visuals.</p>
+
+<h3>2. SpringArm3D: a camera boom that won't clip</h3>
+<p class="aside">The 3D docs explain why you need one: with a plain child camera, <a href="https://docs.godotengine.org/en/stable/tutorials/3d/spring_arm.html">“the camera clips through geometry and hides the scene.”</a></p>
+<p><a href="https://docs.godotengine.org/en/stable/classes/class_springarm3d.html"><code>SpringArm3D</code></a> “casts a ray or a shape along its Z axis and moves all its direct children to the collision point”. Put the camera at the end of it and the camera slides closer to the player when a wall gets in the way. Its length is the <code>spring_length</code> property (default 1 m, which is far too short).</p>
+
+<h3>3. The mouse is an event, not a state</h3>
+<p>Keys can be polled (“is W held?”), but mouse <em>movement</em> arrives as events. Override <a href="https://docs.godotengine.org/en/stable/classes/class_node.html"><code>_unhandled_input(event)</code></a>, which is called for input the UI didn't consume, and read <a href="https://docs.godotengine.org/en/stable/classes/class_inputeventmousemotion.html"><code>InputEventMouseMotion.relative</code></a>, the movement since the last event in pixels. To hide and lock the cursor, set <code>Input.mouse_mode = Input.MOUSE_MODE_CAPTURED</code>. The <a href="https://docs.godotengine.org/en/stable/classes/class_input.html">docs</a> say you then need <code>relative</code> to read motion.</p>
+
+<h3>4. Camera-relative movement</h3>
+<p>Right now, W always moves toward −Z in the world. In a third-person game, W means “away from the camera”. So build the input vector as before, then rotate it around <code>Vector3.UP</code> by the camera's yaw, using <a href="https://docs.godotengine.org/en/stable/classes/class_vector3.html"><code>Vector3.rotated(axis, angle)</code></a>. You know this as a 2D rotation matrix in disguise.</p>
+
+<h3>5. Facing a direction, and the angle wrap trap</h3>
+<p class="aside">Remember this for later: Godot's “forward” is −Z, but <a href="https://docs.godotengine.org/en/stable/classes/class_vector3.html">imported 3D assets face +Z</a> (<code>Vector3.MODEL_FRONT</code>). When you swap the capsule for a real character, it may walk backwards, and now you'll know why.</p>
+<p>Turning a direction vector into a yaw angle is <code>atan2</code>. Smoothing the turn needs care: going from 170° to −170° is a 20° turn, but a plain <code>lerp</code> would sweep 340° the long way. <a href="https://docs.godotengine.org/en/stable/classes/class_%40globalscope.html"><code>lerp_angle(from, to, weight)</code></a> “interpolates correctly when the angles wrap around”.</p>
+<p>Add a small box “nose” to the model so you can see which way it faces. Put it on the model's −Z side.</p>
+
+<h2>The spec</h2>
+
+<p>Modify your <code>player.tscn</code> and <code>player.gd</code> from Lessons 2–3. Tick each criterion off when you've <em>tested</em> it in game:</p>
+
+<ol class="checklist" id="spec">
+  <li>The mouse is captured when the game starts. Moving it left and right orbits the camera around the player.</li>
+  <li>Moving the mouse up and down tilts the camera, clamped so it can't flip over the top or go under the floor.</li>
+  <li><kbd>Esc</kbd> releases the mouse. Clicking in the window captures it again.</li>
+  <li><kbd>W</kbd> moves away from the camera whichever way the camera faces. A, S and D behave the same way relative to the camera.</li>
+  <li>The model turns <em>smoothly</em> to face its movement direction. The camera does <em>not</em> turn with it.</li>
+  <li>Back the player against a crate stack: the camera pulls in instead of disappearing inside it.</li>
+  <li>Coins, jumping and the score still work.</li>
+</ol>
+<p class="progress" data-for="spec"></p>
+
+<h2>Hints: open one at a time, only when stuck</h2>
+
+<div class="recall">
+  <p class="q">Hint 1: the scene tree</p>
+  <details><summary>Show hint</summary>
+<pre class="tree"><b>Player</b> (CharacterBody3D) ← player.gd
+├─ CollisionShape3D            capsule, y = 1
+├─ Model (Node3D)              ← yaw toward movement
+│  ├─ MeshInstance3D           capsule, y = 1
+│  └─ Nose (MeshInstance3D)    small box, y = 1.5, z = -0.5
+└─ CameraPivot (Node3D)        y = 1.5      ← yaw from mouse X
+   └─ SpringArm3D              spring_length = 5, rotation x = -20  ← pitch from mouse Y
+      └─ Camera3D              (leave at 0,0,0: the arm positions it)</pre>
+Delete the old <code>Camera3D</code> you placed in Lesson 2.
+  </details>
+</div>
+
+<div class="recall">
+  <p class="q">Hint 2: reading the mouse</p>
+  <details><summary>Show hint</summary>
+<pre><code>func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		pivot.rotation.y -= event.relative.x * mouse_sensitivity
+		arm.rotation.x -= event.relative.y * mouse_sensitivity
+		arm.rotation.x = clampf(arm.rotation.x, deg_to_rad(-70.0), deg_to_rad(20.0))</code></pre>
+A sensitivity around <code>0.003</code> radians per pixel is a reasonable start. Get <code>pivot</code> and <code>arm</code> with <code>@onready var … = $…</code>, like the label in Lesson 3.
+  </details>
+</div>
+
+<div class="recall">
+  <p class="q">Hint 3: camera-relative direction</p>
+  <details><summary>Show hint</summary>
+<pre><code>var direction := Vector3(input.x, 0, input.y).rotated(Vector3.UP, pivot.rotation.y)</code></pre>
+Then use <code>direction.x</code> and <code>direction.z</code> where you used <code>input.x</code> and <code>input.y</code> before.
+  </details>
+</div>
+
+<div class="recall">
+  <p class="q">Hint 4: the facing angle</p>
+  <details><summary>Show hint</summary>
+A model whose front is −Z, yawed by θ, faces <code>(−sin θ, 0, −cos θ)</code>. Setting that equal to <code>direction</code> gives <code>θ = atan2(-direction.x, -direction.z)</code>. Only update it while actually moving (<code>direction.length() &gt; 0.01</code>), or the model snaps back to 0 when you let go.
+  </details>
+</div>
+
+<div class="recall">
+  <p class="q">Full solution: <code>player.gd</code> (tested in Godot 4.7.2)</p>
+  <details><summary>Show solution</summary>
+<pre><code>extends CharacterBody3D
+
+@export var speed := 5.0
+@export var jump_velocity := 4.5
+@export var mouse_sensitivity := 0.003   <span class="c"># radians per pixel</span>
+@export var turn_speed := 10.0           <span class="c"># higher = snappier turning</span>
+
+@onready var pivot: Node3D = $CameraPivot
+@onready var arm: SpringArm3D = $CameraPivot/SpringArm3D
+@onready var model: Node3D = $Model
+
+func _ready() -> void:
+	add_to_group("player")
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		pivot.rotation.y -= event.relative.x * mouse_sensitivity
+		arm.rotation.x -= event.relative.y * mouse_sensitivity
+		arm.rotation.x = clampf(arm.rotation.x, deg_to_rad(-70.0), deg_to_rad(20.0))
+	elif event.is_action_pressed("ui_cancel"):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	elif event is InputEventMouseButton and event.pressed:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _physics_process(delta: float) -> void:
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = jump_velocity
+
+	var input := Input.get_vector("move_left", "move_right",
+			"move_forward", "move_back")
+	var direction := Vector3(input.x, 0, input.y).rotated(Vector3.UP, pivot.rotation.y)
+	velocity.x = direction.x * speed
+	velocity.z = direction.z * speed
+
+	if direction.length() > 0.01:
+		var target_yaw := atan2(-direction.x, -direction.z)
+		model.rotation.y = lerp_angle(model.rotation.y, target_yaw, turn_speed * delta)
+
+	move_and_slide()</code></pre>
+I checked it in Godot 4.7.2 without a window: with the camera yawed 90°, holding W moved the player 5 m along −X in one second, and the model turned to 90°. A wall behind the player shortened the arm from 5 m to about 2.7 m.
+  </details>
+</div>
+
+<h2>Stretch goals (pick any)</h2>
+<ul>
+  <li><strong>Zoom:</strong> the mouse wheel changes <code>arm.spring_length</code>, clamped to 2–10 m. Wheel events are <code>InputEventMouseButton</code> with <code>MOUSE_BUTTON_WHEEL_UP</code> or <code>MOUSE_BUTTON_WHEEL_DOWN</code>.</li>
+  <li><strong>Sprint:</strong> a new <code>sprint</code> input action (<kbd>Shift</kbd>) that multiplies speed while held. Which of <code>is_action_pressed</code> or <code>is_action_just_pressed</code> do you need?</li>
+  <li><strong>For the control engineer:</strong> <code>lerp(x, target, k * delta)</code> is a first-order low-pass filter, but it's only approximately frame-rate independent, and it overshoots once <code>k * delta</code> &gt; 1. Replace the weight with <code>1.0 - exp(-turn_speed * delta)</code> and explain why that's exact.</li>
+</ul>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">You rotate the <code>CharacterBody3D</code> itself to face movement, with the camera rig as its child. What happens?</p>
+  <button data-correct data-why="Children inherit the parent's transform, so the rig spins along with the body. That's why only the Model rotates.">The camera swings around whenever the player turns</button>
+  <button data-why="Collision would still work. The problem is the camera rig inheriting the rotation.">The collision shape stops working after the turn</button>
+  <button data-why="The spring arm still works. It's just carried around by its rotating parent.">The spring arm ignores every wall after that</button>
+  <button data-why="Movement direction comes from the pivot, not the body. The camera is the visible problem.">Nothing changes because child rotations never get inherited</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">The model faces 170° and should turn to face −170°. With plain <code>lerp</code> instead of <code>lerp_angle</code>, it…</p>
+  <button data-correct data-why="lerp treats angles as plain numbers: 170 → −170 is a 340° sweep. lerp_angle takes the 20° path.">spins the long way around, nearly a full turn</button>
+  <button data-why="lerp doesn't know angles wrap. It interpolates the raw numbers.">turns the short way, exactly the same as lerp_angle</button>
+  <button data-why="lerp still moves toward the target. It just takes the long route.">refuses to turn at all because the angles differ</button>
+  <button data-why="The motion is smooth, just in the wrong direction around the circle.">snaps straight to the target with no smoothing applied</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why read the mouse in <code>_unhandled_input</code> instead of polling in <code>_physics_process</code>?</p>
+  <button data-correct data-why="Mouse motion is delivered as InputEventMouseMotion events with a relative delta. There's no held state to poll.">Mouse motion arrives as events, not as states</button>
+  <button data-why="_physics_process can read input. Mouse motion just isn't a pollable state.">Physics callbacks are forbidden from reading any input</button>
+  <button data-why="Both callbacks run often. The point is the event model, not speed.">_unhandled_input always runs faster than the physics tick</button>
+  <button data-why="Captured mode works with either. You still need the motion events' relative value.">Captured mode only works inside event callback functions</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You import a character model and it walks backwards. The most likely reason?</p>
+  <button data-correct data-why="Vector3.MODEL_FRONT is +Z, while Godot's forward is −Z. Rotate the model 180° under Model, or flip the atan2 signs.">Imported models face +Z, Godot forward is −Z</button>
+  <button data-why="Animations don't decide the facing direction. It's an axis convention mismatch.">The animation is playing in reverse by default</button>
+  <button data-why="atan2 itself is fine. The model's front axis is the mismatch.">The atan2 function in GDScript always returns degrees</button>
+  <button data-why="The spring arm only moves the camera. It never touches the model.">The spring arm flips its children around Y</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>Draw the third-person rig from memory, and say which node rotates on which axis.</li>
+  <li>Why rotate <code>Model</code> rather than the body?</li>
+  <li>From Lesson 2: which movement value gets multiplied by delta, and which doesn't?</li>
+</ul>
+
+<p>Next lesson: replace the capsule with a real animated character (free and CC0 from Quaternius), and play idle, walk and jump animations. That's the bridge to making your own models in Blender.</p>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/tutorials/3d/spring_arm.html">Godot Docs: Third-person camera with spring arm</a>. It explains how the arm sweeps a shape (the camera's near-plane pyramid when the camera is a direct child) and how to tune it.
+</div>
+
+<p class="ask">Stuck past all the hints, or a criterion that won't pass? Paste your script and I'll help you debug it. Explaining what you expected and what happened instead is half the fix.</p>
+
+<nav class="nav">
+  <span>← <a href="0003-coins-signals-score.html">Lesson 3</a> · <a href="0005-mouse-to-camera.html">Lesson 5: From mouse to camera</a> →</span>
+  <span>Reference: <a href="../reference/third-person-controller.html">Third-person controller</a></span>
+</nav>
+
+</main>
+</body>
+</html>

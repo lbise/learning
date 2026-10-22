@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 2: Walk, jump, collide</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 2 · Godot foundations</p>
+<h1>Walk, jump, collide</h1>
+<p class="subtitle">Physics bodies, collision shapes, and your first character that can't walk through walls.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Understand Godot's physics bodies and build a character controller from scratch.</dd>
+  <dt>Time</dt><dd>About 40 minutes, plus 15 minutes of reading</dd>
+  <dt>The win</dt><dd>A capsule “player” you walk with WASD, jump with Space, and climb onto crates with, using a reusable crate scene</dd>
+  <dt>Links</dt><dd>Links in the text are citations and optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Warm-up: from memory, before scrolling</h2>
+<p>Answer these out loud or on paper first, then reveal. Recalling them a few days later is what makes Lesson 1 stick.</p>
+
+<div class="recall">
+  <p class="q">Sketch the scene tree you built in Lesson 1.</p>
+  <details><summary>Show answer</summary><code>Main</code> (Node3D) with three children: <code>Cube</code> (MeshInstance3D, with the script), <code>Camera3D</code>, <code>DirectionalLight3D</code>.</details>
+</div>
+<div class="recall">
+  <p class="q">Why are speeds multiplied by <code>delta</code>?</p>
+  <details><summary>Show answer</summary>Frames take different amounts of time. <code>speed * delta</code> gives the distance for <em>this</em> frame, so the motion per second is the same at any frame rate.</details>
+</div>
+<div class="recall">
+  <p class="q">What's the difference between a node and a scene?</p>
+  <details><summary>Show answer</summary>A node is one building block. A scene is a saved, reusable tree of nodes.</details>
+</div>
+
+<h2>Why physics now</h2>
+
+<p>In Valheim, almost every moment involves the physics engine: walking up a slope, landing a jump, bumping into a tree, a log rolling downhill. Your cube from Lesson 1 had none of that. It was a picture you moved by hand, so it would glide straight through a wall. Today you'll give the game things that are <em>solid</em>.</p>
+
+<h2>Four kinds of collision object</h2>
+
+<p class="aside">The docs page describes the 2D versions. The 3D nodes (<code>…3D</code>) behave the same way.</p>
+
+<p>Godot has <a href="https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html">four kinds of collision object</a>. Picking the right one is most of the design work:</p>
+
+<table>
+  <tr><th>Node</th><th>Moved by</th><th>Use for</th></tr>
+  <tr><td><code>StaticBody3D</code></td><td>Nothing. It's “not moved by the physics engine”</td><td>Floors, walls, trees, crates you stand on</td></tr>
+  <tr><td><code>CharacterBody3D</code></td><td><strong>Your code</strong>: “all movement and collision response must be implemented in code”</td><td>The player and enemies</td></tr>
+  <tr><td><code>RigidBody3D</code></td><td>The physics engine: you apply forces, it computes the motion</td><td>Barrels, falling rocks, ragdolls</td></tr>
+  <tr><td><code>Area3D</code></td><td>Nothing. It only <em>detects</em> overlaps</td><td>Pickups, trigger zones, water</td></tr>
+</table>
+
+<p><strong>Visuals and collision are separate.</strong> A body is invisible to physics until it has a collision shape: <a href="https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html">“In order to detect collisions, at least one Shape … must be assigned to the object.”</a> So every solid thing is a small tree: a body, a <code>CollisionShape3D</code> (what physics sees), and a <code>MeshInstance3D</code> (what you see).</p>
+
+<pre class="tree"><b>Player</b> (CharacterBody3D) ← script     <b>Crate</b> (StaticBody3D)
+├─ CollisionShape3D  (capsule)          ├─ CollisionShape3D  (box)
+├─ MeshInstance3D    (capsule)          └─ MeshInstance3D    (box)
+└─ Camera3D</pre>
+
+<h2>Velocity, not position</h2>
+
+<p class="aside">Physics runs at <a href="https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html">“a fixed rate (a default of 60 iterations per second)”</a>, separate from the frame rate. That's why movement code goes in <code>_physics_process</code>.</p>
+
+<p>With a <code>CharacterBody3D</code> you don't write to <code>position</code>. You set <code>velocity</code> (metres per second) and call <code>move_and_slide()</code>. It <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html">“moves the body based on velocity. If the body collides with another, it will slide along the other body rather than stop immediately”</a>, and it <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html">“uses the physics step's delta value automatically”</a>.</p>
+
+<p>Think of it as integrating twice. Gravity is an <em>acceleration</em>, so you integrate it into velocity yourself: <code>velocity += gravity * delta</code>. Velocity becomes position inside <code>move_and_slide()</code>. The docs warn about the classic bug: <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html">“A common mistake is setting this property to the desired velocity multiplied by delta.”</a></p>
+
+<h2>Build it</h2>
+
+<p>Keep working in your <code>first-steps</code> project.</p>
+
+<h3>A. Input actions</h3>
+<ol class="checklist" id="input">
+  <li><strong>Project → Project Settings → Input Map</strong> tab. Type <code>move_forward</code> in the “Add New Action” field and click <strong>Add</strong>.</li>
+  <li>Click the <strong>+</strong> next to <code>move_forward</code>, press <kbd>W</kbd>, and click OK.</li>
+  <li>Do the same for <code>move_back</code> (<kbd>S</kbd>), <code>move_left</code> (<kbd>A</kbd>), <code>move_right</code> (<kbd>D</kbd>) and <code>jump</code> (<kbd>Space</kbd>). Close the window.</li>
+</ol>
+<p class="progress" data-for="input"></p>
+
+<h3>B. The crate scene</h3>
+<ol class="checklist" id="crate">
+  <li><strong>Scene → New Scene</strong>. Choose <strong>Other Node</strong> and pick <code>StaticBody3D</code>. Rename it <code>Crate</code>.</li>
+  <li>Add a child <code>CollisionShape3D</code>. In the Inspector, set <strong>Shape → New BoxShape3D</strong> (1 m by default) and <strong>Position y = 0.5</strong>, so the crate sits on the ground instead of half inside it.</li>
+  <li>Add a child <code>MeshInstance3D</code> to <code>Crate</code>. Set <strong>Mesh → New BoxMesh</strong> and <strong>Position y = 0.5</strong>.</li>
+  <li>Save as <code>crate.tscn</code>.</li>
+</ol>
+<p class="progress" data-for="crate"></p>
+
+<h3>C. The player scene</h3>
+<ol class="checklist" id="player">
+  <li>New scene, root <code>CharacterBody3D</code>, renamed <code>Player</code>.</li>
+  <li>Add <code>CollisionShape3D</code>: <strong>New CapsuleShape3D</strong>, <strong>Position y = 1</strong>. The default capsule is 2 m tall, so this puts the feet at the player's origin.</li>
+  <li>Add <code>MeshInstance3D</code>: <strong>New CapsuleMesh</strong>, <strong>Position y = 1</strong>.</li>
+  <li>Add <code>Camera3D</code> as a child of <code>Player</code>: <strong>Position</strong> <code>y = 3, z = 6</code>, <strong>Rotation</strong> <code>x = -20</code>. Because it's a child, it will follow the player (remember the orbiting cube).</li>
+  <li>Attach a script to <code>Player</code> (<code>player.gd</code>). Replace its contents with the code below, then save as <code>player.tscn</code>.</li>
+</ol>
+<p class="progress" data-for="player"></p>
+
+<pre><code>extends CharacterBody3D
+
+@export var speed := 5.0          <span class="c"># metres per second</span>
+@export var jump_velocity := 4.5  <span class="c"># metres per second, upward</span>
+
+func _physics_process(delta: float) -> void:
+	<span class="c"># Integrate acceleration into velocity: this one needs delta.</span>
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = jump_velocity
+
+	var input := Input.get_vector("move_left", "move_right",
+			"move_forward", "move_back")
+	velocity.x = input.x * speed
+	velocity.z = input.y * speed
+
+	<span class="c"># Velocity into position, with collisions. Delta applied inside.</span>
+	move_and_slide()
+</code></pre>
+
+<p class="aside"><a href="https://docs.godotengine.org/en/stable/classes/class_physicsbody3d.html"><code>get_gravity()</code></a> returns world gravity (9.8 m/s² down by default), plus any overrides from <code>Area3D</code>s, which is handy for a low-gravity zone later.</p>
+
+<p><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html"><code>is_on_floor()</code></a> reports whether the <em>last</em> <code>move_and_slide()</code> touched a floor. <code>is_action_just_pressed</code> is true only on the tick the key goes down, not while it's held.</p>
+
+<h3>D. The world</h3>
+<ol class="checklist" id="world">
+  <li>New scene, <strong>3D Scene</strong> root, renamed <code>World</code>. Add a <code>DirectionalLight3D</code> with <strong>Rotation x = -45</strong>.</li>
+  <li>Add a <code>StaticBody3D</code> named <code>Floor</code>, then give it a <code>CollisionShape3D</code> (BoxShape3D) and a <code>MeshInstance3D</code> (BoxMesh). Set <strong>both</strong> sizes to <code>20 × 1 × 20</code> and <strong>both</strong> positions to <code>y = -0.5</code>. <em>Size</em> belongs to the shape or mesh, not to the node: in the Inspector, <strong>click the BoxShape3D / BoxMesh field itself</strong> to expand it, and <em>Size</em> (x, y, z) appears underneath. <em>Position</em> is on the node, under <strong>Transform</strong>. Change Size, never the node's Scale: the docs say <a href="https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html">“be careful to never scale your collision shapes”</a>.</li>
+  <li>Drag <code>player.tscn</code> from the FileSystem dock (bottom left) onto <code>World</code>. This creates an <em>instance</em> of your scene.</li>
+  <li>Drag <code>crate.tscn</code> in the same way and set its <strong>Position x = 3</strong>, so it doesn't spawn inside the player. With the crate selected, press <kbd>Ctrl</kbd>+<kbd>D</kbd> a few times to duplicate it, and move the copies around with the gizmo. Put one crate directly on top of another (<code>y = 1</code>).</li>
+  <li>Save as <code>world.tscn</code> and press <kbd>F6</kbd>. Walk, jump, and bump into things.</li>
+</ol>
+<p class="progress" data-for="world"></p>
+
+<h2>Experiments: predict first, then run</h2>
+
+<div class="recall">
+  <p class="q">1. Add a plain <code>MeshInstance3D</code> with a BoxMesh to <code>World</code>, with no body and no shape. What happens when you walk into it?</p>
+  <details><summary>Show answer</summary>You walk straight through it. Physics never sees a mesh, only collision shapes. When something is “invisible but solid” or “visible but ghostly”, the cause is nearly always here.</details>
+</div>
+
+<div class="recall">
+  <p class="q">2. Use the physics you already know. With <code>jump_velocity = 4.5</code> and <em>g</em> = 9.8 m/s², how high does the player's origin (the feet) rise? Can you get onto a 1 m crate? What jump velocity would you need to land on the 2 m stack? Work it out, set it on the Player instance in the Inspector, and test.</p>
+  <details><summary>Show answer</summary><em>h</em> = <em>v</em>²/2<em>g</em> = 4.5²/19.6 ≈ 1.03 m, just enough for one crate. For 2 m: <em>v</em> = √(2·9.8·2) ≈ 6.3 m/s, so try 6.5 for some margin. When I measured it in Godot 4.7, the peak at 4.5 m/s was about 1.07 m, slightly above the analytic value. The engine steps velocity and position in discrete 1/60 s ticks rather than integrating continuously, which you'll recognise from fixed-step control loops.</details>
+</div>
+
+<div class="recall">
+  <p class="q">3. Open <code>crate.tscn</code>, select its <code>MeshInstance3D</code>, and under <strong>Surface Material Override</strong> (or Mesh → Material) create a <strong>New StandardMaterial3D</strong>. Set its <strong>Albedo → Color</strong> to brown and save. How many crates in <code>world.tscn</code> change colour?</p>
+  <details><summary>Show answer</summary>All of them. Each crate in the world is an instance of one scene, so editing the scene updates every copy. That's how you'll later build one enemy and place fifty.</details>
+</div>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">You walk straight through a crate you can clearly see. Most likely cause?</p>
+  <button data-correct data-why="Physics only sees collision shapes. The mesh is just paint.">The crate has no collision shape</button>
+  <button data-why="Materials only affect how it looks. Collision comes from shapes.">The crate mesh has no material</button>
+  <button data-why="Delta affects speed, not whether collisions happen.">The player script lacks a delta</button>
+  <button data-why="The camera doesn't affect physics at all.">The camera is placed too close</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">A tree the player must walk around, which never moves. Which node is its root?</p>
+  <button data-correct data-why="Solid, not moved by physics: exactly a static body.">StaticBody3D</button>
+  <button data-why="A rigid body would fall over or get knocked around by physics.">RigidBody3D</button>
+  <button data-why="Character bodies are for things your code moves, like the player.">CharacterBody3D</button>
+  <button data-why="An Area3D detects overlaps but isn't solid. You'd walk through the tree.">Area3D</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">A coin that disappears when the player touches it. Which node is its root?</p>
+  <button data-correct data-why="You want to detect an overlap, not block movement. That's Area3D (next lesson).">Area3D</button>
+  <button data-why="A static body is solid, so the player would bump into the coin.">StaticBody3D</button>
+  <button data-why="The coin would fall and roll. You only need to detect an overlap.">RigidBody3D</button>
+  <button data-why="The coin doesn't move by code. It only needs to detect the player.">CharacterBody3D</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why is gravity multiplied by delta, but velocity is not?</p>
+  <button data-correct data-why="You integrate acceleration into velocity. move_and_slide integrates velocity into position using the physics delta.">move_and_slide applies delta to velocity itself</button>
+  <button data-why="Both run every physics tick, at the same rate.">gravity is applied less often than velocity</button>
+  <button data-why="velocity is in metres per second. That's why the docs warn against multiplying it by delta.">velocity is stored in metres per frame</button>
+  <button data-why="_physics_process gets a delta too, and gravity uses it.">delta only matters inside the _process function</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You swap <code>is_action_just_pressed</code> for <code>is_action_pressed</code>. Holding Space now…</p>
+  <button data-correct data-why="Held key + touching floor = jump again, on every landing. Bunny hopping.">jumps again on every single landing</button>
+  <button data-why="The check still passes while the key is held and the player is on the floor.">does nothing because the check fails</button>
+  <button data-why="The jump only fires while on the floor, so gravity still wins in the air.">makes the player float upward forever</button>
+  <button data-why="Held + on floor is true again after each landing, so it keeps jumping.">jumps once and then never again</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>Name the four collision objects and give one game example of each.</li>
+  <li>Which value gets multiplied by delta in a character controller, and which doesn't? Why?</li>
+  <li>What happens to every crate in the world when you edit <code>crate.tscn</code>?</li>
+</ul>
+
+<p>Next lesson: coins (<code>Area3D</code>), <strong>signals</strong>, and a score on screen. That makes your first game the kids can actually play.</p>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html">Godot Docs: Physics introduction</a>. Read up to and including “Collision layers and masks”. Layers are how you'll later say “enemies collide with walls but not with each other”. The examples are 2D, but everything applies to 3D.
+</div>
+
+<p class="ask">Something behaves differently from what's described here, or you want to know why Godot does it this way? Ask me. That's what I'm here for.</p>
+
+<nav class="nav">
+  <span>← <a href="0001-a-cube-you-can-drive.html">Lesson 1</a> · <a href="0003-coins-signals-score.html">Lesson 3: Coins, signals, score</a> →</span>
+  <span>Reference: <a href="../reference/godot-basics.html">Godot basics</a> · <a href="../reference/physics-and-movement.html">Physics &amp; movement</a></span>
+</nav>
+
+</main>
+</body>
+</html>

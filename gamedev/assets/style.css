@@ -1,0 +1,217 @@
+/* Shared stylesheet for every lesson and reference doc in this course.
+   Tufte-inspired: one readable column, notes in the margin, quiet colour. */
+
+:root {
+  --paper: #fffff8;
+  --ink: #1d1d1b;
+  --muted: #6b6b63;
+  --rule: #e4e2d6;
+  --accent: #a33b20;      /* rust: headings, links */
+  --code-bg: #f4f2e8;
+  --ok: #2f6b3a;
+  --bad: #9b2c2c;
+  --serif: "Iowan Old Style", "Charter", "Palatino Linotype", Palatino, Georgia, serif;
+  --mono: "JetBrains Mono", "Fira Code", ui-monospace, "DejaVu Sans Mono", monospace;
+  --measure: 36rem;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 18px; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  max-width: calc(var(--measure) + 16rem);
+  padding: 3rem 1.5rem 5rem;
+  margin: 0 auto;
+}
+main > * { max-width: var(--measure); }
+
+/* ---------- Header ---------- */
+.kicker {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 0.25rem;
+}
+h1 { font-size: 2.2rem; line-height: 1.15; font-weight: 400; margin: 0 0 0.5rem; }
+.subtitle { font-style: italic; font-size: 1.15rem; color: var(--muted); margin: 0 0 2rem; }
+h2 { font-weight: 400; font-style: italic; font-size: 1.5rem; margin: 2.75rem 0 0.75rem; }
+h3 { font-weight: 600; font-size: 1rem; margin: 1.75rem 0 0.5rem; }
+p, li { hyphens: auto; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5rem 0; }
+
+/* ---------- Meta box: goal / time / win ---------- */
+.meta {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.75rem 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  font-size: 0.9rem;
+}
+.meta dt { font-variant: small-caps; letter-spacing: 0.05em; color: var(--muted); }
+.meta dd { margin: 0; }
+
+/* ---------- Margin notes (sidenotes) ---------- */
+.aside {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--muted);
+  border-left: 2px solid var(--rule);
+  padding-left: 0.75rem;
+  margin: 0.5rem 0 1rem;
+}
+@media (min-width: 62rem) {
+  /* main is 16rem wider than the text column; asides float into that gutter */
+  main > .aside {
+    float: right;
+    clear: right;
+    width: 12rem;
+    max-width: 12rem;
+    margin-right: 0;
+    margin-top: 0.2rem;
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+
+/* ---------- Code ---------- */
+code, pre, kbd { font-family: var(--mono); font-size: 0.82em; }
+code { background: var(--code-bg); padding: 0.05em 0.3em; border-radius: 3px; }
+pre {
+  background: var(--code-bg);
+  padding: 0.9rem 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  line-height: 1.45;
+  tab-size: 4;
+}
+main > pre { max-width: calc(var(--measure) + 3rem); }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre .c { color: var(--muted); font-style: italic; } /* comment */
+kbd {
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 0.3em;
+  background: #fff;
+}
+
+/* ---------- Tables ---------- */
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; margin: 1rem 0; }
+th { text-align: left; font-weight: 600; border-bottom: 1px solid var(--ink); padding: 0.35rem 0.5rem 0.35rem 0; }
+td { border-bottom: 1px solid var(--rule); padding: 0.35rem 0.5rem 0.35rem 0; vertical-align: top; }
+
+/* ---------- Diagrams: scene tree ---------- */
+.tree {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  background: none;
+  border-left: 2px solid var(--rule);
+  padding: 0.25rem 0 0.25rem 1rem;
+  white-space: pre;
+}
+.tree b { color: var(--accent); font-weight: 600; }
+
+/* ---------- Callouts ---------- */
+.source {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 0.75rem 0;
+  margin: 2rem 0;
+}
+.source strong { font-variant: small-caps; letter-spacing: 0.05em; font-weight: 400; color: var(--muted); display: block; }
+.ask {
+  font-style: italic;
+  background: var(--code-bg);
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+.nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* ---------- Interactive components (see assets/components.js) ---------- */
+.quiz, .recall, .checklist {
+  margin: 1.25rem 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+}
+.quiz .q, .recall .q { margin: 0 0 0.75rem; font-weight: 600; }
+.quiz button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.95rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.5rem 0.75rem;
+  margin: 0.35rem 0;
+  cursor: pointer;
+}
+.quiz button:hover:not([disabled]) { border-color: var(--ink); }
+.quiz button.right { border-color: var(--ok); color: var(--ok); }
+.quiz button.wrong { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
+.quiz button[disabled] { cursor: default; }
+.feedback { font-size: 0.9rem; margin: 0.6rem 0 0; min-height: 1em; }
+.feedback.right { color: var(--ok); }
+.feedback.wrong { color: var(--bad); }
+
+.recall details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+.recall details[open] summary { margin-bottom: 0.5rem; }
+
+.checklist { list-style: none; padding-left: 1.1rem; }
+.checklist li { margin: 0.5rem 0; padding-left: 0.25rem; }
+.checklist label { cursor: pointer; display: flex; gap: 0.6rem; align-items: baseline; }
+.checklist input { accent-color: var(--accent); transform: translateY(1px); }
+.checklist li.done > label > span { color: var(--muted); }
+.progress { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+
+.score { font-variant: small-caps; letter-spacing: 0.05em; color: var(--muted); }
+
+/* ---------- Reference sheets: denser ---------- */
+body.reference main { max-width: 52rem; }
+body.reference main > * { max-width: none; }
+body.reference h2 { margin-top: 2rem; }
+.cols { columns: 2 20rem; column-gap: 2.5rem; }
+.cols > * { break-inside: avoid; }
+body.reference pre { white-space: pre-wrap; }
+
+/* ---------- Print ---------- */
+@media print {
+  html { font-size: 11pt; }
+  body { background: #fff; }
+  main { padding: 0; max-width: none; }
+  main > * { max-width: none; }
+  .aside { float: none; width: auto; margin: 0.25rem 0 0.75rem; border-left: 2px solid var(--rule); padding-left: 0.5rem; }
+  .quiz button { border: 1px solid #ccc; }
+  .nav, .ask { display: none; }
+  pre, .quiz, .recall, table { break-inside: avoid; }
+  a { color: inherit; }
+}

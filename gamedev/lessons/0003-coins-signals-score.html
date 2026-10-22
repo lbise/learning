@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 3: Coins, signals, and a score</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 3 · Godot foundations</p>
+<h1>Coins, signals, and a score</h1>
+<p class="subtitle">Detect things without colliding, let objects talk without knowing each other, and put text on screen. Then hand the keyboard to your kids.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Use <code>Area3D</code> and signals to react to events, and understand resources versus nodes.</dd>
+  <dt>Time</dt><dd>About 40 minutes, plus a 10-minute playtest and 15 minutes of reading</dd>
+  <dt>The win</dt><dd>A complete tiny game: collect every coin (some on top of crates) and the screen says you won</dd>
+  <dt>Links</dt><dd>Links in the text are citations and optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Warm-up: from memory, before scrolling</h2>
+
+<div class="recall">
+  <p class="q">Name the four collision objects and give one game example of each.</p>
+  <details><summary>Show answer</summary><code>StaticBody3D</code> (wall, tree), <code>CharacterBody3D</code> (player, enemy), <code>RigidBody3D</code> (barrel, falling rock), <code>Area3D</code> (pickup, trigger zone).</details>
+</div>
+<div class="recall">
+  <p class="q">In a character controller, which value is multiplied by delta, and which isn't? Why?</p>
+  <details><summary>Show answer</summary>Gravity (an acceleration) is multiplied by delta to update velocity. Velocity is <em>not</em>, because <code>move_and_slide()</code> applies the physics delta itself.</details>
+</div>
+<div class="recall">
+  <p class="q">What happens to every crate in the world when you edit <code>crate.tscn</code>?</p>
+  <details><summary>Show answer</summary>They all change. Each one is an instance of that scene.</details>
+</div>
+
+<h2>Nodes and resources: the Size mystery</h2>
+
+<p class="aside">This answers your question from Lesson 2: why Size wasn't on the node.</p>
+
+<p>In Lesson 2 you had to click into <code>BoxShape3D</code> to find <em>Size</em>. That's because Godot has two kinds of thing. <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/resources.html">“Nodes give you functionality … Resources are data containers. They don't do anything on their own: instead, nodes use the data contained in resources.”</a></p>
+
+<table>
+  <tr><th></th><th>Node</th><th>Resource</th></tr>
+  <tr><td>Examples</td><td><code>CollisionShape3D</code>, <code>MeshInstance3D</code>, <code>Camera3D</code></td><td><code>BoxShape3D</code>, <code>BoxMesh</code>, <code>StandardMaterial3D</code>, a script, a <code>.tscn</code></td></tr>
+  <tr><td>Lives</td><td>In the scene tree</td><td>Inside a node's property (the clickable field in the Inspector), or as a file</td></tr>
+  <tr><td>Holds</td><td>Where something is, and what it does</td><td>Data: how big, what colour, what shape</td></tr>
+</table>
+
+<p>In embedded terms, a resource is like a <code>const</code> config struct that several drivers point to. Edit it once and everyone using it sees the change. That's why colouring one crate in Lesson 2 coloured them all.</p>
+
+<h2>Area3D: detect, don't block</h2>
+
+<p>A coin should notice the player without stopping them, which is exactly what <code>Area3D</code> is for. When a body enters it, the area emits <a href="https://docs.godotengine.org/en/stable/classes/class_area3d.html"><code>body_entered(body)</code></a>: “Emitted when the received body enters this area.”</p>
+
+<h2>Signals: callbacks with zero coupling</h2>
+
+<p class="aside">The docs point to the <a href="https://gameprogrammingpatterns.com/observer.html">observer pattern</a> in <em>Game Programming Patterns</em>. It's a good read for a programmer.</p>
+
+<p><a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/signals.html">“Signals are a delegation mechanism built into Godot that allows one game object to react to a change in another without them referencing one another.”</a> You already know the shape of this: it's registering a callback, like attaching a handler to an interrupt. The emitter fires and doesn't care who is listening.</p>
+
+<p>Today you'll use both kinds:</p>
+<ul>
+  <li><strong>Built-in signal:</strong> the coin listens to its own <code>body_entered</code>.</li>
+  <li><strong>Custom signal:</strong> the coin declares <code>signal collected</code> and emits it. The world listens and updates the score. The coin never needs to know a score or a HUD exists.</li>
+</ul>
+
+<pre class="tree"><b>World</b> (Node3D) ← world.gd: counts coins, updates label
+├─ HUD (CanvasLayer)
+│  └─ ScoreLabel (Label)
+├─ Coins (Node3D)                 ← just a folder
+│  ├─ <b>Coin</b>  ─── collected ──▶ World._on_coin_collected()
+│  ├─ Coin
+│  └─ Coin
+├─ Player, Floor, Crates, DirectionalLight3D (from Lesson 2)</pre>
+
+<p class="aside">A <a href="https://docs.godotengine.org/en/stable/classes/class_canvaslayer.html"><code>CanvasLayer</code></a> draws its 2D children on a separate layer, on top of the 3D view. That makes it the standard home for a HUD.</p>
+
+<p>One ordering fact makes the world script work: <a href="https://docs.godotengine.org/en/stable/classes/class_node.html">“If the node has children, their <code>_ready()</code> callbacks get triggered first, and the parent node will receive the ready notification afterwards.”</a> So when <code>World._ready()</code> runs, every coin already exists and can be connected.</p>
+
+<h2>Build it</h2>
+
+<h3>A. The coin scene</h3>
+<ol class="checklist" id="coin">
+  <li>New scene, root <strong>Other Node → <code>Area3D</code></strong>, renamed <code>Coin</code>.</li>
+  <li>Add a child <code>CollisionShape3D</code> with <strong>New SphereShape3D</strong> (default radius 0.5 m).</li>
+  <li>Add a child <code>MeshInstance3D</code> with <strong>New CylinderMesh</strong>. Click the CylinderMesh field to expand it (it's a resource) and set <em>Top Radius</em> and <em>Bottom Radius</em> to <code>0.4</code> and <em>Height</em> to <code>0.1</code>. On the <strong>node</strong>, set <em>Rotation x = 90</em> so the coin stands upright.</li>
+  <li>Still inside the CylinderMesh resource, set <strong>Material → New StandardMaterial3D</strong>. Click it to expand and set <em>Albedo → Color</em> to gold. Optionally set <em>Metallic</em> to <code>0.8</code>.</li>
+  <li>Attach a script to <code>Coin</code> (<code>coin.gd</code>) with the code below. Save as <code>coin.tscn</code>.</li>
+</ol>
+<p class="progress" data-for="coin"></p>
+
+<pre><code>extends Area3D
+
+signal collected   <span class="c"># custom signal: "I was picked up"</span>
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)   <span class="c"># built-in signal → my handler</span>
+
+func _process(delta: float) -> void:
+	rotate_y(3.0 * delta)                    <span class="c"># purely visual spin</span>
+
+func _on_body_entered(body: Node3D) -> void:
+	if body.is_in_group("player"):
+		collected.emit()
+		queue_free()                         <span class="c"># delete me at the end of this frame</span>
+</code></pre>
+
+<p class="aside"><a href="https://docs.godotengine.org/en/stable/classes/class_node.html"><code>queue_free()</code></a> “queues this node to be deleted at the end of the current frame”, which is safer than freeing it in the middle of a signal callback.</p>
+
+<h3>B. Tag the player</h3>
+<ol class="checklist" id="tag">
+  <li>Open <code>player.gd</code> and add this above <code>_physics_process</code>. It puts the player in a <em>group</em>, a named tag the coin can check, so enemies or rolling barrels won't pick up coins later:
+<pre><code>func _ready() -> void:
+	add_to_group("player")</code></pre></li>
+</ol>
+<p class="progress" data-for="tag"></p>
+
+<h3>C. Coins and HUD in the world</h3>
+<ol class="checklist" id="world">
+  <li>Open <code>world.tscn</code>. Add a plain <code>Node3D</code> child of <code>World</code> named <code>Coins</code>. It's just a folder.</li>
+  <li>Drag <code>coin.tscn</code> from the FileSystem dock <strong>onto the <code>Coins</code> node</strong>, so it becomes its child. Set <em>Position y = 1</em>. Press <kbd>Ctrl</kbd>+<kbd>D</kbd> to make 5–8 coins and spread them out. Put at least two on top of crates (<em>y = 2</em>), and one on your 2 m stack (<em>y = 3</em>) as the hard one.</li>
+  <li>Add a <code>CanvasLayer</code> child of <code>World</code> named <code>HUD</code>, and give it a <code>Label</code> child named <code>ScoreLabel</code>. In the Label's Inspector: <em>Layout → Transform → Position</em> = <code>(20, 20)</code>, and <em>Theme Overrides → Font Sizes → Font Size</em> = <code>32</code>.</li>
+  <li>Attach a script to <code>World</code> (<code>world.gd</code>) with the code below. Save and press <kbd>F6</kbd>.</li>
+</ol>
+<p class="progress" data-for="world"></p>
+
+<pre><code>extends Node3D
+
+@onready var score_label: Label = $HUD/ScoreLabel   <span class="c"># looked up once _ready runs</span>
+
+var score := 0
+var total := 0
+
+func _ready() -> void:
+	var coins := $Coins.get_children()   <span class="c"># coins are already ready (children first)</span>
+	total = coins.size()
+	for coin in coins:
+		coin.collected.connect(_on_coin_collected)
+	update_label()
+
+func _on_coin_collected() -> void:
+	score += 1
+	update_label()
+
+func update_label() -> void:
+	if score == total:
+		score_label.text = "You found all the coins!"
+	else:
+		score_label.text = "Coins: %d / %d" % [score, total]
+</code></pre>
+
+<p class="aside"><code>$HUD/ScoreLabel</code> is a <em>node path</em> relative to this node, so it walks the scene tree. <code>@onready</code> delays the lookup until the node is ready.</p>
+
+<h2>Experiments: predict first, then run</h2>
+
+<div class="recall">
+  <p class="q">1. In <code>coin.tscn</code>, change the Material's colour to red and save. How many coins change? Why?</p>
+  <details><summary>Show answer</summary>All of them. Every coin instance uses the same CylinderMesh resource, and the Material resource inside it. One piece of data with many users, like the shared config struct.</details>
+</div>
+
+<div class="recall">
+  <p class="q">2. Comment out <code>add_to_group("player")</code> in <code>player.gd</code> and run. What happens when you touch a coin? Then put it back.</p>
+  <details><summary>Show answer</summary>Nothing. <code>body_entered</code> still fires (put a <code>print(body)</code> in the handler to see it), but the group check fails, so nothing is collected. Signals firing and your logic reacting are two separate things, and checking each one is how you debug them.</details>
+</div>
+
+<div class="recall">
+  <p class="q">3. Drag one extra coin onto <code>World</code> directly instead of onto <code>Coins</code>. What will the counter show, and what happens when you pick that coin up?</p>
+  <details><summary>Show answer</summary>The total is one short, and picking that coin up does nothing to the score. It still vanishes, because its own script works, but <code>World</code> only connected the children of <code>Coins</code>. The scene tree's structure is part of your program's logic.</details>
+</div>
+
+<h2>Playtest with your kids</h2>
+
+<p>This is the part that counts. Real players are the feedback loop no lesson can fake.</p>
+
+<ol class="checklist" id="playtest">
+  <li>Sit them down. Tell them only “find all the coins”. Don't explain the controls.</li>
+  <li>Watch silently for 5–10 minutes. Don't help unless they're truly stuck.</li>
+  <li>Write down one thing that confused them and one thing that delighted them.</li>
+  <li>Bring both to the next session. They'll steer what we build next.</li>
+</ol>
+<p class="progress" data-for="playtest"></p>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">The player walks <em>through</em> the coin instead of bumping into it. Why?</p>
+  <button data-correct data-why="Area3D reports overlaps but isn't solid, which is exactly what a pickup needs.">Areas detect overlaps but never block bodies</button>
+  <button data-why="The coin does have a SphereShape3D. Without one it couldn't detect the player at all.">The coin is missing its collision shape</button>
+  <button data-why="The player's script doesn't decide this. The collision object type does.">The player script ignores all Area3D nodes</button>
+  <button data-why="queue_free only runs after the signal fires. It doesn't explain walking through.">queue_free removes the shape before any contact</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why does the coin emit <code>collected</code> instead of updating the label itself?</p>
+  <button data-correct data-why="Signals limit coupling. You can reuse the coin in any level, with or without a HUD.">The coin stays unaware the HUD exists</button>
+  <button data-why="Calling a function directly is just as fast. The point is decoupling, not speed.">Signals run faster than direct function calls</button>
+  <button data-why="Coins can access other nodes. It's just a bad idea, because it couples them.">Coins are not allowed to access labels</button>
+  <button data-why="Labels can be changed from any script. Choosing a signal is a design decision.">Labels only update when a signal fires</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why can <code>World._ready()</code> safely connect to every coin?</p>
+  <button data-correct data-why="The docs: children's _ready fires first, then the parent's.">Children finish their _ready before the parent</button>
+  <button data-why="Godot doesn't order _ready by name. It goes children first, then the parent.">Godot runs _ready in alphabetical node order</button>
+  <button data-why="@onready only delays one variable's lookup. It doesn't change the order of _ready.">The @onready keyword waits for every coin</button>
+  <button data-why="Signals can be connected only after the emitter exists, so the order matters.">Signals can connect before nodes even exist</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Which of these is a <em>resource</em>, not a node?</p>
+  <button data-correct data-why="It's data (colour, metalness) used by a mesh. It doesn't sit in the scene tree.">StandardMaterial3D</button>
+  <button data-why="It's in the scene tree and holds a shape resource. It's a node.">CollisionShape3D</button>
+  <button data-why="It's in the scene tree and holds a mesh resource. It's a node.">MeshInstance3D</button>
+  <button data-why="It's in the scene tree and draws its children on top. It's a node.">CanvasLayer</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">The coin's spin lives in <code>_process</code>, not <code>_physics_process</code>. Is that right?</p>
+  <button data-correct data-why="Visual-only motion can update every rendered frame. Physics and collision code belongs in _physics_process.">Yes, the spin is purely visual motion</button>
+  <button data-why="_process is fine for visuals. Only physics and collision code needs the fixed tick.">No, every rotation must use physics ticks</button>
+  <button data-why="_process gets a delta too, and the spin uses it to stay frame-rate independent.">No, because _process has no delta value</button>
+  <button data-why="Area3D nodes can rotate. Your coin is spinning right now.">Yes, because an Area3D cannot ever rotate</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>Node vs resource: define each in one sentence and give two examples.</li>
+  <li>Write the line that connects a signal to a function, from memory.</li>
+  <li>Your kids' one confusion and one delight.</li>
+</ul>
+
+<p>Next lesson: a proper third-person feel, with the camera orbiting behind the player and the player turning to face the way they walk. That's the first step toward Valheim.</p>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/signals.html">Godot Docs: Using signals</a>. It shows connecting signals in the editor (Node dock) as well as in code, plus custom signals with arguments, like <code>collected(value)</code> for coins worth different amounts.
+</div>
+
+<p class="ask">Stuck on a step, or curious why something works the way it does? Ask me. That's what I'm here for.</p>
+
+<nav class="nav">
+  <span>← <a href="0002-walk-jump-collide.html">Lesson 2</a> · <a href="0004-third-person-camera.html">Lesson 4: Third-person camera</a> →</span>
+  <span>Reference: <a href="../reference/signals-and-resources.html">Signals, areas &amp; resources</a></span>
+</nav>
+
+</main>
+</body>
+</html>

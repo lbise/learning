@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signals, areas &amp; resources: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Godot 4.7</p>
+<h1>Signals, areas &amp; resources</h1>
+<p class="subtitle">Events, pickups, HUD text, and the node/resource split. Built from <a href="../lessons/0003-coins-signals-score.html">Lesson 3</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>Node vs resource</h2>
+<table>
+  <tr><th>Node</th><th>Resource</th></tr>
+  <tr><td>Does things, lives in the scene tree</td><td>Data container, lives in a property or a file</td></tr>
+  <tr><td><code>CollisionShape3D</code>, <code>MeshInstance3D</code>, <code>Label</code></td><td><code>BoxShape3D</code>, <code>BoxMesh</code>, <code>StandardMaterial3D</code>, scripts, <code>.tscn</code></td></tr>
+</table>
+<p>In the Inspector, <strong>click a resource field to expand it</strong>. Instances of a scene share its resources, so one edit changes them all.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/resources.html">Resources</a></p>
+</section>
+
+<section>
+<h2>Signals</h2>
+<pre><code><span class="c"># declare (custom)</span>
+signal collected
+signal damaged(amount: int)
+
+<span class="c"># emit</span>
+collected.emit()
+damaged.emit(10)
+
+<span class="c"># connect: signal.connect(callable)</span>
+body_entered.connect(_on_body_entered)
+coin.collected.connect(_on_coin_collected)</code></pre>
+<p>The emitter doesn't know who listens (the observer pattern). Handler names follow the convention <code>_on_&lt;node&gt;_&lt;signal&gt;</code>.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/signals.html">Using signals</a></p>
+</section>
+
+<section>
+<h2>Area3D pickups</h2>
+<pre><code>extends Area3D
+signal collected
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+func _on_body_entered(body: Node3D) -> void:
+	if body.is_in_group("player"):
+		collected.emit()
+		queue_free()</code></pre>
+<p><code>body_entered</code> fires for any physics body, so filter with a group. <code>queue_free()</code> deletes the node at the end of the frame.</p>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/classes/class_area3d.html">Area3D</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_node.html">Node</a></p>
+</section>
+
+<section>
+<h2>Tree and lifecycle facts</h2>
+<table>
+  <tr><td><code>_ready()</code> order</td><td>Children first, then the parent</td></tr>
+  <tr><td><code>$A/B</code></td><td>Node path relative to this node</td></tr>
+  <tr><td><code>@onready var x = $A</code></td><td>Lookup deferred until ready</td></tr>
+  <tr><td><code>get_children()</code></td><td>Direct children only. Use a plain <code>Node3D</code> as a folder</td></tr>
+  <tr><td><code>add_to_group("g")</code> / <code>is_in_group("g")</code></td><td>Named tags for filtering</td></tr>
+</table>
+</section>
+
+<section>
+<h2>HUD</h2>
+<pre class="tree"><b>HUD</b> (CanvasLayer)   drawn on top of the 3D view
+└─ ScoreLabel (Label)</pre>
+<pre><code>score_label.text = "Coins: %d / %d" % [score, total]</code></pre>
+<p>Label font size: <em>Theme Overrides → Font Sizes</em>.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/classes/class_canvaslayer.html">CanvasLayer</a></p>
+</section>
+
+</div>
+</main>
+</body>
+</html>

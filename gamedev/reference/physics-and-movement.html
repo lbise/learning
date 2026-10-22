@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physics &amp; movement: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Godot 4.7</p>
+<h1>Physics &amp; movement</h1>
+<p class="subtitle">Collision objects, the character controller, and jump maths. Built from <a href="../lessons/0002-walk-jump-collide.html">Lesson 2</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>Collision objects</h2>
+<table>
+  <tr><th>Node</th><th>Moved by</th><th>Examples</th></tr>
+  <tr><td><code>StaticBody3D</code></td><td>Nothing</td><td>Floor, wall, tree, crate</td></tr>
+  <tr><td><code>CharacterBody3D</code></td><td>Your code (<code>velocity</code> + <code>move_and_slide()</code>)</td><td>Player, enemies</td></tr>
+  <tr><td><code>RigidBody3D</code></td><td>Physics engine (forces, impulses)</td><td>Barrel, rock, ragdoll</td></tr>
+  <tr><td><code>Area3D</code></td><td>Nothing. Detects overlaps only</td><td>Coin, trigger, water, gravity zone</td></tr>
+</table>
+<p>Every body needs ≥1 <code>CollisionShape3D</code> child. A mesh is visuals only: physics never sees it.</p>
+<p>Resize shapes with <em>Size</em> or <em>Radius</em>, <strong>never Scale</strong>.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html">Physics introduction</a></p>
+</section>
+
+<section>
+<h2>Standard scene shapes</h2>
+<pre class="tree"><b>Player</b> (CharacterBody3D) ← script
+├─ CollisionShape3D  capsule, y = 1
+├─ MeshInstance3D    capsule, y = 1
+└─ Camera3D          follows (child)
+
+<b>Crate</b> (StaticBody3D)
+├─ CollisionShape3D  box, y = 0.5
+└─ MeshInstance3D    box, y = 0.5</pre>
+<p>Offset children by half their height so the scene's origin sits on the ground.</p>
+</section>
+
+<section>
+<h2>Character controller</h2>
+<pre><code>extends CharacterBody3D
+
+@export var speed := 5.0
+@export var jump_velocity := 4.5
+
+func _physics_process(delta: float) -> void:
+	if not is_on_floor():
+		velocity += get_gravity() * delta   <span class="c"># accel → vel: × delta</span>
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = jump_velocity
+	var input := Input.get_vector("move_left", "move_right",
+			"move_forward", "move_back")
+	velocity.x = input.x * speed
+	velocity.z = input.y * speed
+	move_and_slide()                        <span class="c"># vel → pos: delta applied inside</span></code></pre>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html">CharacterBody3D</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_physicsbody3d.html">PhysicsBody3D.get_gravity</a></p>
+</section>
+
+<section>
+<h2>Rules of thumb</h2>
+<table>
+  <tr><td>Movement code</td><td><code>_physics_process</code> (fixed 60 Hz by default)</td></tr>
+  <tr><td><code>velocity</code></td><td>m/s. Never pre-multiply by delta</td></tr>
+  <tr><td><code>is_on_floor()</code></td><td>Result of the <em>last</em> <code>move_and_slide()</code></td></tr>
+  <tr><td><code>is_action_just_pressed</code></td><td>True on one tick only, for one-shot actions (jump, shoot)</td></tr>
+  <tr><td><code>is_action_pressed</code></td><td>True while held, for continuous actions (sprint)</td></tr>
+  <tr><td>Input actions</td><td>Project Settings → Input Map. Name actions by intent (<code>jump</code>), not by key</td></tr>
+  <tr><td>Scene instances</td><td>Edit the <code>.tscn</code> and every instance updates</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Jump maths</h2>
+<table>
+  <tr><td>Peak height</td><td><em>h</em> = <em>v</em>² / 2<em>g</em></td></tr>
+  <tr><td>Velocity for height</td><td><em>v</em> = √(2<em>gh</em>)</td></tr>
+  <tr><td>Time to peak</td><td><em>t</em> = <em>v</em> / <em>g</em></td></tr>
+  <tr><td>Default <em>g</em></td><td>9.8 m/s²</td></tr>
+</table>
+<p>Measured in 4.7: <em>v</em> = 4.5 → about 1.07 m (the analytic value is 1.03). Discrete 60 Hz steps overshoot slightly.</p>
+</section>
+
+</div>
+</main>
+</body>
+</html>

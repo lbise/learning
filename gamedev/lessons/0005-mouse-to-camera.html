@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 5: From mouse to camera</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 5 · Third-person feel</p>
+<h1>From mouse to camera</h1>
+<p class="subtitle">The part of Lesson 4 that blocked you, taken apart slowly. Then you extend it: first with help, then on your own.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Understand how input events reach your code well enough to write new input handling yourself.</dd>
+  <dt>Time</dt><dd>About 40 minutes, plus 10 minutes of reading</dd>
+  <dt>The win</dt><dd>Mouse-wheel zoom and a sprint key, both in your third-person game, the second written without help</dd>
+  <dt>Format</dt><dd>Three parts, each with less help than the last: <strong>① worked example</strong> (read and understand), <strong>② completion</strong> (fill the gaps), <strong>③ on your own</strong> (only things you already know).</dd>
+  <dt>Links</dt><dd>Citations are optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">Draw the third-person rig. Which node rotates on which axis?</p>
+  <details><summary>Show answer</summary><code>Player</code> (never rotated) → <code>Model</code> (yaw toward movement) and <code>CameraPivot</code> (yaw from mouse X) → <code>SpringArm3D</code> (pitch from mouse Y) → <code>Camera3D</code>.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 2: what's the difference between <code>is_action_pressed</code> and <code>is_action_just_pressed</code>?</p>
+  <details><summary>Show answer</summary><code>is_action_pressed</code> is true every tick while the key is held. <code>is_action_just_pressed</code> is true only on the tick it goes down.</details>
+</div>
+
+<h2>① Worked example: how a mouse movement becomes a camera turn</h2>
+
+<h3>The embedded picture</h3>
+
+<p class="aside"><code>relative</code> is <a href="https://docs.godotengine.org/en/stable/classes/class_inputeventmousemotion.html">“the mouse position relative to the previous position”</a>, in pixels.</p>
+
+<p>You already know two ways hardware reports input:</p>
+<ul>
+  <li>A <strong>button on a GPIO pin</strong>: you <em>poll</em> its level whenever you like. That's <code>Input.is_action_pressed("jump")</code>: keys have a state you can query at any time.</li>
+  <li>A <strong>rotary encoder</strong>: it fires interrupts carrying <em>tick counts since the last report</em>. There's no absolute position to read, so you accumulate the deltas yourself. <strong>Mouse movement works this way.</strong> Godot hands you an event with <code>relative</code> (pixels moved since the last event), and you add it to an angle you keep.</li>
+</ul>
+
+<p>The angle you keep is <code>pivot.rotation.y</code>. It's the accumulator.</p>
+
+<h3>The path an event takes</h3>
+
+<p class="aside">The docs: <a href="https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html">“For gameplay input, <code>Node._unhandled_input()</code> is generally a better fit, because it allows the GUI to intercept the events.”</a> So a click on a menu button won't also swing your camera.</p>
+
+<pre class="tree">mouse moves
+   │  OS → Godot wraps it in an <b>InputEventMouseMotion</b> object
+   ▼
+_input()            on any node that defines it
+   ▼
+GUI controls        buttons and menus may consume it
+   ▼
+<b>_unhandled_input(event)</b>   ← your Player.gd receives it here
+   │  you check its type, read event.relative, update the rig
+   ▼
+pivot.rotation.y / arm.rotation.x change → the camera moves next frame</pre>
+
+<p>Godot calls <code>_unhandled_input</code> for <em>every</em> kind of event: key presses, mouse clicks, the wheel, mouse motion. Your job in that function is to <strong>sort by type</strong>, like a <code>switch</code> on the message ID of a tagged union.</p>
+
+<h3>The code, line by line</h3>
+
+<pre><code>func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion \
+			and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		pivot.rotation.y -= event.relative.x * mouse_sensitivity
+		arm.rotation.x -= event.relative.y * mouse_sensitivity
+		arm.rotation.x = clampf(arm.rotation.x,
+				deg_to_rad(-70.0), deg_to_rad(20.0))
+	elif event.is_action_pressed("ui_cancel"):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	elif event is InputEventMouseButton and event.pressed:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED</code></pre>
+
+<table>
+  <tr><th>Line</th><th>What it does and why</th></tr>
+  <tr><td><code>event: InputEvent</code></td><td>The base type. The actual object is one of its subclasses (mouse motion, mouse button, key, …).</td></tr>
+  <tr><td><code>event is InputEventMouseMotion</code></td><td>The type check (“is this message a motion report?”). Inside this branch, Godot lets you use <code>event.relative</code>.</td></tr>
+  <tr><td><code>… and mouse_mode == CAPTURED</code></td><td>Only steer the camera while the mouse is locked, so moving the cursor to another window after <kbd>Esc</kbd> doesn't spin the view.</td></tr>
+  <tr><td><code>pivot.rotation.y -= relative.x * sens</code></td><td>Accumulate horizontal movement into <strong>yaw</strong> on the pivot. Units: pixels × (rad/pixel) = rad. 100 px × 0.003 = 0.3 rad ≈ 17°. The minus sign: in Godot a positive Y rotation turns left (counter-clockwise from above), and moving the mouse right should turn right.</td></tr>
+  <tr><td><code>arm.rotation.x -= relative.y * sens</code></td><td>Vertical movement goes to <strong>pitch</strong> on the <em>other</em> node, the arm. One axis per node.</td></tr>
+  <tr><td><code>clampf(…, -70°, 20°)</code></td><td>Limit the accumulator so the camera can't flip over the top or dive under the floor. Same idea as saturating an integrator.</td></tr>
+  <tr><td><code>ui_cancel</code> → <code>VISIBLE</code></td><td><kbd>Esc</kbd> is a built-in action. Releasing the mouse is how players get out of the game window.</td></tr>
+  <tr><td><code>InputEventMouseButton and pressed</code></td><td>Any click recaptures the mouse. <code>pressed</code> filters out the release half of the click.</td></tr>
+</table>
+
+<p><code>pivot</code> and <code>arm</code> come from <code>@onready var pivot: Node3D = $CameraPivot</code>, the same node-path lookup as <code>$HUD/ScoreLabel</code> in Lesson 3.</p>
+
+<h3>Check your understanding: predict, then try it</h3>
+
+<div class="recall">
+  <p class="q">1. You delete the minus sign: <code>pivot.rotation.y += …</code>. What does the player experience?</p>
+  <details><summary>Show answer</summary>Inverted horizontal look: moving the mouse right turns the view left. Many games offer exactly this as an “invert X” option. It's one sign.</details>
+</div>
+<div class="recall">
+  <p class="q">2. You accidentally write <code>pivot.rotation.x</code> instead of <code>.y</code> on the first line. What happens?</p>
+  <details><summary>Show answer</summary>Moving the mouse sideways now tilts the camera up and down around the pivot, unclamped, so it can flip right over. The pitch from the arm adds on top. This is why one axis per node keeps things understandable.</details>
+</div>
+<div class="recall">
+  <p class="q">3. A colleague moves the mouse code into <code>_physics_process</code> using <code>Input.is_action_pressed</code>. Why can't that work?</p>
+  <details><summary>Show answer</summary>Mouse motion isn't an action with a held state. It's a stream of delta reports, like encoder ticks. You have to receive the events.</details>
+</div>
+
+<h2>② Completion: mouse-wheel zoom</h2>
+
+<p>The wheel arrives as an <a href="https://docs.godotengine.org/en/stable/classes/class_inputeventmousebutton.html"><code>InputEventMouseButton</code></a>, the same type as a click. Its <code>button_index</code> tells you which “button” it was. You'll compare it to the constants <code>MOUSE_BUTTON_WHEEL_UP</code> and <code>MOUSE_BUTTON_WHEEL_DOWN</code>. Zoom means changing <code>arm.spring_length</code> (metres).</p>
+
+<p>Replace the last <code>elif</code> branch of your <code>_unhandled_input</code> with this skeleton, add the three <code>@export</code>s at the top, and fill in the four <code>TODO</code>s:</p>
+
+<pre><code>@export var zoom_step := 0.5   <span class="c"># metres per wheel notch</span>
+@export var min_zoom := 2.0
+@export var max_zoom := 10.0
+
+<span class="c"># … inside _unhandled_input, replacing the old MouseButton branch:</span>
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			pass  <span class="c"># TODO 1: zoom in, so the arm gets shorter</span>
+		elif <span class="c">TODO 2: the other wheel direction</span>:
+			pass  <span class="c"># TODO 3: zoom out</span>
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED   <span class="c"># real clicks still recapture</span>
+		<span class="c"># TODO 4: keep arm.spring_length between min_zoom and max_zoom</span></code></pre>
+
+<p>Done when: scrolling up moves the camera closer, scrolling down moves it away, and it stops at 2 m and at 10 m.</p>
+
+<div class="recall">
+  <p class="q">Hint (only if stuck)</p>
+  <details><summary>Show hint</summary>TODO 4 is the same pattern as the pitch clamp a few lines above, just with <code>spring_length</code> and your two exports. TODOs 1 and 3 are <code>-=</code> and <code>+=</code> with <code>zoom_step</code>.</details>
+</div>
+<div class="recall">
+  <p class="q">Solution</p>
+  <details><summary>Show solution</summary>
+<pre><code>	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			arm.spring_length -= zoom_step
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			arm.spring_length += zoom_step
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		arm.spring_length = clampf(arm.spring_length, min_zoom, max_zoom)</code></pre>
+I ran this in Godot 4.7.2 without a window: 30 wheel-up events from 5 m stopped at exactly 2.0 m.
+  </details>
+</div>
+
+<h2>A note on reading the docs</h2>
+
+<p class="aside">From the docs' own guide to <a href="https://docs.godotengine.org/en/stable/getting_started/introduction/learning_new_features.html">learning new features</a>.</p>
+
+<p>You said looking things up in the docs felt like it defeated the purpose. Half of that is right: a lesson shouldn't make you <em>discover</em> the core idea, and Lesson 4 did. But looking up details is a core skill, not cheating. Every Godot developer does it constantly. Two shortcuts make it fast:</p>
+<ul>
+  <li>In the script editor, hold <kbd>Ctrl</kbd> and click a class, method or property name to jump to its documentation.</li>
+  <li><kbd>F1</kbd> (Help → Search Help) searches the built-in class reference offline.</li>
+</ul>
+<p>Practise on purpose: <kbd>Ctrl</kbd>+click <code>InputEventMouseButton</code> in your script and find the property that holds the wheel's precise scroll amount on trackpads. (It's <code>factor</code>, but find it yourself.) That's the kind of lookup you'll do while building games.</p>
+
+<h2>③ On your own: sprint</h2>
+
+<p>Everything you need, you've already used in Lessons 1–2. No new concepts.</p>
+
+<ol class="checklist" id="sprint">
+  <li>Holding <kbd>Shift</kbd> makes the player move twice as fast. Releasing it returns to normal speed.</li>
+  <li>The multiplier can be tuned in the Inspector.</li>
+  <li>Sprinting doesn't change jump height.</li>
+  <li>Your code checks an input <em>action</em> named by intent, never a raw key.</li>
+</ol>
+<p class="progress" data-for="sprint"></p>
+
+<div class="recall">
+  <p class="q">Solution: open only after your own attempt works or you've tried for 15 minutes</p>
+  <details><summary>Show solution</summary>
+Add a <code>sprint</code> action bound to <kbd>Shift</kbd> in the Input Map, then:
+<pre><code>@export var sprint_multiplier := 2.0
+
+<span class="c"># in _physics_process, before setting velocity.x / .z:</span>
+	var current_speed := speed
+	if Input.is_action_pressed("sprint"):   <span class="c"># held → pressed, not just_pressed</span>
+		current_speed *= sprint_multiplier
+	velocity.x = direction.x * current_speed
+	velocity.z = direction.z * current_speed</code></pre>
+Tested: 1 s of walking covered 5 m, and 1 s of sprinting covered 10 m. Jump height is untouched because only the horizontal components use <code>current_speed</code>.
+  </details>
+</div>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">The mouse movement inside a motion event is best compared to…</p>
+  <button data-correct data-why="Motion is reported as deltas since the last report. You accumulate them into an angle.">encoder ticks counted since the last report</button>
+  <button data-why="That's keys: a level you can poll. Mouse motion has no level to read.">a GPIO level you can poll anytime</button>
+  <button data-why="relative is a change since the last event, not an absolute position.">the absolute position of the cursor now</button>
+  <button data-why="Godot does deliver it, as a stream of InputEventMouseMotion events.">a value Godot never gives to scripts</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why use <code>_unhandled_input</code> for camera look rather than <code>_input</code>?</p>
+  <button data-correct data-why="_unhandled_input runs after the GUI has had a chance to consume the event, so menus take priority.">menus get the chance to consume events first</button>
+  <button data-why="_input receives mouse motion too. The difference is the order relative to the GUI.">_input simply never receives any mouse motion events</button>
+  <button data-why="Both are called per event. Speed isn't the reason.">_unhandled_input is called more often per frame</button>
+  <button data-why="Captured mode works with either callback. The difference is GUI priority.">captured mouse mode always requires the unhandled callback</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Units check: <code>relative.x * mouse_sensitivity</code> must be in radians. So sensitivity is in…</p>
+  <button data-correct data-why="pixels × rad/pixel = rad. Unit analysis catches many bugs before you run anything.">radians per pixel of mouse movement</button>
+  <button data-why="Nothing here involves time. The deltas are per event, not per second.">radians per second of mouse movement</button>
+  <button data-why="Code works in radians. Degrees appear only in the Inspector.">degrees per pixel of mouse movement</button>
+  <button data-why="It would need to cancel pixels, so it's rad/pixel, not pixels/rad.">pixels per radian of mouse movement</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Sprint uses <code>is_action_pressed</code>, jump uses <code>is_action_just_pressed</code>. Why?</p>
+  <button data-correct data-why="Sprint lasts while held (a state). Jump fires once per press (an edge).">sprint is a held state, jump an edge</button>
+  <button data-why="Both are valid in _physics_process. The choice depends on held vs one-shot.">just_pressed only ever works inside the physics callback</button>
+  <button data-why="Both work with any key. It's about the behaviour you want.">Shift cannot be read by just_pressed at all</button>
+  <button data-why="With pressed, holding Space would re-jump on every landing (Lesson 2).">jump would be too weak with plain pressed</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>Explain the event path from mouse to <code>pivot.rotation.y</code> in three sentences.</li>
+  <li>From Lesson 3: why does the coin emit a signal instead of updating the label?</li>
+  <li>From Lesson 2: why is gravity multiplied by delta, but velocity isn't?</li>
+</ul>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html">Godot Docs: Using InputEvent</a>. Read the “How does it work?” section. It's the full version of the event-path diagram above.
+</div>
+
+<p class="ask">If any line in the worked example still feels like magic, ask me about that line. Ten minutes on it now is far better than another Lesson 4.</p>
+
+<nav class="nav">
+  <span>← <a href="0004-third-person-camera.html">Lesson 4: Third-person camera</a></span>
+  <span>Reference: <a href="../reference/third-person-controller.html">Third-person controller</a></span>
+</nav>
+
+</main>
+</body>
+</html>

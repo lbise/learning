@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://x584hiir57lw"]
+
+[ext_resource type="Script" uid="uid://cva0e2cibxqwk" path="res://cube.gd" id="1_ig7tw"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ln6rh"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_ln6rh"]
+
+[node name="Main" type="Node3D" unique_id=657404699]
+
+[node name="Cube" type="MeshInstance3D" parent="." unique_id=1846861055]
+mesh = SubResource("BoxMesh_ln6rh")
+script = ExtResource("1_ig7tw")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Cube" unique_id=161488307]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
+mesh = SubResource("CapsuleMesh_ln6rh")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1265338069]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 4)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=246113309]
+transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 0, 0)

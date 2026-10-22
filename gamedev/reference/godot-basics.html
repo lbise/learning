@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Godot basics: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Godot 4.7</p>
+<h1>Godot basics</h1>
+<p class="subtitle">The model, the loop, 3D conventions, and shortcuts. Built from <a href="../lessons/0001-a-cube-you-can-drive.html">Lesson 1</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>The model</h2>
+<table>
+  <tr><th>Concept</th><th>What it is</th></tr>
+  <tr><td>Node</td><td>One building block with one job (draw a mesh, render a view, emit light).</td></tr>
+  <tr><td>Scene</td><td>A saved tree of nodes (<code>.tscn</code>). Reusable, like a prefab. Scenes nest inside scenes.</td></tr>
+  <tr><td>Scene tree</td><td>All running scenes joined into one tree at runtime.</td></tr>
+  <tr><td>Script</td><td>A class attached to a node. <code>extends</code> names the node type.</td></tr>
+</table>
+<p>Children inherit their parent's transform: move or rotate the parent and the children follow.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/getting_started/introduction/key_concepts_overview.html">Key concepts overview</a></p>
+</section>
+
+<section>
+<h2>The game loop</h2>
+<table>
+  <tr><th>Callback</th><th>When</th></tr>
+  <tr><td><code>_ready()</code></td><td>Once, when the node enters the scene tree</td></tr>
+  <tr><td><code>_process(delta)</code></td><td>Every rendered frame. Frame rate varies.</td></tr>
+  <tr><td><code>_physics_process(delta)</code></td><td>Fixed rate, 60/s by default. Use for movement that collides.</td></tr>
+</table>
+<p><code>delta</code> = seconds since the last call. <strong>Always multiply speeds by <code>delta</code>.</strong></p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/idle_and_physics_processing.html">Idle and Physics Processing</a></p>
+</section>
+
+<section>
+<h2>3D conventions</h2>
+<table>
+  <tr><td>Up</td><td><strong>+Y</strong> (Blender uses +Z: watch for this when importing)</td></tr>
+  <tr><td>Forward</td><td><code>Vector3.FORWARD</code> = <code>(0, 0, -1)</code></td></tr>
+  <tr><td>Units</td><td>1 unit = 1 metre</td></tr>
+  <tr><td>Angles</td><td>Radians in code (full turn = <code>TAU</code> ≈ 6.28). Degrees in the Inspector. <code>deg_to_rad()</code> converts.</td></tr>
+  <tr><td><code>position</code></td><td>Relative to the parent. <code>global_position</code> is relative to the world.</td></tr>
+  <tr><td>Import</td><td>glTF 2.0 (<code>.glb</code>/<code>.gltf</code>) is the recommended format</td></tr>
+</table>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/tutorials/3d/introduction_to_3d.html">Intro to 3D</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_node3d.html">Node3D</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_vector3.html">Vector3</a>, <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html">3D formats</a></p>
+</section>
+
+<section>
+<h2>Snippets</h2>
+<pre><code><span class="c"># Expose a tunable value in the Inspector</span>
+@export var speed := 3.0
+
+<span class="c"># Spin around Y, frame-rate independent</span>
+rotate_y(spin_speed * delta)
+
+<span class="c"># Arrow/WASD/stick → ground-plane movement</span>
+var v := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+position += Vector3(v.x, 0, v.y) * speed * delta
+
+<span class="c"># Single action check</span>
+if Input.is_action_pressed("ui_accept"):
+	pass</code></pre>
+<p class="aside"><code>get_vector</code> caps the length at 1, so diagonals aren't faster. <a href="https://docs.godotengine.org/en/stable/classes/class_input.html">Input reference</a></p>
+</section>
+
+<section>
+<h2>Editor shortcuts</h2>
+<table>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Add child node to the selected node</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save scene</td></tr>
+  <tr><td><kbd>F5</kbd></td><td>Run the project (main scene)</td></tr>
+  <tr><td><kbd>F6</kbd></td><td>Run the current scene</td></tr>
+  <tr><td><kbd>F1</kbd></td><td>Search the built-in docs</td></tr>
+</table>
+</section>
+
+</div>
+</main>
+</body>
+</html>

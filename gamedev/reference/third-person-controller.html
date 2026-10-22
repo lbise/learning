@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Third-person controller: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Godot 4.7</p>
+<h1>Third-person controller</h1>
+<p class="subtitle">The rig, mouse look, camera-relative movement, facing. Built from <a href="../lessons/0004-third-person-camera.html">Lesson 4</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>The rig: one axis per node</h2>
+<pre class="tree"><b>Player</b> (CharacterBody3D)  never rotated
+├─ CollisionShape3D
+├─ Model (Node3D)          yaw → movement dir
+│  └─ meshes / imported character
+└─ CameraPivot (Node3D)    yaw ← mouse X, y≈1.5
+   └─ SpringArm3D          pitch ← mouse Y, length 5
+      └─ Camera3D          positioned by the arm</pre>
+<p>Rotate the <em>Model</em>, not the body. Children inherit transforms.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/3d/spring_arm.html">Third-person camera with spring arm</a></p>
+</section>
+
+<section>
+<h2>Mouse look</h2>
+<pre><code>Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		pivot.rotation.y -= event.relative.x * sens
+		arm.rotation.x = clampf(
+			arm.rotation.x - event.relative.y * sens,
+			deg_to_rad(-70.0), deg_to_rad(20.0))</code></pre>
+<p>Mouse motion is an <em>event</em> (<code>relative</code> = pixels since the last event), not a pollable state.</p>
+</section>
+
+<section>
+<h2>Input: poll vs events</h2>
+<table>
+  <tr><td>Keys / actions</td><td>Have a state: poll with <code>Input.is_action_pressed()</code> (held) or <code>is_action_just_pressed()</code> (edge)</td></tr>
+  <tr><td>Mouse motion</td><td>Delta reports, like encoder ticks: receive in <code>_unhandled_input</code> and accumulate <code>event.relative</code></td></tr>
+  <tr><td>Wheel</td><td><code>InputEventMouseButton</code>, <code>button_index == MOUSE_BUTTON_WHEEL_UP / _DOWN</code></td></tr>
+  <tr><td>Event order</td><td><code>_input</code> → GUI → <code>_unhandled_input</code>. Gameplay goes in the last one</td></tr>
+  <tr><td>Units</td><td>sensitivity = rad/pixel. 100 px × 0.003 = 0.3 rad ≈ 17°</td></tr>
+</table>
+<pre><code><span class="c"># zoom</span>
+arm.spring_length = clampf(arm.spring_length ± zoom_step, 2.0, 10.0)
+<span class="c"># sprint (held state)</span>
+var s := speed * (sprint_multiplier if Input.is_action_pressed("sprint") else 1.0)</code></pre>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html">Using InputEvent</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_inputeventmousebutton.html">InputEventMouseButton</a>. Look-ups: <kbd>Ctrl</kbd>+click a symbol, or <kbd>F1</kbd>.</p>
+</section>
+
+<section>
+<h2>Camera-relative movement</h2>
+<pre><code>var dir := Vector3(input.x, 0, input.y) \
+		.rotated(Vector3.UP, pivot.rotation.y)
+velocity.x = dir.x * speed
+velocity.z = dir.z * speed</code></pre>
+</section>
+
+<section>
+<h2>Facing and smoothing</h2>
+<pre><code>if dir.length() > 0.01:
+	var yaw := atan2(-dir.x, -dir.z)   <span class="c"># front = −Z</span>
+	model.rotation.y = lerp_angle(model.rotation.y, yaw,
+			1.0 - exp(-turn_speed * delta))</code></pre>
+<table>
+  <tr><td><code>lerp_angle</code></td><td>Takes the short way across the ±180° wrap</td></tr>
+  <tr><td><code>1 - exp(-k·dt)</code></td><td>Exact, frame-rate independent smoothing weight</td></tr>
+  <tr><td><code>Vector3.FORWARD</code></td><td>(0, 0, −1): Godot nodes and cameras</td></tr>
+  <tr><td><code>Vector3.MODEL_FRONT</code></td><td>(0, 0, +1): imported assets face this way</td></tr>
+</table>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/classes/class_%40globalscope.html">@GlobalScope</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_vector3.html">Vector3</a></p>
+</section>
+
+<section>
+<h2>Gotchas</h2>
+<table>
+  <tr><td>Camera clips into walls</td><td>Use <code>SpringArm3D</code>, with the camera as a <em>direct</em> child</td></tr>
+  <tr><td>Arm too short</td><td><code>spring_length</code> defaults to 1 m</td></tr>
+  <tr><td>Model snaps back when idle</td><td>Only update the facing while moving</td></tr>
+  <tr><td>Character walks backwards</td><td>+Z vs −Z front: rotate the mesh 180° under Model</td></tr>
+  <tr><td>Esc doesn't free the mouse</td><td>Handle <code>ui_cancel</code> → <code>MOUSE_MODE_VISIBLE</code></td></tr>
+</table>
+</section>
+
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 1: A cube you can drive</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 1 · Godot foundations</p>
+<h1>A cube you can drive</h1>
+<p class="subtitle">Nodes, scenes, and the game loop, by building the smallest possible 3D game.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Understand how a Godot game is put together: a tree of nodes, each updated every frame.</dd>
+  <dt>Time</dt><dd>About 30 minutes, plus 20 minutes of reading</dd>
+  <dt>The win</dt><dd>A 3D cube spinning on screen that you can drive around with the arrow keys</dd>
+  <dt>Links</dt><dd>Links in the text are citations. Follow one only if you're curious or doubt a claim. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Why start here</h2>
+
+<p class="aside">The Godot docs <a href="https://docs.godotengine.org/en/stable/getting_started/first_3d_game/index.html">recommend starting with 2D</a> because “3D game code is always more complex”. You already program for a living, so we'll start in 3D but keep it tiny.</p>
+
+<p>A Valheim-style Viking and a cyberpunk mercenary are built the same way in Godot: as a <strong>tree of nodes</strong>. In the docs' words: <a href="https://docs.godotengine.org/en/stable/getting_started/introduction/key_concepts_overview.html">“In Godot, a game is a tree of nodes that you group together into scenes.”</a> Once this model clicks, every tutorial you read afterwards gets easier.</p>
+
+<h2>Three ideas</h2>
+
+<p><strong>Node.</strong> <a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/nodes_and_scenes.html">“Nodes are the fundamental building blocks of your game.”</a> Each node does one job: a <code>MeshInstance3D</code> draws a shape, a <code>Camera3D</code> renders the view, a <code>DirectionalLight3D</code> acts as a sun.</p>
+
+<p><strong>Scene.</strong> A tree of nodes saved to a <code>.tscn</code> file. Scenes are reusable: <a href="https://docs.godotengine.org/en/stable/getting_started/introduction/key_concepts_overview.html">they “fill the role of both prefabs and scenes in some other game engines.”</a> One player scene, one enemy scene, one level scene that contains the others.</p>
+
+<p><strong>Scene tree.</strong> At runtime, all your scenes come together into one big tree. A child node's position is relative to its parent, so moving a parent moves its children too.</p>
+
+<p>Here is a player you might build later, next to the scene you'll build today:</p>
+
+<pre class="tree"><b>Player</b> (CharacterBody3D)        <b>Main</b> (Node3D)
+├─ Model (Viking .glb)       ├─ Cube (MeshInstance3D) ← script
+├─ CollisionShape3D          ├─ Camera3D
+└─ CameraRig                 └─ DirectionalLight3D
+   └─ Camera3D</pre>
+
+<h2>The game loop, embedded-style</h2>
+
+<p class="aside">GDScript <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html">“uses an indentation-based syntax similar to languages like Python”</a> but is “entirely independent from Python”. Type hints like <code>delta: float</code> are <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/static_typing.html">optional but catch errors earlier</a>.</p>
+
+<p>You know the superloop: <code>while(1) { read_inputs(); update(); }</code>. Godot runs that loop for you and calls your node's <code>_process(delta)</code> once per frame. <code>delta</code> is <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/idle_and_physics_processing.html">“the time elapsed in seconds since the previous call”</a>.</p>
+
+<p>Frame rate isn't fixed. It changes between machines and from moment to moment. So you never move “3 units per frame”. You move <code>3 * delta</code>, which works out to 3 metres per second whatever the frame rate. The docs are blunt about it: <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/idle_and_physics_processing.html">“you should always multiply a speed value by delta”</a>.</p>
+
+<h2>Build it</h2>
+
+<ol class="checklist" id="build">
+  <li>Run <code>godot</code>. In the Project Manager, click <strong>Create</strong>. Name it <code>first-steps</code>, put it in <code>~/learning/gamedev/projects/</code>, keep the <strong>Forward+</strong> renderer, and create it.</li>
+  <li>In the Scene dock (top left), click <strong>3D Scene</strong>. This creates a <code>Node3D</code> root. Double-click it and rename it <code>Main</code>.</li>
+  <li>With <code>Main</code> selected, press <kbd>Ctrl</kbd>+<kbd>A</kbd> (Add Child Node), search for <code>MeshInstance3D</code>, and create it. Rename it <code>Cube</code>.</li>
+  <li>In the Inspector (right), find <strong>Mesh</strong>, click <em>&lt;empty&gt;</em> and choose <strong>New BoxMesh</strong>. A 1 m cube appears.</li>
+  <li>Select <code>Main</code> again and add a <code>Camera3D</code>. In the Inspector, open <strong>Transform</strong> and set <strong>Position</strong> to <code>y = 1</code>, <code>z = 4</code>. Godot is <a href="https://docs.godotengine.org/en/stable/tutorials/3d/introduction_to_3d.html">Y-up, 1 unit = 1 metre</a>, so the camera now sits 4 m back and 1 m up, looking toward the cube.</li>
+  <li>Select <code>Main</code> and add a <code>DirectionalLight3D</code>. Set its <strong>Rotation</strong> to <code>x = -45</code> so the “sun” shines down at an angle.</li>
+  <li>Save with <kbd>Ctrl</kbd>+<kbd>S</kbd> as <code>main.tscn</code>. Press <kbd>F6</kbd> (Run Current Scene). You should see a lit cube. Close the window.</li>
+  <li>Right-click <code>Cube</code> → <strong>Attach Script</strong> → keep the name <code>cube.gd</code> → <strong>Create</strong>. Replace everything in the editor with the script below.</li>
+  <li>Press <kbd>F6</kbd>. The cube spins, and the arrow keys drive it around.</li>
+</ol>
+<p class="progress" data-for="build"></p>
+
+<pre><code>extends MeshInstance3D
+
+@export var spin_speed := 1.5   <span class="c"># radians per second</span>
+@export var move_speed := 3.0   <span class="c"># metres per second</span>
+
+func _process(delta: float) -> void:
+	rotate_y(spin_speed * delta)
+	var input := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	position += Vector3(input.x, 0, input.y) * move_speed * delta
+</code></pre>
+
+<p class="aside"><code>ui_left</code> and the others <a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/scripting_player_input.html">“are predefined in every Godot project”</a>. Later you'll define your own actions, such as <code>jump</code>.</p>
+
+<p>Line by line: <code>extends</code> says which node type this script controls, because <a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/scripting_first_script.html">“every GDScript file is implicitly a class”</a>. <code>@export</code> exposes a variable in the Inspector. <a href="https://docs.godotengine.org/en/stable/classes/class_input.html"><code>Input.get_vector</code></a> turns four actions into a 2D vector capped at length 1, so diagonal movement isn't faster. You map its screen-style X/Y onto the ground plane, X/Z, because Y is up. Up arrow gives <code>y = -1</code>, which becomes <code>-Z</code>, and <a href="https://docs.godotengine.org/en/stable/classes/class_vector3.html"><code>Vector3.FORWARD</code> is <code>(0, 0, -1)</code></a>: away from the camera.</p>
+
+<h2>Experiments: predict first, then run</h2>
+
+<p>Write down your prediction before each run. If the result surprises you, you've just learned something.</p>
+
+<div class="recall">
+  <p class="q">1. Select <code>Cube</code>. In the Inspector, set <em>Spin Speed</em> to <code>6.28</code>. How long will one full turn take?</p>
+  <details><summary>Show answer</summary>About one second. Angles in code are radians, and a full turn is 2π ≈ 6.28. The Inspector shows <em>Rotation</em> in degrees for humans, but <a href="https://docs.godotengine.org/en/stable/classes/class_node3d.html">methods take radians</a>.</details>
+</div>
+
+<div class="recall">
+  <p class="q">2. Add a second <code>MeshInstance3D</code> with a BoxMesh as a <strong>child of <code>Cube</code></strong> (not of <code>Main</code>). Set its position to <code>x = 1.5</code>. What will it do when you run?</p>
+  <details><summary>Show answer</summary>It orbits the big cube and follows it when you drive. A child's transform is relative to its parent, so the parent's spin and movement carry the child along. That's how a sword stays in a character's hand.</details>
+</div>
+
+<div class="recall">
+  <p class="q">3. Delete <code>* delta</code> from the <code>rotate_y</code> line and run. What happens, and why? (Put it back afterwards.)</p>
+  <details><summary>Show answer</summary>It spins wildly: 1.5 radians <em>per frame</em>, so 90 radians per second at 60 fps and more on a faster machine. The speed now depends on the machine. That's exactly the bug <code>delta</code> prevents.</details>
+</div>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">What is a scene in Godot?</p>
+  <button data-correct data-why="A scene is a saved node tree. A level is one use of a scene, and so is a player or a bullet.">A saved tree of nodes you can reuse</button>
+  <button data-why="Levels are scenes, but so are players, enemies and UI. A scene is any saved node tree.">One level of the game, like a map</button>
+  <button data-why="A script is attached to a node and adds behaviour. The scene is the whole saved tree.">The script that is attached to a node</button>
+  <button data-why="A camera is just one node. A scene doesn't need a camera at all.">A camera and all the nodes it sees</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">A heavy moment drops the game from 120 fps to 30 fps. With <code>* delta</code> in place, the cube…</p>
+  <button data-correct data-why="Each frame takes 4× longer, so delta is 4× bigger and each step is 4× larger. Same distance per second.">keeps the same speed per second</button>
+  <button data-why="That would be true without delta. Delta grows as frames slow down, which compensates.">moves four times slower per second</button>
+  <button data-why="Delta exactly compensates for the slower frames, so it doesn't overshoot.">moves four times faster per second</button>
+  <button data-why="_process still runs every frame, just less often. The cube keeps moving.">stops until the frame rate recovers</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You want the cube to make a quarter turn. Which call is correct?</p>
+  <button data-correct data-why="A full turn is 2π radians, so a quarter turn is π/2.">rotate_y(PI/2)</button>
+  <button data-why="Methods take radians: 90 radians is about 14 full turns.">rotate_y(90.0)</button>
+  <button data-why="0.25 radians is about 14°. Turns aren't the unit, radians are.">rotate_y(0.25)</button>
+  <button data-why="2π radians is a full turn, which leaves the cube where it started.">rotate_y(PI*2)</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">A node's <code>position</code> is measured relative to what?</p>
+  <button data-correct data-why="The docs: “Position … in parent space (relative to the parent node).” That's why your orbiting child cube worked.">Relative to its parent node</button>
+  <button data-why="The camera has nothing to do with it. Move the camera and the cube's position stays the same.">Relative to the camera view</button>
+  <button data-why="That's global_position. Plain position is relative to the parent. They only match when the parent sits at the origin.">Relative to the world origin</button>
+  <button data-why="Its own rotation affects local-space methods, not position, which is why spinning didn't change the driving direction.">Relative to its own rotation</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<p>At the start of the next lesson, before opening Godot, answer these from memory:</p>
+<ul>
+  <li>Sketch the scene tree you built today.</li>
+  <li>Explain to an imaginary colleague why speeds are multiplied by <code>delta</code>.</li>
+  <li>What is the difference between a node and a scene?</li>
+</ul>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/getting_started/step_by_step/nodes_and_scenes.html">Godot Docs: Nodes and Scenes</a>, then <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/idle_and_physics_processing.html">Idle and Physics Processing</a>. They're short, official, and cover exactly today's model. The second also explains <code>_physics_process</code>, which you'll need once things collide.
+</div>
+
+<p class="ask">Stuck, curious, or something didn't behave as described? Ask me. I'm your teacher for this, and questions like “why does Godot do it this way?” are exactly what I'm here for.</p>
+
+<nav class="nav">
+  <span>Reference: <a href="../reference/godot-basics.html">Godot basics cheat sheet</a></span>
+  <span>Next: <a href="0002-walk-jump-collide.html">Lesson 2: Walk, jump, collide</a> →</span>
+</nav>
+
+</main>
+</body>
+</html>
