@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State machines: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Godot 4.7</p>
+<h1>State machines</h1>
+<p class="subtitle">Enum + match character controller with one-shot animations. Built from <a href="../lessons/0007-state-machine.html">Lesson 7</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>The pattern</h2>
+<table>
+  <tr><td><code>enum State {…}</code> + <code>var state</code></td><td>Single source of truth</td></tr>
+  <tr><td><code>match state:</code> in <code>_physics_process</code></td><td>Per-tick behaviour + exit conditions</td></tr>
+  <tr><td><code>change_state(new)</code></td><td>The only writer of <code>state</code>. Guard against same-state, then run enter actions once</td></tr>
+  <tr><td><code>animation_finished</code></td><td>Exit trigger for one-shot states. Check <code>state</code> in the handler</td></tr>
+</table>
+<p>Smell that calls for this pattern: several booleans where only one should be true.</p>
+<p class="aside">Source: <a href="https://gameprogrammingpatterns.com/state.html">Game Programming Patterns: State</a></p>
+</section>
+
+<section>
+<h2>Skeleton</h2>
+<pre><code>enum State { IDLE, MOVE, AIR, LAND, ROLL, CELEBRATE }
+var state := State.IDLE
+
+func _physics_process(delta: float) -> void:
+	<span class="c"># shared: gravity, read input</span>
+	match state:
+		State.IDLE, State.MOVE:
+			<span class="c"># walk; check jump / roll / fall / move</span>
+		State.AIR:
+			if is_on_floor(): change_state(State.LAND)
+		State.LAND:
+			<span class="c"># cancel into MOVE on input</span>
+		State.ROLL:
+			<span class="c"># fixed direction, no steering</span>
+	move_and_slide()
+
+func change_state(new_state: State) -> void:
+	if new_state == state:
+		return
+	state = new_state
+	match state:
+		State.LAND: anim.play("Jump_Land", 0.1, 2.0)
+		<span class="c"># …</span>
+
+func _on_animation_finished(_name: StringName) -> void:
+	if state in [State.LAND, State.ROLL]:
+		change_state(State.IDLE)</code></pre>
+</section>
+
+<section>
+<h2>Facts and gotchas</h2>
+<table>
+  <tr><td><code>play(name, blend, speed)</code></td><td>The 3rd argument is the playback speed (2.0 = twice as fast)</td></tr>
+  <tr><td><code>animation_finished</code></td><td>Never emitted for looping clips</td></tr>
+  <tr><td>Facing direction</td><td><code>-model.global_basis.z</code> (Model −Z faces the movement)</td></tr>
+  <tr><td>First tick</td><td><code>is_on_floor()</code> is false until the first <code>move_and_slide()</code></td></tr>
+  <tr><td>Commit moves</td><td>Store the direction in the enter action (a roll ignores steering)</td></tr>
+  <tr><td>Game feel</td><td>Make long one-shots cancellable (LAND → MOVE on input)</td></tr>
+</table>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/classes/class_animationmixer.html">AnimationMixer</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_node3d.html">Node3D</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html">CharacterBody3D</a></p>
+</section>
+
+<section>
+<h2>Next steps beyond enum + match</h2>
+<table>
+  <tr><td>State objects / nodes</td><td>One class per state with <code>enter</code>/<code>exit</code>/<code>update</code>, for when branches grow large</td></tr>
+  <tr><td>Hierarchical states</td><td>Shared behaviour in a parent state (e.g. GROUNDED contains IDLE/MOVE)</td></tr>
+  <tr><td>AnimationTree StateMachine</td><td>Godot's visual animation state machine with blending</td></tr>
+</table>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/animation/animation_tree.html">Using AnimationTree</a></p>
+</section>
+
+</div>
+</main>
+</body>
+</html>

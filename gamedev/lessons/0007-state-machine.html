@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 7: One state at a time</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 7 · Characters</p>
+<h1>One state at a time</h1>
+<p class="subtitle">Replace flags and if-ladders with a finite state machine, then add landing and a dodge roll without the code turning to spaghetti.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Structure a character controller as an explicit state machine with enter actions and animation-driven exits.</dd>
+  <dt>Time</dt><dd>About 45 minutes, plus 15 minutes of reading</dd>
+  <dt>The win</dt><dd>A character with six clean states: idle, move, air, land, roll and celebrate. Adding the sixth should feel easy.</dd>
+  <dt>Format</dt><dd><strong>① worked example</strong> (refactor to a state machine) → <strong>② completion</strong> (landing) → <strong>③ on your own</strong> (dodge roll).</dd>
+  <dt>Links</dt><dd>Citations are optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">Who should connect the <code>all_coins_collected</code> signal to <code>Player.celebrate</code>, and why not the player itself?</p>
+  <details><summary>Show answer</summary>The world, or an editor connection saved in <code>world.tscn</code>: the node that knows both sides. If the player connected itself, it would have to find its level, and the reusable scene would then depend on that level.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 6: <code>play("Walk")</code> every tick while Walk is already playing. Does it restart?</p>
+  <details><summary>Show answer</summary>No, it continues. Only a <em>finished</em> non-looping clip restarts.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 3: in which order do <code>_ready()</code> calls run, parent or children first?</p>
+  <details><summary>Show answer</summary>Children first, then the parent.</details>
+</div>
+
+<h2>① Worked example: from flags to states</h2>
+
+<h3>The smell</h3>
+
+<p>Your Lesson 6 player has <code>celebrating</code> (a flag), an early <code>return</code>, and an <code>if</code>-ladder in <code>update_animation</code>. Now imagine adding landing, rolling, attacking and swimming. Can you roll while celebrating? Jump mid-roll? Every new flag multiplies the combinations you have to think about. Robert Nystrom describes exactly this in <em>Game Programming Patterns</em>: <a href="https://gameprogrammingpatterns.com/state.html">“When you have a handful of flags where only one is true at a time, that's a hint that what you really want is an enum.”</a></p>
+
+<p class="aside">You've probably written this in C: <code>switch (state)</code> inside the superloop. GDScript's version is an <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html"><code>enum</code></a> plus <code>match</code>.</p>
+
+<p>A <strong>finite state machine</strong> says that the character is in exactly one state at a time. Each state decides what happens each tick and when to leave, and entering a state runs its one-time setup, such as starting an animation.</p>
+
+<pre class="tree wide">            jump / walked off edge
+   <b>IDLE</b> ⇄ <b>MOVE</b> ───────────────────▶ <b>AIR</b>
+     ▲                                 │ touches floor
+     │ anim finished / input           ▼
+     └──────────────────────────── <b>LAND</b>      (② you add this)
+
+   IDLE/MOVE ── roll pressed ──▶ <b>ROLL</b> ── anim finished ──▶ IDLE   (③ on your own)
+   any ── all coins collected ──▶ <b>CELEBRATE</b></pre>
+
+<h3>The pattern: three pieces</h3>
+
+<table>
+  <tr><th>Piece</th><th>Job</th></tr>
+  <tr><td><code>enum State</code> + <code>var state</code></td><td>The single source of truth: “what am I doing right now?”</td></tr>
+  <tr><td><code>match state:</code> in <code>_physics_process</code></td><td>Per-tick behaviour <em>and</em> exit conditions for the current state</td></tr>
+  <tr><td><code>change_state(new)</code></td><td>The only place <code>state</code> is assigned. It runs <strong>enter actions</strong> (start an animation, store a direction) exactly once</td></tr>
+</table>
+
+<h3>The refactored <code>player.gd</code></h3>
+
+<p>This replaces the movement part of your script and keeps <code>_ready</code>'s mouse capture and <code>_unhandled_input</code> as they are. It's long, but there's almost nothing new in it: the same pieces you wrote, rearranged.</p>
+
+<pre class="wide"><code>extends CharacterBody3D
+
+enum State { IDLE, MOVE, AIR, CELEBRATE }
+
+<span class="c"># … your @export vars and @onready vars from before (speed, anim, pivot, model …)</span>
+
+var state := State.IDLE
+
+func _physics_process(delta: float) -> void:
+	if not is_on_floor():
+		velocity += get_gravity() * delta        <span class="c"># gravity applies in every state</span>
+
+	var input := Input.get_vector("move_left", "move_right",
+			"move_forward", "move_back")
+	var direction := Vector3(input.x, 0, input.y).rotated(Vector3.UP, pivot.rotation.y)
+	var sprinting := Input.is_action_pressed("sprint")
+
+	match state:
+		State.IDLE, State.MOVE:
+			walk(direction, sprinting, delta)
+			if Input.is_action_just_pressed("jump") and is_on_floor():
+				velocity.y = jump_velocity
+				change_state(State.AIR)
+			elif not is_on_floor():
+				change_state(State.AIR)              <span class="c"># walked off an edge</span>
+			elif direction.length() > 0.01:
+				change_state(State.MOVE)
+				anim.play("Sprint" if sprinting else "Walk", anim_blend)
+			else:
+				change_state(State.IDLE)
+		State.AIR:
+			walk(direction, sprinting, delta)        <span class="c"># air control</span>
+			if is_on_floor():
+				change_state(State.IDLE)             <span class="c"># ② will route this via LAND</span>
+		State.CELEBRATE:
+			velocity.x = 0
+			velocity.z = 0
+
+	move_and_slide()
+
+func change_state(new_state: State) -> void:
+	if new_state == state:
+		return                                   <span class="c"># enter actions run once, not every tick</span>
+	state = new_state
+	match state:
+		State.IDLE:
+			anim.play("Idle", anim_blend)
+		State.AIR:
+			anim.play("Jump", anim_blend)
+		State.CELEBRATE:
+			anim.play("Dance", anim_blend)
+
+func walk(direction: Vector3, sprinting: bool, delta: float) -> void:
+	var current_speed := speed * (sprint_multiplier if sprinting else 1.0)
+	velocity.x = direction.x * current_speed
+	velocity.z = direction.z * current_speed
+	if direction.length() > 0.01:
+		var target_yaw := atan2(-direction.x, -direction.z)
+		model.rotation.y = lerp_angle(model.rotation.y, target_yaw, turn_speed * delta)
+
+func celebrate() -> void:
+	change_state(State.CELEBRATE)</code></pre>
+
+<p>Things to notice:</p>
+<ul>
+  <li><code>celebrating</code>, the early <code>return</code> and <code>update_animation</code> are gone. <code>CELEBRATE</code> simply has no transitions out, so it's a terminal state.</li>
+  <li><code>State.IDLE, State.MOVE:</code> shares one branch between two states. They differ only in their animation.</li>
+  <li>MOVE still calls <code>anim.play</code> every tick, so switching between walk and sprint works mid-move. That's safe because <code>play</code> on the current clip continues it.</li>
+  <li><code>walk()</code> was pulled out because two states use it. Nothing in it is new.</li>
+</ul>
+
+<h3>Predict, then try</h3>
+
+<div class="recall">
+  <p class="q">1. Delete the <code>if new_state == state: return</code> guard. What changes on screen?</p>
+  <details><summary>Show answer</summary>Very little for <code>Idle</code>, because <code>play</code> on the current clip continues. But every enter action now runs every tick. Once you add a one-shot like LAND or ROLL in ② and ③, it would restart every frame and never finish. The guard is what makes “enter” mean <em>enter</em>.</details>
+</div>
+<div class="recall">
+  <p class="q">2. Can the character jump while celebrating? Point to the line that decides it.</p>
+  <details><summary>Show answer</summary>No. The jump check exists only in the <code>IDLE, MOVE</code> branch. In a state machine, “can I do X in state Y?” is answered by looking at a single branch, not by working through every combination of flags.</details>
+</div>
+
+<h2>② Completion: landing</h2>
+
+<p>The clip <code>"Jump_Land"</code> is a one-shot (no loop token, so it plays once). At normal speed it lasts 1.27 s, which is far too long to lock the player, so play it faster and let movement cancel it. You'll need one new tool: <code>AnimationPlayer</code>'s <a href="https://docs.godotengine.org/en/stable/classes/class_animationmixer.html"><code>animation_finished(anim_name)</code></a> signal, which “notifies when an animation finished playing”. The docs add: <em>“This signal is not emitted if an animation is looping.”</em></p>
+
+<pre class="wide"><code>enum State { IDLE, MOVE, AIR, LAND, CELEBRATE }      <span class="c"># + LAND</span>
+@export var land_anim_speed := 2.0
+
+func _ready() -> void:
+	<span class="c"># … existing lines …</span>
+	<span class="c"># TODO 1: connect anim.animation_finished to _on_animation_finished</span>
+
+<span class="c"># in _physics_process:</span>
+		State.AIR:
+			walk(direction, sprinting, delta)
+			if is_on_floor():
+				<span class="c"># TODO 2: go to LAND instead of IDLE</span>
+		State.LAND:
+			<span class="c"># TODO 3: if there's movement input, cancel into MOVE.</span>
+			<span class="c">#         Otherwise stand still (zero horizontal velocity).</span>
+
+<span class="c"># in change_state's match:</span>
+		State.LAND:
+			anim.play("Jump_Land", 0.1, land_anim_speed)   <span class="c"># args: name, blend, speed</span>
+
+func _on_animation_finished(anim_name: StringName) -> void:
+	<span class="c"># TODO 4: if we're still landing, go back to IDLE</span>
+	pass</code></pre>
+
+<p>Done when: a jump ends with a short landing animation, standing still afterwards returns to idle, and pressing a direction during the landing walks away immediately.</p>
+
+<div class="recall">
+  <p class="q">Hint</p>
+  <details><summary>Show hint</summary>TODO 1 is the same pattern as <code>body_entered.connect(...)</code> in your coin. TODO 4 must check the state, because the signal fires for <em>any</em> finished one-shot. If movement already cancelled the landing, you're in MOVE and should stay there.</details>
+</div>
+<div class="recall">
+  <p class="q">Solution</p>
+  <details><summary>Show solution</summary>
+<pre><code>	anim.animation_finished.connect(_on_animation_finished)   <span class="c"># TODO 1</span>
+
+				change_state(State.LAND)                       <span class="c"># TODO 2</span>
+
+		State.LAND:                                        <span class="c"># TODO 3</span>
+			if direction.length() > 0.01:
+				change_state(State.MOVE)
+			else:
+				velocity.x = 0
+				velocity.z = 0
+
+func _on_animation_finished(anim_name: StringName) -> void:   <span class="c"># TODO 4</span>
+	if state == State.LAND:
+		change_state(State.IDLE)</code></pre>
+Tested in Godot 4.7.2 without a window: walk, jump, AIR (Jump), touch down, LAND (Jump_Land at 2×), animation finished, IDLE.
+  </details>
+</div>
+
+<div class="recall">
+  <p class="q">Debugging puzzle: when the game starts, the character plays the landing animation once, without ever jumping. Why?</p>
+  <details><summary>Show answer</summary><a href="https://docs.godotengine.org/en/stable/classes/class_characterbody3d.html"><code>is_on_floor()</code></a> reports the result of the <em>last</em> <code>move_and_slide()</code>. On the very first tick there hasn't been one yet, so it's false. IDLE goes to AIR, and the next tick goes from AIR to LAND. It's harmless here, but it's a classic first-frame bug. (Lesson 2 quoted that same <em>last call</em> wording.)</details>
+</div>
+
+<h2>③ On your own: dodge roll</h2>
+
+<p>The clip is <code>"Roll"</code> (a one-shot, 1.47 s). Everything you need is now in your script.</p>
+
+<ol class="checklist" id="roll">
+  <li>A new <code>roll</code> input action (pick a key, e.g. <kbd>C</kbd> or <kbd>Alt</kbd>) starts a roll from IDLE or MOVE, on the floor only.</li>
+  <li>The roll goes in the direction the character <em>faces</em> when it starts, at a tunable <code>roll_speed</code>. Steering input during the roll is ignored.</li>
+  <li>The roll animation plays at a tunable speed (try 1.5×). When it finishes, the character returns to IDLE.</li>
+  <li>You can't jump or start another roll mid-roll. Gravity still applies.</li>
+</ol>
+<p class="progress" data-for="roll"></p>
+
+<div class="recall">
+  <p class="q">Hint: which way is “facing”?</p>
+  <details><summary>Show hint</summary>Your facing code points the Model's −Z axis at the movement direction, so the facing direction is <code>-model.global_basis.z</code>. <a href="https://docs.godotengine.org/en/stable/classes/class_node3d.html"><code>global_basis</code></a> is the node's rotation in world space. Store it once, in the enter action, flattened (<code>y = 0</code>) and normalized.</details>
+</div>
+<div class="recall">
+  <p class="q">Solution</p>
+  <details><summary>Show solution</summary>
+<pre><code>enum State { IDLE, MOVE, AIR, LAND, ROLL, CELEBRATE }
+@export var roll_speed := 7.0
+@export var roll_anim_speed := 1.5
+var roll_direction := Vector3.ZERO
+
+<span class="c"># IDLE/MOVE branch, after the jump check:</span>
+			elif Input.is_action_just_pressed("roll") and is_on_floor():
+				change_state(State.ROLL)
+
+		State.ROLL:
+			velocity.x = roll_direction.x * roll_speed
+			velocity.z = roll_direction.z * roll_speed
+
+<span class="c"># change_state:</span>
+		State.ROLL:
+			roll_direction = -model.global_basis.z
+			roll_direction.y = 0
+			roll_direction = roll_direction.normalized()
+			anim.play("Roll", 0.1, roll_anim_speed)
+
+<span class="c"># _on_animation_finished:</span>
+	if state == State.LAND or state == State.ROLL:
+		change_state(State.IDLE)</code></pre>
+Tested: the roll held its starting direction while D was pressed, lasted about 1 s at 1.5×, then went back to IDLE and on to MOVE.
+  </details>
+</div>
+
+<p class="aside">Godot also has a visual state machine for animations, <a href="https://docs.godotengine.org/en/stable/tutorials/animation/animation_tree.html"><code>AnimationTree</code></a>'s StateMachine, which handles blending as well. You'll understand it far faster now that you've built the logic by hand.</p>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">Why does <code>change_state</code> return early when the state is unchanged?</p>
+  <button data-correct data-why="Enter actions must run once per entry. Without the guard, one-shots like Roll would restart every tick.">Enter actions would otherwise replay every tick</button>
+  <button data-why="Assigning the same enum value is perfectly legal.">Godot forbids reassigning an enum's current value</button>
+  <button data-why="match handles repeated values fine. The problem is the enter actions.">Match statements crash on repeated state values</button>
+  <button data-why="An integer assignment costs nothing. The guard is about behaviour.">It saves memory by skipping the assignment</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Which signal fires when the looping <code>"Walk"</code> clip reaches its end?</p>
+  <button data-correct data-why="The docs: animation_finished “is not emitted if an animation is looping.” Loops never finish.">No signal, since looping clips never finish</button>
+  <button data-why="Only non-looping clips emit animation_finished.">animation_finished fires once at every loop restart</button>
+  <button data-why="animation_started marks a play() call starting, not each loop wrapping around.">animation_started fires again at each loop end</button>
+  <button data-why="Looping doesn't change the current animation, so no change is signalled.">animation_changed fires because the clip restarts itself</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why store <code>roll_direction</code> when entering ROLL instead of reading the facing every tick?</p>
+  <button data-correct data-why="Locking it at entry is what makes a roll a commitment: steering can't bend it.">So steering input cannot bend the roll</button>
+  <button data-why="Reading a property is cheap. The reason is behaviour.">Reading global_basis every tick is too slow</button>
+  <button data-why="The basis is always defined. It's the rotation of the node.">The model's basis is undefined during rolls</button>
+  <button data-why="move_and_slide doesn't know about your states at all.">move_and_slide resets velocity when states change</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">A designer asks: “Can you roll while landing?” With your state machine, how do you answer?</p>
+  <button data-correct data-why="One branch answers it: the roll check lives only in IDLE/MOVE, so no.">Read the LAND branch and check for rolls</button>
+  <button data-why="There's nothing to enumerate. The states are explicit.">Enumerate every possible combination of the boolean flags</button>
+  <button data-why="You can answer from the code. That's the point of the pattern.">Run the game repeatedly until it finally happens</button>
+  <button data-why="Animations don't decide what's allowed. States do.">Check whether the Roll animation has already finished</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>The three pieces of the state-machine pattern and what each one does.</li>
+  <li>Why <code>is_on_floor()</code> is false on the very first tick.</li>
+  <li>From Lesson 5: what <code>event.relative</code> is, and its units.</li>
+</ul>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://gameprogrammingpatterns.com/state.html">Game Programming Patterns: State</a> by Robert Nystrom (free online). It starts from the same flag mess you just escaped, then goes further: enter/exit actions, state objects, concurrent and hierarchical state machines, pushdown automata. It's written for programmers, and you'll recognise everything you built today.
+</div>
+
+<p class="ask">Want to argue about the design, for example whether states should be separate nodes or classes instead of an enum? Bring it. That's exactly the next level, and the reading above sets it up.</p>
+
+<nav class="nav">
+  <span>← <a href="0006-animated-character.html">Lesson 6: Animated character</a></span>
+  <span>Reference: <a href="../reference/state-machines.html">State machines</a></span>
+</nav>
+
+</main>
+</body>
+</html>
