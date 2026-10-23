@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animation &amp; import: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Godot 4.7</p>
+<h1>Animation &amp; import</h1>
+<p class="subtitle">Bringing in glTF characters and driving an AnimationPlayer. Built from <a href="../lessons/0006-animated-character.html">Lesson 6</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>Importing a character</h2>
+<table>
+  <tr><td>Format</td><td>glTF 2.0 (<code>.glb</code>) is recommended. Drop it in the project and it imports automatically</td></tr>
+  <tr><td>Use</td><td>Instance it like any scene: drag it onto <code>Model</code></td></tr>
+  <tr><td>Facing</td><td>Assets face +Z (<code>MODEL_FRONT</code>). Rotate the instance 180° under <code>Model</code></td></tr>
+  <tr><td>Preview clips</td><td>Double-click the <code>.glb</code> to open Advanced Import Settings</td></tr>
+  <tr><td>Looping</td><td>Clip names containing the token <code>loop</code>/<code>cycle</code> import looping, <strong>with the token stripped</strong> (<code>Walk_Loop</code> → <code>Walk</code>)</td></tr>
+  <tr><td>Root motion</td><td>Use clips <em>without</em> root motion with a <code>CharacterBody3D</code>: your code moves the body</td></tr>
+</table>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/node_type_customization.html">Node type customization</a>, <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/import_configuration.html">Import configuration</a>, <a href="https://docs.godotengine.org/en/stable/classes/class_vector3.html">Vector3</a></p>
+</section>
+
+<section>
+<h2>Player rig with a character</h2>
+<pre class="tree"><b>Player</b> (CharacterBody3D)
+├─ CollisionShape3D       capsule: physics
+├─ Model (Node3D)         yaw → movement
+│  └─ Character (.glb)    rotation y = 180
+│     ├─ Armature/Skeleton3D/Mannequin
+│     └─ AnimationPlayer
+└─ CameraPivot/SpringArm3D/Camera3D</pre>
+</section>
+
+<section>
+<h2>AnimationPlayer</h2>
+<pre><code>@onready var anim: AnimationPlayer = $Model/Character/AnimationPlayer
+
+func update_animation(dir: Vector3, sprinting: bool) -> void:
+	if not is_on_floor():
+		anim.play("Jump", anim_blend)
+	elif dir.length() > 0.01:
+		anim.play("Sprint" if sprinting else "Walk", anim_blend)
+	else:
+		anim.play("Idle", anim_blend)</code></pre>
+<table>
+  <tr><td><code>play(name, blend)</code></td><td><code>blend</code> = cross-fade seconds (−1 uses the default)</td></tr>
+  <tr><td>Same clip again</td><td>Continues, doesn't restart. Safe to call every tick</td></tr>
+  <tr><td>Finished one-shot clip</td><td><code>play()</code> again restarts it</td></tr>
+  <tr><td>List clips</td><td><code>anim.get_animation_list()</code></td></tr>
+  <tr><td>Blend feel</td><td>0.1–0.25 s is usually right</td></tr>
+</table>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/classes/class_animationplayer.html">AnimationPlayer</a>. The continue and restart behaviour was tested in 4.7.2.</p>
+</section>
+
+<section>
+<h2>UAL mannequin: useful clips</h2>
+<p><code>Idle</code>, <code>Walk</code>, <code>Jog_Fwd</code>, <code>Sprint</code>, <code>Jump</code> (airborne loop), <code>Jump_Start</code>, <code>Jump_Land</code>, <code>Roll</code>, <code>Crouch_Idle</code>, <code>Crouch_Fwd</code>, <code>Sword_Attack</code>, <code>Punch_Jab</code>, <code>Hit_Chest</code>, <code>Death01</code>, <code>Swim_Fwd</code>, <code>Dance</code>, <code>Interact</code>, <code>PickUp_Table</code>. 1.83 m tall, origin at the feet, faces +Z.</p>
+<p class="aside">Source: <a href="https://quaternius.itch.io/universal-animation-library">Quaternius Universal Animation Library</a> (CC0)</p>
+</section>
+
+</div>
+</main>
+</body>
+</html>

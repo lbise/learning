@@ -60,6 +60,23 @@ func _on_body_entered(body: Node3D) -> void:
 </section>
 
 <section>
+<h2>Who wires the signal?</h2>
+<p><strong>The node that knows both sides.</strong> Usually that's the parent or level, never the reusable child.</p>
+<pre><code><span class="c"># world.gd: emits AND wires (dependency injection)</span>
+signal all_coins_collected
+
+func _ready() -> void:
+	all_coins_collected.connect($Player.celebrate)</code></pre>
+<table>
+  <tr><td>World calls <code>player.celebrate()</code></td><td>OK: the parent calls down</td></tr>
+  <tr><td>Player finds World and connects itself</td><td>Avoid: the child now depends on its level</td></tr>
+  <tr><td>World emits, World (or the editor's Node dock) connects</td><td>Best: neither script needs the other</td></tr>
+</table>
+<p>Name signals in the past tense: <code>item_collected</code>, <code>all_coins_collected</code>.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/best_practices/scene_organization.html">Scene organization</a>: “design scenes to have no dependencies”</p>
+</section>
+
+<section>
 <h2>Tree and lifecycle facts</h2>
 <table>
   <tr><td><code>_ready()</code> order</td><td>Children first, then the parent</td></tr>

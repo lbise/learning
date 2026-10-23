@@ -1,12 +1,9 @@
 [gd_scene format=3 uid="uid://b1t1o0uecymkq"]
 
 [ext_resource type="Script" uid="uid://buwho2lvmg4o3" path="res://player.gd" id="1_4flbx"]
+[ext_resource type="PackedScene" uid="uid://2ybs36b0qbvn" path="res://models/UAL1_Standard.glb" id="2_onrkg"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ln6rh"]
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_ln6rh"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_ln6rh"]
 
 [node name="player" type="CharacterBody3D" unique_id=426209575]
 script = ExtResource("1_4flbx")
@@ -17,13 +14,8 @@ shape = SubResource("CapsuleShape3D_ln6rh")
 
 [node name="Model" type="Node3D" parent="." unique_id=1055961911]
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Model" unique_id=1435937610]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("CapsuleMesh_ln6rh")
-
-[node name="Nose" type="MeshInstance3D" parent="Model" unique_id=1890833828]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -0.5)
-mesh = SubResource("BoxMesh_ln6rh")
+[node name="Character" parent="Model" unique_id=2068479084 instance=ExtResource("2_onrkg")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="CameraPivot" type="Node3D" parent="." unique_id=2031095522]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)

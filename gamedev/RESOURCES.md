@@ -19,10 +19,14 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
   Use for: exact API behaviour (`rotate_y`, `position`, `get_vector`, `Vector3.FORWARD`).
 - [GDScript reference](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html) · [Static typing](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/static_typing.html)
   Python-like syntax, but "entirely independent from Python". Use for: language questions.
+- [Best practices: Scene organization](https://docs.godotengine.org/en/stable/tutorials/best_practices/scene_organization.html)
+  "Design scenes to have no dependencies". It covers dependency injection and which node connects signals. Use for: architecture questions (who references whom).
 - [Scripting languages (GDScript vs C#)](https://docs.godotengine.org/en/stable/getting_started/step_by_step/scripting_languages.html)
   The docs recommend GDScript for beginners. C# projects can't export to the web in Godot 4. Use for: justifying GDScript.
 - [Your first 3D game (Squash the Creeps)](https://docs.godotengine.org/en/stable/getting_started/first_3d_game/index.html)
   A complete small 3D game: player, enemies, score. Use for: the first full project, after lesson 1-2.
+- [Import configuration](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/import_configuration.html) · [Node type customization (name suffixes, `loop`)](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/node_type_customization.html) · [AnimationPlayer](https://docs.godotengine.org/en/stable/classes/class_animationplayer.html)
+  Use for: importing characters, clip looping, playing animations.
 - [Importing 3D scenes: available formats](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html)
   glTF 2.0 is recommended. Includes a section on exporting from Blender. Use for: the Blender → Godot pipeline.
 
@@ -49,6 +53,8 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
 ### Free assets (all CC0: commercial use OK, no attribution needed)
 - [Kenney](https://kenney.nl/assets) ([licence FAQ](https://kenney.nl/support)): stand-in 3D/2D assets.
 - [Quaternius](https://quaternius.com/) ([FAQ](https://quaternius.com/faq.html)): low-poly characters and props, often rigged.
+  - [Universal Animation Library (Standard)](https://quaternius.itch.io/universal-animation-library): a 1.83 m mannequin with 43 clips in one `.glb` (use `Unreal-Godot/UAL1_Standard.glb`, not `_RM`). Tested in 4.7.2. Used in L6.
+- [Kenney Mini Characters](https://kenney.nl/assets/mini-characters): 12 small (0.67 m) CC0 characters, 32 clips each. Every clip imports non-looping, so set looping in Advanced Import Settings. Backup option.
 - [Poly Haven](https://polyhaven.com/) ([licence](https://polyhaven.com/license)): HDRI skies, textures, models.
 
 ## Wisdom (Communities)

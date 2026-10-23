@@ -12,8 +12,9 @@
 2. ✅ L2 Physics bodies: CharacterBody3D walks/jumps among crates, Input Map, scene instancing
 3. ✅ L3 Area3D + signals + score UI + node vs resource: collect coins → first game the kids can play (includes a kids playtest: bring back one confusion and one delight)
 4. L4 Third-person camera (SpringArm3D, mouse look, camera-relative movement, Model facing). FIRST SPEC-DRIVEN LESSON
-4a. L5 Mouse→camera worked example + zoom (completion) + sprint (independent). Consolidates L4, which was copied, not learned
-4b. L6 Imported animated character (Quaternius CC0) + AnimationPlayer/AnimationTree: idle/walk/jump; +Z MODEL_FRONT gotcha
+4a. ✅ L5 Mouse→camera worked example + zoom (completion) + sprint (independent). Consolidates L4. He did ② and ③ unaided and liked the format
+4b. L6 Imported animated character (Quaternius UAL, CC0) + AnimationPlayer: idle/walk/sprint/jump, victory dance; +Z MODEL_FRONT; _Loop suffix stripped
+4c. L7 candidate: state machine (enum + match first, then AnimationTree StateMachine), motivated by the L6 celebrating-flag mess. Add Jump_Start/Jump_Land one-shots
 5. Squash the Creeps (official) as a self-guided consolidation project, or skip if L2-L4 cover it
 6. Blender intro → model a simple prop → glTF into Godot
 7. Third-person (Valheim-ish) or isometric (cyberpunk) prototype

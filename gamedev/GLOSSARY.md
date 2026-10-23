@@ -45,3 +45,31 @@ _Avoid_: speed (which is velocity's magnitude only)
 **Input action**:
 A named intent (`jump`, `move_left`) defined in the Input Map and bound to one or more keys or buttons. Code checks actions, never raw keys.
 _Avoid_: keybind, key
+
+## Scripting
+
+**Resource**:
+A data container used by nodes (`BoxShape3D`, `BoxMesh`, `StandardMaterial3D`, scripts, `.tscn` files). It isn't part of the scene tree, and instances of a scene share its resources.
+_Avoid_: asset, data node
+
+**Signal**:
+A named event that a node emits. Other nodes connect functions to it without the emitter referencing them (the observer pattern).
+_Avoid_: event (reserved for input events), message
+
+**Input event**:
+An `InputEvent` object that Godot delivers to `_input` / `_unhandled_input` for every key press, click, wheel notch or mouse movement. Mouse motion only exists as events (deltas in `relative`), never as a pollable state.
+_Avoid_: signal
+
+**Group**:
+A named tag on a node (`add_to_group` / `is_in_group`), used to filter or find nodes by role.
+_Avoid_: tag, layer
+
+## 3D camera
+
+**Yaw / pitch**:
+Rotation around the vertical Y axis (turning left and right) and around the X axis (tilting up and down). In a camera rig, each lives on its own node.
+_Avoid_: pan/tilt, heading
+
+**Spring arm**:
+A `SpringArm3D`: casts along its Z axis and moves its children to the nearest hit, so a third-person camera never ends up inside walls.
+_Avoid_: camera boom, collision camera

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 6: A character that moves like one</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 6 · Characters</p>
+<h1>A character that moves like one</h1>
+<p class="subtitle">Swap the capsule for a real animated character, and pick its animation from what the body is doing.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Import a glTF character and drive its <code>AnimationPlayer</code> from movement state.</dd>
+  <dt>Time</dt><dd>About 45 minutes, plus 10 minutes of reading</dd>
+  <dt>The win</dt><dd>A character who idles, walks, sprints and jumps, and does a victory dance when the last coin is collected</dd>
+  <dt>Format</dt><dd><strong>① worked example</strong> (new: importing and animation) → <strong>② completion</strong> (sprint animation) → <strong>③ on your own</strong> (victory dance, using signals and groups from Lesson 3).</dd>
+  <dt>Links</dt><dd>Citations are optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">In three sentences: how does a mouse movement end up changing <code>pivot.rotation.y</code>?</p>
+  <details><summary>Show answer</summary>The OS reports the motion and Godot wraps it in an <code>InputEventMouseMotion</code>. It passes through <code>_input</code> and the GUI, and if nothing consumes it, it reaches <code>_unhandled_input(event)</code>. There you check its type and add <code>event.relative.x × sensitivity</code> to the yaw: you're accumulating deltas, like encoder ticks.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 3: why does the coin emit a signal instead of updating the label?</p>
+  <details><summary>Show answer</summary>So the coin doesn't need to know a HUD exists (low coupling). Anything can listen, or nothing.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 2: why is gravity multiplied by delta, but velocity isn't?</p>
+  <details><summary>Show answer</summary>You integrate acceleration into velocity yourself. <code>move_and_slide()</code> integrates velocity into position using the physics delta.</details>
+</div>
+
+<h2>① Worked example: importing and animating</h2>
+
+<h3>The asset</h3>
+
+<p class="aside">Quaternius' pack page states <a href="https://quaternius.com/packs/universalanimationlibrary.html">“License CC0”</a>, and the itch page says “Free to use in personal, educational and commercial projects.”</p>
+
+<p>We'll use Quaternius' <a href="https://quaternius.itch.io/universal-animation-library"><strong>Universal Animation Library</strong> (Standard)</a>: a 1.83 m mannequin with 43 animations in a single <code>.glb</code> file. It's CC0, so it's fine for a Steam game, and it's a grey mannequin on purpose: later you can model your own character in Blender for this same skeleton.</p>
+
+<p>Godot treats a <code>.glb</code> as a <strong>scene</strong>. Drop it in your project and it gets imported. Then you instantiate it exactly like <code>crate.tscn</code>. The docs recommend glTF as the format: <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html">“glTF 2.0 (recommended)”</a>. Here's what's inside this one, with paths checked in Godot 4.7.2:</p>
+
+<pre class="tree"><b>UAL1_Standard</b> (Node3D)    ← rename instance to "Character"
+├─ Armature (Node3D)
+│  └─ Skeleton3D            65 bones
+│     └─ Mannequin          the skin (MeshInstance3D)
+└─ <b>AnimationPlayer</b>         43 clips: Idle, Walk, Sprint, …</pre>
+
+<h3>Three facts that will bite you</h3>
+
+<table>
+  <tr><th>Fact</th><th>Consequence</th></tr>
+  <tr><td><strong>Looping comes from the clip name.</strong> The docs: <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/node_type_customization.html">“Animation clips … that start or end with the token <code>loop</code> or <code>cycle</code> will be imported as a Godot Animation with the loop flag set.”</a></td><td>The file has <code>Walk_Loop</code>, <code>Idle_Loop</code> and so on, and Godot <strong>strips the suffix</strong>. So in code it's <code>"Walk"</code>, not <code>"Walk_Loop"</code>. Clips without the token, like <code>Jump_Start</code>, play once and stop.</td></tr>
+  <tr><td><strong>Imported models face +Z.</strong> <a href="https://docs.godotengine.org/en/stable/classes/class_vector3.html"><code>MODEL_FRONT</code></a> is <code>(0, 0, 1)</code>, but your facing code from Lesson 4 assumes the front is −Z.</td><td>Rotate the character instance <strong>180°</strong> inside <code>Model</code>. The facing maths stays unchanged.</td></tr>
+  <tr><td><strong><code>play()</code> on the clip that's already playing continues it.</strong> (I tested this: calling <code>play("Walk")</code> every frame keeps advancing smoothly.)</td><td>You can safely call <code>play()</code> every physics tick with the animation you want. One catch: a <em>finished</em> non-looping clip restarts.</td></tr>
+</table>
+
+<p><a href="https://docs.godotengine.org/en/stable/classes/class_animationplayer.html"><code>play(name, custom_blend)</code></a>: the second argument is a cross-fade time in seconds. Without it, switching from Walk to Idle snaps instantly. Each clip is an <code>Animation</code> <em>resource</em> held by the player node: the same node/resource split as in Lesson 3.</p>
+
+<h3>Set it up (new editor steps, so full instructions)</h3>
+
+<ol class="checklist" id="setup">
+  <li>Open the <a href="https://quaternius.itch.io/universal-animation-library">itch.io page</a> → <strong>Download Now</strong> → skip the payment prompt (the Standard version is free) → download <code>Universal Animation Library[Standard].zip</code>.</li>
+  <li>Unzip it. Copy <code>Unreal-Godot/UAL1_Standard.glb</code> (<em>not</em> the <code>_RM</code> one, which has root motion baked in) into a new <code>models/</code> folder in your project. Godot imports it automatically.</li>
+  <li><em>Optional, but fun:</em> double-click the <code>.glb</code> in the FileSystem dock to open <strong>Advanced Import Settings</strong>. You can preview every animation there.</li>
+  <li>Open <code>player.tscn</code>. Drag <code>UAL1_Standard.glb</code> <strong>onto the <code>Model</code> node</strong>. Rename the new node <code>Character</code> and set its <strong>Rotation y = 180</strong>.</li>
+  <li>Delete the old capsule <code>MeshInstance3D</code> and the <code>Nose</code> under <code>Model</code>. Keep the <code>CollisionShape3D</code> on <code>Player</code>: physics still uses the capsule, because collision and visuals are separate.</li>
+</ol>
+<p class="progress" data-for="setup"></p>
+
+<h3>The code</h3>
+
+<p>Add a reference and a blend setting at the top of <code>player.gd</code>, call <code>update_animation</code> as the last line of <code>_physics_process</code>, and add the function:</p>
+
+<pre><code>@export var anim_blend := 0.2   <span class="c"># seconds of cross-fade between clips</span>
+@onready var anim: AnimationPlayer = $Model/Character/AnimationPlayer
+
+<span class="c"># … at the very end of _physics_process, after move_and_slide():</span>
+	update_animation(direction)
+
+func update_animation(direction: Vector3) -> void:
+	if not is_on_floor():
+		anim.play("Jump", anim_blend)      <span class="c"># the airborne loop</span>
+	elif direction.length() > 0.01:
+		anim.play("Walk", anim_blend)
+	else:
+		anim.play("Idle", anim_blend)</code></pre>
+
+<p class="aside">The path <code>$Model/Character/AnimationPlayer</code> reaches <em>into</em> the imported scene. That works fine in code. The editor only hides those children unless you enable “Editable Children”.</p>
+
+<p>Read <code>update_animation</code> as a <strong>priority list</strong>: airborne beats moving, and moving beats standing. It runs after <code>move_and_slide()</code>, so <code>is_on_floor()</code> reflects this tick's movement.</p>
+
+<h3>Predict, then try</h3>
+
+<div class="recall">
+  <p class="q">1. Set the Character's Rotation y back to 0 and walk around. What do you see?</p>
+  <details><summary>Show answer</summary>Moonwalking. The legs walk forward while the body moves backwards, because the model's front is +Z and your facing code points −Z at the movement direction. Set it back to 180.</details>
+</div>
+<div class="recall">
+  <p class="q">2. Change <code>"Walk"</code> to <code>"Walk_Loop"</code>. What happens?</p>
+  <details><summary>Show answer</summary>An error in the debugger like “Animation not found”, and the character stops animating while moving. Godot renamed the clip during import. When a name doesn't work, check the real list: double-click the <code>.glb</code> to see it in Advanced Import Settings, or <code>print(anim.get_animation_list())</code>.</details>
+</div>
+<div class="recall">
+  <p class="q">3. Set <code>anim_blend</code> to <code>0.0</code> in the Inspector, then to <code>1.0</code>. How does each feel?</p>
+  <details><summary>Show answer</summary>At 0, each switch snaps between poses. At 1.0 everything feels floaty: the character is still half-walking a second after stopping. Values around 0.1–0.25 s usually feel right. This is game feel, and tuning it is half the craft.</details>
+</div>
+
+<h2>② Completion: the sprint animation</h2>
+
+<p>Your sprint from Lesson 5 makes the character faster, but it still uses the walk animation. The clip <code>"Sprint"</code> exists. Fill in the <code>TODO</code>s:</p>
+
+<pre><code><span class="c"># in _physics_process: you already compute this for speed. Keep it in a variable</span>
+	var sprinting := Input.is_action_pressed("sprint")
+	<span class="c"># …</span>
+	update_animation(direction, <span class="c">TODO 1</span>)
+
+func update_animation(direction: Vector3, sprinting: bool) -> void:
+	if not is_on_floor():
+		anim.play("Jump", anim_blend)
+	elif direction.length() > 0.01:
+		<span class="c"># TODO 2: "Sprint" while sprinting, otherwise "Walk"</span>
+	else:
+		anim.play("Idle", anim_blend)</code></pre>
+
+<p>Done when: holding <kbd>Shift</kbd> while moving switches to a running animation, standing still with <kbd>Shift</kbd> held still idles, and jumping while sprinting shows the airborne clip.</p>
+
+<div class="recall">
+  <p class="q">Solution</p>
+  <details><summary>Show solution</summary>
+<pre><code>	update_animation(direction, sprinting)
+
+	elif direction.length() > 0.01:
+		if sprinting:
+			anim.play("Sprint", anim_blend)
+		else:
+			anim.play("Walk", anim_blend)</code></pre>
+Tested in Godot 4.7.2 without a window: standing gave Idle, holding W gave Walk, W + Shift gave Sprint, then Jump while airborne and Idle after landing.
+  </details>
+</div>
+
+<h2>③ On your own: the victory dance</h2>
+
+<p>Your kids collect the last coin, and the character stops and dances (the clip is <code>"Dance"</code>). Everything you need comes from Lessons 2–3. The only new call is <code>anim.play</code>, which you've just used.</p>
+
+<ol class="checklist" id="dance">
+  <li>When the last coin is collected, the character plays <code>"Dance"</code> and keeps dancing.</li>
+  <li>While dancing, WASD and jump do nothing, but gravity still works.</li>
+  <li>The coin and the player still don't know about each other. The <em>world</em> tells the player.</li>
+  <li>The player is found without a hard-coded node path.</li>
+</ol>
+<p class="progress" data-for="dance"></p>
+
+<div class="recall">
+  <p class="q">Hint 1: why the dance stops after one frame</p>
+  <details><summary>Show hint</summary>If you just call <code>anim.play("Dance")</code> from outside, the next tick's <code>update_animation</code> immediately plays <code>"Idle"</code> over it. The player needs to <em>know</em> it's celebrating, with a flag it checks early in <code>_physics_process</code>.</details>
+</div>
+<div class="recall">
+  <p class="q">Hint 2: finding the player from the world</p>
+  <details><summary>Show hint</summary>The player is already in the <code>"player"</code> group (Lesson 3). <code>get_tree().get_first_node_in_group("player")</code> returns it.</details>
+</div>
+<div class="recall">
+  <p class="q">Solution</p>
+  <details><summary>Show solution</summary>
+<pre><code><span class="c"># player.gd</span>
+var celebrating := false
+
+func celebrate() -> void:
+	celebrating = true
+	anim.play("Dance", anim_blend)
+
+<span class="c"># at the top of _physics_process, after applying gravity:</span>
+	if celebrating:
+		velocity.x = 0
+		velocity.z = 0
+		move_and_slide()
+		return
+
+<span class="c"># world.gd, in _on_coin_collected, after update_label():</span>
+	if score == total:
+		get_tree().get_first_node_in_group("player").celebrate()</code></pre>
+Tested: after <code>celebrate()</code>, holding W left the velocity at zero and the animation stayed on Dance.
+  </details>
+</div>
+
+<p class="aside">Notice the pattern: a <code>celebrating</code> flag, an early <code>return</code>, and an <code>if</code>-ladder of animations. Add a few more states (attacking, hurt, swimming) and this gets messy fast. That mess is the reason <em>state machines</em> exist, which is coming soon.</p>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q"><code>anim.play("Walk_Loop")</code> fails, but the file clearly contains <code>Walk_Loop</code>. Why?</p>
+  <button data-correct data-why="The loop token sets the loop flag, and Godot drops it from the name. Check get_animation_list() when in doubt.">Import set the loop flag and stripped the suffix</button>
+  <button data-why="The clip imported fine. Only its name changed.">The clip failed to import from the glTF file</button>
+  <button data-why="Clip names are case-sensitive strings, but the case wasn't the problem here.">AnimationPlayer clip names must always be written in lowercase</button>
+  <button data-why="Animations work in any process callback. The name is what's wrong.">Loops can only be played from the _process callback</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You call <code>anim.play("Walk")</code> every physics tick while walking. What happens?</p>
+  <button data-correct data-why="Calling play() with the clip that's already playing continues it. Tested: the position kept advancing.">The walk keeps playing smoothly without restarting</button>
+  <button data-why="That only happens to a finished non-looping clip.">The walk restarts from zero every tick</button>
+  <button data-why="Nothing queues up. play() replaces or continues the current clip.">The calls pile up into a queue</button>
+  <button data-why="It works fine, and the engine doesn't complain.">Godot raises an error about repeated calls</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why keep the capsule <code>CollisionShape3D</code> after adding the detailed character?</p>
+  <button data-correct data-why="Visuals and collision are separate (Lesson 2). A simple capsule gives stable, cheap collision.">Physics only ever sees shapes, never the mesh</button>
+  <button data-why="The capsule mesh is gone. It's the shape that remains.">The capsule mesh is needed to draw shadows</button>
+  <button data-why="The animation player doesn't need a shape at all.">AnimationPlayer requires a CollisionShape3D in order to run</button>
+  <button data-why="Spring arms cast against physics shapes, but that isn't why the player keeps its capsule.">The spring arm attaches itself to that shape</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Without the 180° rotation, the character walks backwards. Which fix is <em>also</em> correct?</p>
+  <button data-correct data-why="Flipping both signs makes +Z (MODEL_FRONT) face the movement direction. It works, but it's less clear than the rotation.">Use atan2(direction.x, direction.z) for the yaw</button>
+  <button data-why="Pitch has nothing to do with facing left, right, forward or back.">Rotate the SpringArm3D by 180 degrees</button>
+  <button data-why="That would invert your controls without fixing the model.">Swap the move_forward and move_back actions</button>
+  <button data-why="A negative scale mirrors the mesh. Avoid it, as it breaks lighting and physics.">Set the Character's z scale negative</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>Why does <code>Walk_Loop</code> become <code>Walk</code>, and what else does that rule do?</li>
+  <li>What's the order of checks in <code>update_animation</code>, and why that order?</li>
+  <li>From Lesson 4: why rotate <code>Model</code> rather than the <code>CharacterBody3D</code>?</li>
+</ul>
+
+<p><strong>Show the kids.</strong> A dancing character is a big upgrade from a capsule. Their reaction is good data for what to build next.</p>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/import_configuration.html">Godot Docs: Import configuration</a>. It covers how imported scenes work, the Advanced Import Settings dialog, and scene inheritance. You'll use all of these when you bring in your own Blender models.
+</div>
+
+<p class="ask">Character stuck in a T-pose, sliding, or facing the wrong way? Tell me what you see and paste your <code>update_animation</code>. These are classic import problems and quick to diagnose.</p>
+
+<nav class="nav">
+  <span>← <a href="0005-mouse-to-camera.html">Lesson 5: From mouse to camera</a></span>
+  <span>Reference: <a href="../reference/animation-and-import.html">Animation &amp; import</a></span>
+</nav>
+
+</main>
+</body>
+</html>
