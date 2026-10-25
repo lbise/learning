@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-enum State { IDLE, MOVE, AIR, LAND, CELEBRATE }
+enum State { IDLE, MOVE, AIR, LAND, ROLL, CELEBRATE }
 
 @export var speed := 5.0          # metres per second
 @export var jump_velocity := 4.5  # metres per second, upward
@@ -10,6 +10,8 @@ enum State { IDLE, MOVE, AIR, LAND, CELEBRATE }
 @export var zoom_max := 10
 @export var sprint_multiplier := 2.0
 @export var land_anim_speed := 2.0
+@export var roll_anim_speed := 1.5
+@export var roll_speed := 7
 
 @export var mouse_sensitivity := 0.003
 @onready var pivot: Node3D = $CameraPivot
@@ -20,6 +22,7 @@ enum State { IDLE, MOVE, AIR, LAND, CELEBRATE }
 @onready var anim: AnimationPlayer = $Model/Character/AnimationPlayer
 
 var state := State.IDLE
+var roll_dir := Vector3.ZERO
 
 func _ready() -> void:
 	add_to_group("player")
@@ -34,6 +37,7 @@ func _physics_process(delta: float) -> void:
 			"move_forward", "move_back")
 	var direction := Vector3(input.x, 0, input.y).rotated(Vector3.UP, pivot.rotation.y)
 	var sprinting := Input.is_action_pressed("sprint")
+	var rolling := Input.is_action_pressed("roll")
 
 	match state:
 		State.IDLE, State.MOVE:
@@ -43,6 +47,9 @@ func _physics_process(delta: float) -> void:
 				change_state(State.AIR)
 			elif not is_on_floor():
 				change_state(State.AIR)              # walked off an edge
+			elif Input.is_action_just_pressed("roll"):
+				roll_dir = direction
+				change_state(State.ROLL)
 			elif direction.length() > 0.01:
 				change_state(State.MOVE)
 				anim.play("Sprint" if sprinting else "Walk", anim_blend)
@@ -58,6 +65,8 @@ func _physics_process(delta: float) -> void:
 			else:
 				velocity.x = 0
 				velocity.z = 0
+		State.ROLL:
+			roll(roll_dir, delta)
 		State.CELEBRATE:
 			velocity.x = 0
 			velocity.z = 0
@@ -74,7 +83,13 @@ func change_state(new_state: State) -> void:
 		State.AIR:
 			anim.play("Jump", anim_blend)
 		State.LAND:
-			anim.play("Jump_Land", 0.1, land_anim_speed)   # args: name, blend, speed	
+			anim.play("Jump_Land", 0.1, land_anim_speed)   # args: name, blend, speed
+		State.ROLL:
+			#anim.play("Roll", 0.1, roll_anim_speed)
+			roll_dir = -model.global_basis.z
+			roll_dir.y = 0
+			roll_dir = roll_dir.normalized()
+			anim.play("Roll", 0.1, roll_anim_speed)
 		State.CELEBRATE:
 			anim.play("Dance", anim_blend)
 
@@ -86,8 +101,12 @@ func walk(direction: Vector3, sprinting: bool, delta: float) -> void:
 		var target_yaw := atan2(-direction.x, -direction.z)
 		model.rotation.y = lerp_angle(model.rotation.y, target_yaw, turn_speed * delta)
 
+func roll(direction: Vector3, delta: float) -> void:
+	velocity.x = direction.x * roll_speed
+	velocity.z = direction.z * roll_speed
+
 func _on_animation_finished(anim_name: StringName) -> void:
-	if state == State.LAND:
+	if state == State.LAND or state == State.ROLL:
 		change_state(State.IDLE)
 
 func celebrate() -> void:

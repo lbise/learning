@@ -45,8 +45,10 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
   Use for: authoritative tool behaviour and export settings.
 - [Blender Guru: Beginner Donut Tutorial (Blender 5.0, 2026)](https://www.blenderguru.com/posts/blender-donut-v5-tutorial)
   The standard beginner course (about 4 h of video). Use for: first contact with Blender.
-- [Grant Abbitt: Learn Blender 5](https://www.youtube.com/playlist?list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8) · [Low-poly modelling](https://www.youtube.com/playlist?list=PLn3ukorJv4vsPy9J9x4--pat6jaPqNm11)
-  A game-art focused teacher. Low-poly fits a Valheim-like style. Use for: making game assets.
+- [Grant Abbitt: Blender 5 Complete Beginners Guide (free, 8 parts)](https://www.youtube.com/playlist?list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8)
+  Published Nov 2025, about 100 min of video in total (parts are 11-14 min). 1 Interface, 2 Materials, 3-4 Old Man, 5-6 Monster, 7 Street, 8 Lights & Compositing (renders: least relevant to Godot). Chosen by the learner as his primary Blender course. Use for: the Blender fundamentals track.
+- [Grant Abbitt: Low-poly modelling](https://www.youtube.com/playlist?list=PLn3ukorJv4vsPy9J9x4--pat6jaPqNm11)
+  32 videos. Use for: game-ready props after the beginner course.
 - [Blender Studio: Blender 2.8 Fundamentals](https://studio.blender.org/training/blender-2-8-fundamentals/)
   Free and official, but the UI is dated. The rest of Blender Studio is paid. Use for: second opinions on fundamentals.
 

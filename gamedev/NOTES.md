@@ -14,7 +14,7 @@
 4. L4 Third-person camera (SpringArm3D, mouse look, camera-relative movement, Model facing). FIRST SPEC-DRIVEN LESSON
 4a. ✅ L5 Mouse→camera worked example + zoom (completion) + sprint (independent). Consolidates L4. He did ② and ③ unaided and liked the format
 4b. ✅ L6 Imported animated character (Quaternius UAL, CC0) + AnimationPlayer: idle/walk/sprint/jump, victory dance; +Z MODEL_FRONT; _Loop suffix stripped
-4c. L7 State machine: enum + match + change_state enter actions; LAND via animation_finished (completion); ROLL (independent)
+4c. ✅ L7 State machine: enum + match + change_state enter actions; LAND via animation_finished (completion); ROLL (independent)
 4d. L8 candidates: kids-playtest-driven level design OR enemies (second CharacterBody3D with its own simple FSM: patrol/chase via Area3D detection) OR Blender start. Ask him which he prefers. Reached a natural milestone: a Valheim-ish controller
 5. Squash the Creeps (official) as a self-guided consolidation project, or skip if L2-L4 cover it
 6. Blender intro → model a simple prop → glTF into Godot
@@ -32,3 +32,11 @@
   Learning-science sources: Clark, Kirschner & Sweller 2012 (https://www.aft.org/sites/default/files/Clark.pdf); Bjork lab, desirable difficulties (https://bjorklab.psych.ucla.edu/research/)
 - He found L1-L3 easy. Don't over-explain programming. Maths/engineering framings (integration, LPF, rotation matrices) land well.
 - Stop asking for quiz scores every time. Ask once casually at most. The kids-playtest feedback is still worth asking about.
+
+## Blender track (agreed: same workspace, lessons continue numbering, kicker "Blender track")
+- He wants to start Blender now and chose Grant Abbitt's "Blender 5 Complete Beginners Guide" (8 × ~12 min). Blender 5.2.2 LTS is installed (~/.local/bin/blender).
+- Blender is visual: VIDEO is the primary instruction. My role: companion pages per chunk (what to watch, active follow-along, retrieval quiz, shortcut sheet), a "transfer" task that makes an asset for HIS game, then Blender → Godot pipeline lessons (glTF export, scale/apply transforms, origin at the base, Z-up vs Y-up, collision).
+- Recommended keeping it in this workspace as a separate track (same mission: success criteria include a self-made Blender asset in Godot).
+- Blender track format: companion page per video block. ① setup → ② watch (chapter table + "watch for") → ③ recall quiz → ④ transfer task making assets for HIS game. Pipeline lessons (export/import) in between.
+- Plan: L8 Parts 1-2 + coin & tree. L9 origin, join, apply transforms, glTF export → replace Godot coin, plant trees (Godot-side lesson in the faded format). L10 Parts 3-4 (Old Man), and so on. Part 8 (lights & compositing) is optional for game purposes.
+- Grant's video descriptions include chapter timestamps (fetch via the watch-page shortDescription) to build the "watch for" tables.

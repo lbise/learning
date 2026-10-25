@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 9: From Blender into your game</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 9 · Blender track</p>
+<h1>From Blender into your game</h1>
+<p class="subtitle">Prepare, export, import, replace. Your coin and your trees become part of the game your kids play.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Learn the Blender → glTF → Godot pipeline, and the three preparations that make a model behave: origin, applied transforms, selection-only export.</dd>
+  <dt>Time</dt><dd>About 45 minutes, plus 10 minutes of reading</dd>
+  <dt>The win</dt><dd>Your own gold coin spinning in the level, and a forest of your own trees that the player and camera collide with</dd>
+  <dt>Format</dt><dd><strong>① worked example</strong> (the coin, end to end) → <strong>② completion</strong> (the tree) → <strong>③ on your own</strong> (a solid tree scene and a forest).</dd>
+  <dt>Links</dt><dd>Citations are optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">Blender's up axis vs Godot's, and who converts between them?</p>
+  <details><summary>Show answer</summary>Blender is Z-up and Godot is Y-up. The glTF exporter's <em>+Y Up</em> option converts.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 2: what does the Godot documentation say about scaling collision shapes?</p>
+  <details><summary>Show answer</summary>Never do it. Change their size properties instead. You'll need this again in part ③.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 8: in Blender, what's the difference between an object and its mesh data?</p>
+  <details><summary>Show answer</summary>The object holds the location, rotation and scale (like a Node3D). The mesh data holds the actual shape (like a Mesh resource). <kbd>G</kbd>/<kbd>R</kbd>/<kbd>S</kbd> in Object Mode change the object, not the data.</details>
+</div>
+
+<h2>① Worked example: the coin</h2>
+
+<h3>Why preparation matters</h3>
+
+<p>An exported glTF keeps Blender's object structure: each object becomes a node <em>with its transform</em>. If your coin sits 3 m to the side, rotated 90°, Godot gets a node 3 m to the side, rotated 90°, inside your Coin scene. Three habits prevent most problems:</p>
+
+<table>
+  <tr><th>Habit</th><th>Blender</th><th>Why it matters in Godot</th></tr>
+  <tr><td><strong>Object at the world origin</strong></td><td><kbd>Alt</kbd>+<kbd>G</kbd>: <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/clear.html">“move the selection back to the coordinates (0, 0, 0)”</a></td><td>Otherwise the model is offset from your scene's origin, and from its collision shape.</td></tr>
+  <tr><td><strong>Transforms applied</strong></td><td><kbd>Ctrl</kbd>+<kbd>A</kbd> → All Transforms: <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/apply.html">“The object transformation coordinates are transferred to the object data.”</a></td><td>The shape lives in the mesh and the node arrives clean (no rotation, scale 1). No hidden scale ends up under your physics bodies.</td></tr>
+  <tr><td><strong>Export only the selection</strong></td><td>Export option <em>Include → Limit to → Selected Objects</em></td><td>Otherwise <code>coin.glb</code> also contains your tree, and anything else in the file.</td></tr>
+</table>
+
+<h3>Blender side</h3>
+<ol class="checklist" id="coin-blender">
+  <li>Open <code>props.blend</code>. Click the <code>Coin</code> so it's the only thing selected.</li>
+  <li><kbd>Alt</kbd>+<kbd>G</kbd>. The coin jumps back to the world origin (it was 3 m out on X). It'll overlap the tree for now, which is fine.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>A</kbd> → <strong>All Transforms</strong>. Check the Sidebar (<kbd>N</kbd>): rotation is now 0, 0, 0 but the coin still stands upright, because the rotation has moved into the mesh.</li>
+  <li><strong>File → Export → glTF 2.0</strong>. On the right: <em>Format</em> <strong>.glb</strong>. Under <em>Include</em>, tick <strong>Limit to: Selected Objects</strong>. Under <em>Transform</em>, keep <strong>+Y Up</strong> ticked (the default).</li>
+  <li>Save it as <code>coin.glb</code> in a <code>models/</code> folder <strong>inside your Godot project</strong>.</li>
+</ol>
+<p class="progress" data-for="coin-blender"></p>
+
+<h3>Godot side</h3>
+<ol class="checklist" id="coin-godot">
+  <li>Switch to Godot. The FileSystem dock shows <code>models/coin.glb</code>, imported automatically.</li>
+  <li>Open <code>coin.tscn</code>. Delete the old <code>MeshInstance3D</code> (the CylinderMesh with rotation x = 90).</li>
+  <li>Drag <code>coin.glb</code> onto the <code>Coin</code> root. That's all: no rotation needed, because Blender's +Z-up and your applied rotation become an upright coin in Godot.</li>
+  <li>Run the world. Every coin is now <em>yours</em>: same size, same spin, gold material from Blender.</li>
+</ol>
+<p class="progress" data-for="coin-godot"></p>
+
+<p class="aside">I ran this whole pipeline headless: Blender 5.2.2 → <code>.glb</code> → Godot 4.7.2. The imported coin is 0.8 × 0.8 × 0.1 m (standing upright, facing Z), and its material arrived as a <code>StandardMaterial3D</code> named <code>Gold</code> with metallic 1.0 and roughness 0.3.</p>
+
+<p><strong>The iteration loop:</strong> change the coin in Blender, export again over the same file, and Godot reimports it. Every coin instance in every level updates, the same way your crates did when you edited <code>crate.tscn</code>.</p>
+
+<h3>Predict, then check</h3>
+
+<div class="recall">
+  <p class="q">1. You skip <kbd>Alt</kbd>+<kbd>G</kbd> and export the coin while it's still 3 m out on X. What do players experience?</p>
+  <details><summary>Show answer</summary>The visible coin floats 3 m away from where it can be picked up. The <code>Area3D</code>'s sphere is still at the Coin scene's origin. Visuals and collision are separate (Lesson 2), and here they've drifted apart.</details>
+</div>
+<div class="recall">
+  <p class="q">2. You forget <em>Selected Objects</em>. What's inside <code>coin.glb</code>?</p>
+  <details><summary>Show answer</summary>Everything in the file: coin, trunk, foliage, and the default camera and light if they're still in the scene (the exporter's Include panel decides what goes in). Every coin in your level would carry a tree.</details>
+</div>
+
+<h2>② Completion: the tree</h2>
+
+<p>The tree is two objects (trunk and foliage) with the trunk's base on the ground. For a game prop you want <strong>one</strong> object whose <strong>origin is at the base of the trunk</strong>, so that placing it at y = 0 in Godot puts it on the ground, the same way the crate scene worked. Fill in the blanks, then check:</p>
+
+<ol class="checklist" id="tree">
+  <li><strong>Join:</strong> click <code>Foliage</code>, then <kbd>Shift</kbd>-click <code>Trunk</code> so the trunk is selected <em>last</em>. Press <kbd>Ctrl</kbd>+<kbd>J</kbd>. Join <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/join.html">“merges all selected objects into the last selected Active object”</a>. Rename the result <code>Tree</code>. <em>Blank 1: which object's origin does the joined object keep?</em></li>
+  <li><strong>Origin to the base:</strong> <kbd>Shift</kbd>+<kbd>S</kbd> → <em>Cursor to World Origin</em>. Your trunk's base is already at (0, 0, 0), so now use <strong>Object → Set Origin → ______</strong>. <em>Blank 2.</em></li>
+  <li><strong>Clean transforms:</strong> <kbd>Ctrl</kbd>+<kbd>A</kbd> → ______. <em>Blank 3.</em></li>
+  <li><strong>Export</strong> <code>tree.glb</code> into the same <code>models/</code> folder, with the same three export settings as the coin.</li>
+</ol>
+<p class="progress" data-for="tree"></p>
+
+<div class="recall">
+  <p class="q">Answers</p>
+  <details><summary>Show answers</summary>
+  <strong>1.</strong> The active (last-selected) object's, so the trunk's centre at (0, 0, 0.75): <em>not</em> at the base, which is why step 2 exists. <strong>2.</strong> <em>Origin to 3D Cursor</em>: <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/origin.html">“Moves the origin of the model to the position of the 3D cursor.”</a> <strong>3.</strong> <em>All Transforms</em>.<br>
+  Tested: the imported tree's bounds start at y = 0 and are 3.3 m tall, and it keeps two materials, <code>Bark</code> and <code>Leaves</code>, as two surfaces of one mesh.
+  </details>
+</div>
+
+<p class="aside">Two shortcuts you may meet later. Godot can import <code>.blend</code> files directly by <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html">“calling Blender to export to glTF in a transparent manner”</a>. And an object named with a <code>-col</code> suffix gets a collision shape generated <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/node_type_customization.html">“using the same geometry as the mesh … slow, but accurate”</a>. Doing it by hand first tells you what those shortcuts automate.</p>
+
+<h2>③ On your own: a solid tree, then a forest</h2>
+
+<p>Everything you need comes from Lessons 2 and 3 plus today. Build a reusable <code>tree.tscn</code> and plant it around your level.</p>
+
+<ol class="checklist" id="forest">
+  <li><code>tree.tscn</code>'s root is the right collision object type for something that never moves (Lesson 2).</li>
+  <li>The player can't walk through the trunk. Choose a collision shape and size that fits it. Do you want the foliage to be solid too? Decide, and know why.</li>
+  <li>At least 8 trees in <code>world.tscn</code>, placed around the coins. Vary them by rotating around Y so they don't all look identical.</li>
+  <li>Some trees are a different size, <strong>without</strong> scaling any collision shape.</li>
+  <li>Back the player up against a trunk: the camera should pull in rather than end up inside it. Why does that already work?</li>
+</ol>
+<p class="progress" data-for="forest"></p>
+
+<div class="recall">
+  <p class="q">Hint: size variety without scaling collision</p>
+  <details><summary>Show hint</summary>Scaling the <code>StaticBody3D</code> scales its shape, which the docs warn against. Two clean options: make a <em>second</em> tree in Blender (taller, or wider) and export it as <code>tree_tall.glb</code> with its own scene and correctly sized shape; or keep one scene and use the shape's own <em>Radius</em>/<em>Height</em> fields for a variant. Variety from rotation alone already goes a long way.</details>
+</div>
+<div class="recall">
+  <p class="q">Solution sketch</p>
+  <details><summary>Show solution</summary>
+<pre class="tree"><b>Tree</b> (StaticBody3D)
+├─ tree (instance of tree.glb)        origin at the base, no transform
+└─ CollisionShape3D  CylinderShape3D  radius ≈ 0.2, height 1.5, position y = 0.75</pre>
+Trunk-only collision lets the player brush through the low branches, which feels fine for a pine. A taller cylinder or a <code>ConeShape</code>-like approximation makes the whole tree solid. The camera already pulls in because the <code>SpringArm3D</code> casts against physics shapes (Lesson 4), and your trunk now has one.
+  </details>
+</div>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">After importing, your tree floats 0.75 m above the ground. What was skipped?</p>
+  <button data-correct data-why="The joined object kept the trunk's centre as its origin. Set Origin → Origin to 3D Cursor (with the cursor at the base) fixes it.">Setting the origin to the base of the trunk</button>
+  <button data-why="+Y Up handles axis conversion, not the origin's height.">Ticking the +Y Up option in the exporter</button>
+  <button data-why="Selection only decides what gets exported, not where its origin is.">Limiting the export to only Selected Objects</button>
+  <button data-why="Materials don't affect position.">Assigning the Bark material to the tree trunk</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why apply transforms (<kbd>Ctrl</kbd>+<kbd>A</kbd>) before exporting?</p>
+  <button data-correct data-why="The shape moves into the mesh data and the node arrives with no rotation or scale, so nothing scaled ends up under your physics bodies.">So the node arrives clean, with the shape in the mesh</button>
+  <button data-why="Unapplied transforms export fine. They just come along as node transforms.">Because glTF cannot store any rotation or scale at all</button>
+  <button data-why="Materials are unaffected by applying transforms.">Because unapplied materials will not export into the glb</button>
+  <button data-why="Applying doesn't change the up axis. +Y Up does that.">So that Blender converts its Z axis into Godot's Y axis</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You re-export <code>coin.glb</code> with a new shape. What happens to the 7 coins in your level?</p>
+  <button data-correct data-why="They're instances of coin.tscn, which instances the reimported coin.glb. One source, every copy updates.">All of them update after Godot reimports the file</button>
+  <button data-why="Instances stay linked to their source. That's the point of them.">None change until you delete and place them again</button>
+  <button data-why="All instances share the same source scene.">Only the coin you last selected changes in the level</button>
+  <button data-why="Reimporting a changed glb is routine. Nothing breaks.">Godot refuses because the file is already imported</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You want a big tree. Why not just scale the <code>StaticBody3D</code> by 2?</p>
+  <button data-correct data-why="Scaling a body scales its collision shapes. Lesson 2's docs quote: never scale collision shapes. Change the shape's size, or model a variant.">It scales the collision shape, which the docs warn against</button>
+  <button data-why="Godot can scale nodes. It's the collision shape scaling that's the problem.">Godot does not allow any node to be scaled at all</button>
+  <button data-why="The material would scale along with the mesh just fine.">The material from Blender would not scale along with it</button>
+  <button data-why="Scale has nothing to do with the glTF up axis.">The glTF up-axis conversion would undo the new scale</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>The three habits before export, with their shortcuts.</li>
+  <li>Join: whose origin survives, and how do you move it to the base?</li>
+  <li>From Lesson 7: what does <code>change_state</code>'s early return protect?</li>
+</ul>
+
+<p><strong>Playtest time.</strong> Your kids now have a forest to search for coins in, with coins and trees you made. Watch where they get lost or bored. That's level-design feedback for later.</p>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html">Godot Docs: Available 3D formats</a>. Read the glTF section, especially “Exporting glTF 2.0 files from Blender (recommended)”. It's Godot's own checklist for this exact pipeline.
+</div>
+
+<p class="ask">Model arrives sideways, offset, giant or tiny, or grey instead of gold? Tell me which, and paste what the Sidebar (<kbd>N</kbd>) shows for the object in Blender. Each symptom maps to one of the three habits.</p>
+
+<nav class="nav">
+  <span>← <a href="0008-blender-shapes-and-materials.html">Lesson 8: Shapes &amp; materials</a></span>
+  <span>Reference: <a href="../reference/blender-to-godot.html">Blender → Godot pipeline</a></span>
+</nav>
+
+</main>
+</body>
+</html>

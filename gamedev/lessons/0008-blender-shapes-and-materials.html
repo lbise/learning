@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 8: Blender, shapes and materials</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 8 · Blender track</p>
+<h1>Shapes and materials</h1>
+<p class="subtitle">Grant Abbitt's Parts 1–2, watched with Blender open, connected to what you already know from Godot. Then make two props for your own game.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Navigate Blender, place and transform objects, and give them materials that will survive the trip to Godot.</dd>
+  <dt>Time</dt><dd>About 25 min of video, which takes 60–75 min when you follow along, plus about 30 min for the props. Splitting it over two sessions is fine.</dd>
+  <dt>The win</dt><dd>A gold coin and a low-poly tree, built to the sizes your Godot game uses, saved in a <code>.blend</code> file and ready for Lesson 9</dd>
+  <dt>Format</dt><dd><strong>Blender track:</strong> the video is the teacher. This page is the companion: ① set up → ② watch, with what to look for → ③ recall from memory → ④ make something for <em>your</em> game.</dd>
+  <dt>Links</dt><dd>Citations are optional. The videos are the primary source.</dd>
+</dl>
+
+<h2>① Set up (5 minutes)</h2>
+
+<ol class="checklist" id="setup">
+  <li>Launch Blender (you have <strong>5.2.2 LTS</strong>; the course uses 5.0, so expect tiny UI differences). Arrange it next to the video, or on a second screen.</li>
+  <li>No numpad on your keyboard? Go to <strong>Edit → Preferences → Input → Emulate Numpad</strong>. The manual: <a href="https://docs.blender.org/manual/en/latest/editors/preferences/input.html">“The Numpad keys are used quite often in Blender and are not assigned to the same action as the regular number keys.”</a></li>
+  <li>Make a folder <code>~/learning/gamedev/blender/</code> for your <code>.blend</code> files.</li>
+</ol>
+<p class="progress" data-for="setup"></p>
+
+<h2>② Watch: and do every step yourself</h2>
+
+<p class="aside">Same principle as Lessons 1–3: watching feels like learning, but doing it is what makes it stick. If you catch yourself just watching, rewind 30 seconds and do it.</p>
+
+<p><strong>Pause and copy every action.</strong> Grant moves fast and the shortcuts only stick when your own hands do them. Below, the chapter list from each video's description, with what to look out for.</p>
+
+<h3><a href="https://www.youtube.com/watch?v=kVcY7K-JA1Y&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 1: The Interface</a> (12 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>02:12 Navigating</td><td>Orbit, pan, zoom. Practise until it's automatic. Everything else depends on it.</td></tr>
+  <tr><td>03:24 Perspective / Ortho</td><td>Orthographic views are how you line things up precisely.</td></tr>
+  <tr><td>04:00 Coordinates &amp; views</td><td><strong>Blender's up is Z.</strong> Godot's is Y. Remember this for Lesson 9.</td></tr>
+  <tr><td>04:41 Adding objects</td><td>Right after adding, a small panel appears bottom-left (“Adjust Last Operation”) where you can set size, vertex count and so on. You'll need it for the props.</td></tr>
+  <tr><td>06:14–07:48 G / R / S + axis</td><td>The core verb-plus-axis grammar: <kbd>G</kbd> then <kbd>Z</kbd> then <code>2</code> then <kbd>Enter</kbd> means “move 2 m up”.</td></tr>
+  <tr><td>09:06 Challenge</td><td><strong>Do it.</strong> It's your first retrieval practice.</td></tr>
+</table>
+
+<h3><a href="https://www.youtube.com/watch?v=J2OpaKlChI8&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 2: Materials</a> (11 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>00:18 Shading workspace</td><td>The node editor, where materials are wired.</td></tr>
+  <tr><td>02:47 Principled BSDF</td><td><strong>The important one.</strong> Base Color, Metallic and Roughness are exactly what Godot's <code>StandardMaterial3D</code> uses (see the table below).</td></tr>
+  <tr><td>05:42 Viewport modes</td><td>Material Preview vs Rendered.</td></tr>
+  <tr><td>04:30, 06:45–09:33 Camera, lights, render engines, rendering</td><td><em>Watch, but don't sweat it.</em> Blender's lights, camera and render engines don't come along into your game. Godot lights and renders the scene itself.</td></tr>
+</table>
+
+<h2>Bridge: what you already know from Godot</h2>
+
+<p>Most of Blender's model maps onto concepts you already have:</p>
+
+<table>
+  <tr><th>Blender</th><th>Godot</th><th>Notes</th></tr>
+  <tr><td>Object</td><td>Node3D</td><td>Has a location, rotation and scale (<kbd>G</kbd>/<kbd>R</kbd>/<kbd>S</kbd>).</td></tr>
+  <tr><td>Object origin (the small dot)</td><td>The node's origin</td><td><a href="https://docs.blender.org/manual/en/latest/scene_layout/object/origin.html">“The location of this point determines where the object is located in 3D space.”</a> It's the pivot for rotation and scaling. For game props, you'll want it at the base (Lesson 9).</td></tr>
+  <tr><td>Object vs its mesh data</td><td>Node vs its Mesh <em>resource</em></td><td>Same split as Lesson 3. Pressing <kbd>S</kbd> in Object Mode changes the object's scale, not the mesh. <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/apply.html"><kbd>Ctrl</kbd>+<kbd>A</kbd> Apply</a> moves it into the data: “The object transformation coordinates are transferred to the object data.” That's coming in Lesson 9.</td></tr>
+  <tr><td>Principled BSDF</td><td>StandardMaterial3D</td><td>The glTF exporter <a href="https://docs.blender.org/manual/en/latest/addons/scene_gltf2.html">reads Base Color, Metallic and Roughness from the Principled BSDF node</a>. Plain values carry over cleanly. Fancy node setups mostly don't.</td></tr>
+  <tr><td>Z up</td><td>Y up</td><td>The exporter converts it for you: its <a href="https://docs.blender.org/manual/en/latest/addons/scene_gltf2.html">“+Y Up”</a> option means “Export using glTF convention, +Y up.”</td></tr>
+  <tr><td>1 unit (metric)</td><td>1 unit = 1 m</td><td>Keep Scene Properties → Units at Metric, scale 1.0, and your sizes carry over as-is.</td></tr>
+  <tr><td>Lights, camera, Eevee/Cycles</td><td>(none)</td><td>Useful for previews and portfolio renders. Godot ignores them for your game.</td></tr>
+</table>
+
+<h2>③ Recall: after watching, from memory</h2>
+
+<div class="quiz">
+  <p class="q">You want to move the selected object exactly 2 m straight up. Which keys?</p>
+  <button data-correct data-why="Verb (G), axis (Z: up in Blender), amount, confirm.">G, then Z, then 2, then Enter</button>
+  <button data-why="Y is a horizontal axis in Blender. Up is Z.">G, then Y, then 2, then Enter</button>
+  <button data-why="R rotates. G (grab) moves.">R, then Z, then 2, then Enter</button>
+  <button data-why="S scales. G (grab) moves.">S, then Z, then 2, then Enter</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You just added a cylinder and want it to have 12 sides instead of 32. Where?</p>
+  <button data-correct data-why="Right after an operation, its parameters can be tweaked there (or with F9). Once you do something else, the chance is gone.">The Adjust Last Operation panel, at bottom left</button>
+  <button data-why="The material doesn't define geometry.">The Principled BSDF node in the Shading workspace</button>
+  <button data-why="Scaling changes size, not the number of sides.">Press S and type twelve, then press Enter</button>
+  <button data-why="That's display units, not geometry.">Scene Properties, under the Units and Unit Scale</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Which Principled BSDF settings will reliably carry over to Godot through glTF?</p>
+  <button data-correct data-why="The glTF exporter reads exactly these from the Principled BSDF node and Godot maps them onto StandardMaterial3D.">Base Color, Metallic and Roughness slider values</button>
+  <button data-why="Blender lights don't become part of your material.">The lights and world settings around it</button>
+  <button data-why="The render engine is Blender-only. Godot uses its own renderer.">The render engine chosen in Render Properties</button>
+  <button data-why="Arbitrary node graphs don't map to glTF. Keep materials simple.">Any node graph you build in Shading</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">In Godot, “up” is +Y. In Blender, “up” is…</p>
+  <button data-correct data-why="Blender is Z-up. The glTF exporter's +Y Up option converts it for Godot.">+Z, and the glTF exporter converts it</button>
+  <button data-why="Blender uses Z for up.">+Y, exactly the same as in Godot</button>
+  <button data-why="X is horizontal in both programs.">+X, so you rotate it by hand</button>
+  <button data-why="Up is always +Z in Blender, whatever you're editing.">It depends on the object's current mode</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<div class="recall">
+  <p class="q">Name these from memory: orbit, pan, zoom, front view, top view, toggle orthographic, add menu, shading pie, frame selected.</p>
+  <details><summary>Show answer</summary>Orbit <kbd>MMB</kbd> drag · pan <kbd>Shift</kbd>+<kbd>MMB</kbd> · zoom <kbd>Wheel</kbd> · front <kbd>Numpad1</kbd> · top <kbd>Numpad7</kbd> · ortho/persp <kbd>Numpad5</kbd> · add <kbd>Shift</kbd>+<kbd>A</kbd> · shading pie <kbd>Z</kbd> · frame selected <kbd>Numpad .</kbd> (from the <a href="https://docs.blender.org/manual/en/latest/editors/3dview/navigate/navigation.html">navigation</a> and <a href="https://docs.blender.org/manual/en/latest/editors/3dview/navigate/viewpoint.html">viewpoint</a> pages)</details>
+</div>
+
+<h2>④ On your own: props for your game</h2>
+
+<p>Use only what Parts 1–2 taught: adding shapes, the Adjust Last Operation panel, <kbd>G</kbd>/<kbd>R</kbd>/<kbd>S</kbd> with axes, and Principled BSDF materials. The sizes match your Godot game, which uses metres in both programs.</p>
+
+<h3>The coin</h3>
+<ol class="checklist" id="coin">
+  <li>New file (General). Delete the default cube.</li>
+  <li>Add a <strong>Cylinder</strong>. In Adjust Last Operation set <strong>Radius 0.4 m</strong>, <strong>Depth 0.1 m</strong>, and <strong>Vertices 24</strong>, which gives a lower-poly look. Same size as the Godot coin from Lesson 3.</li>
+  <li>Stand it upright: rotate it 90° around X.</li>
+  <li>Give it a new material named <code>Gold</code>: a gold Base Color, <strong>Metallic 1.0</strong>, <strong>Roughness ≈ 0.3</strong>. Check it in Material Preview.</li>
+  <li>Name the object <code>Coin</code> (double-click it in the Outliner).</li>
+</ol>
+<p class="progress" data-for="coin"></p>
+
+<h3>The tree</h3>
+<ol class="checklist" id="tree">
+  <li>Move the coin aside (say 3 m along X) so you have room.</li>
+  <li><strong>Trunk:</strong> a Cylinder with radius 0.15 m, depth 1.5 m and 8 vertices. Move it up so its bottom sits on the ground (Z = 0). <em>Where must its centre be?</em></li>
+  <li><strong>Foliage:</strong> a <strong>Cone</strong> with 8 vertices, Radius 1 of 0.9 m, Radius 2 of 0 and depth 2 m. Place it so it overlaps the top of the trunk a little.</li>
+  <li>Materials: <code>Bark</code> (brown, Roughness 0.9) on the trunk and <code>Leaves</code> (green, Roughness 0.8) on the cone. Name the objects <code>Trunk</code> and <code>Foliage</code>.</li>
+  <li>Check it from the front view in orthographic (<kbd>Numpad1</kbd>, <kbd>Numpad5</kbd>): is the trunk's bottom exactly on the ground line?</li>
+  <li>Save as <code>~/learning/gamedev/blender/props.blend</code>.</li>
+</ol>
+<p class="progress" data-for="tree"></p>
+
+<div class="recall">
+  <p class="q">Hint: where the trunk's centre goes</p>
+  <details><summary>Show hint</summary>A new cylinder's origin is at its centre, so half of it sits below the ground. Depth 1.5 → move it up by half: <kbd>G</kbd> <kbd>Z</kbd> <code>0.75</code> <kbd>Enter</kbd>. The cone (depth 2) then needs its centre at about 1.5 + 1 − a little overlap ≈ <strong>2.3 m</strong>. Same reasoning as the crate in Lesson 2, where you set the mesh to y = 0.5.</details>
+</div>
+
+<div class="recall">
+  <p class="q">Stretch: make it feel more “made” (only if you have time)</p>
+  <details><summary>Show ideas</summary>Rotate the cone a few degrees around Z so its facets don't line up with the trunk's. Add a second, smaller cone above the first for a fuller pine. Make a <em>variant</em>: a short, wide tree with a sphere (UV Sphere, low segment count) for foliage. Variety matters more than detail in a level.</details>
+</div>
+
+<p class="aside">Keep the <code>.blend</code>. Lesson 9 covers origins, joining the tree into one object, applying transforms, and exporting to <code>.glb</code>. Then your coin replaces the cylinder in your Godot game, and trees go into the level.</p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>The G/R/S grammar: verb, axis, amount, confirm. Do it with your eyes closed.</li>
+  <li>Which material values survive the trip to Godot, and why lights don't.</li>
+  <li>From Lesson 7: the three pieces of the state-machine pattern.</li>
+</ul>
+
+<div class="source">
+  <strong>Primary source: the videos themselves</strong>
+  <a href="https://www.youtube.com/playlist?list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Grant Abbitt: Blender 5 Complete Beginners Guide</a>, Parts 1–2. When a tool behaves strangely, look it up in the <a href="https://docs.blender.org/manual/en/latest/">Blender 5.2 manual</a>, Blender's equivalent of Godot's class reference.
+</div>
+
+<p class="ask">Something in the video doesn't match your Blender 5.2 screen, or a prop won't sit right? Describe what you see (or what you pressed) and I'll help. Screenshots work too: just tell me the file path.</p>
+
+<nav class="nav">
+  <span>← <a href="0007-state-machine.html">Lesson 7: State machine</a></span>
+  <span>Reference: <a href="../reference/blender-basics.html">Blender basics</a></span>
+</nav>
+
+</main>
+</body>
+</html>

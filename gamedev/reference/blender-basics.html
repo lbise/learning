@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blender basics: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Blender 5.2 LTS</p>
+<h1>Blender basics</h1>
+<p class="subtitle">Navigation, transforms, materials, and the Godot bridge. Built from <a href="../lessons/0008-blender-shapes-and-materials.html">Lesson 8</a> (Grant Abbitt Parts 1–2).</p>
+
+<div class="cols">
+
+<section>
+<h2>Navigate</h2>
+<table>
+  <tr><td><kbd>MMB</kbd> drag</td><td>Orbit</td></tr>
+  <tr><td><kbd>Shift</kbd>+<kbd>MMB</kbd></td><td>Pan</td></tr>
+  <tr><td><kbd>Wheel</kbd> / <kbd>Ctrl</kbd>+<kbd>MMB</kbd></td><td>Zoom</td></tr>
+  <tr><td><kbd>Numpad1</kbd> / <kbd>3</kbd> / <kbd>7</kbd></td><td>Front / right / top (<kbd>Ctrl</kbd> = opposite side)</td></tr>
+  <tr><td><kbd>Numpad5</kbd></td><td>Toggle perspective / orthographic</td></tr>
+  <tr><td><kbd>Numpad .</kbd></td><td>Frame selected</td></tr>
+  <tr><td><kbd>Z</kbd></td><td>Shading pie (Solid, Material Preview, Rendered)</td></tr>
+</table>
+<p>No numpad: Preferences → Input → Emulate Numpad.</p>
+<p class="aside">Sources: manual, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/navigate/navigation.html">Navigation</a>, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/navigate/viewpoint.html">Viewpoint</a>, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/display/shading.html">Shading</a></p>
+</section>
+
+<section>
+<h2>Create &amp; transform</h2>
+<table>
+  <tr><td><kbd>Shift</kbd>+<kbd>A</kbd></td><td>Add menu (Mesh → Cube, Cylinder, Cone…)</td></tr>
+  <tr><td><kbd>F9</kbd> / bottom-left panel</td><td>Adjust Last Operation: size, vertices… (only right after adding)</td></tr>
+  <tr><td><kbd>G</kbd> / <kbd>R</kbd> / <kbd>S</kbd></td><td>Move / rotate / scale</td></tr>
+  <tr><td>then <kbd>X</kbd> <kbd>Y</kbd> <kbd>Z</kbd></td><td>Lock to an axis (<kbd>Shift</kbd>+axis = exclude that axis)</td></tr>
+  <tr><td>then a number, <kbd>Enter</kbd></td><td>Exact amount. <kbd>RMB</kbd> / <kbd>Esc</kbd> cancels</td></tr>
+  <tr><td><kbd>X</kbd> / <kbd>Delete</kbd></td><td>Delete selected</td></tr>
+</table>
+<p><strong>Grammar:</strong> verb → axis → amount → confirm. <kbd>G</kbd> <kbd>Z</kbd> <code>0.75</code> <kbd>Enter</kbd>.</p>
+<p class="aside">Source: <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/transform/control/axis_locking.html">Axis locking</a>, <a href="https://docs.blender.org/manual/en/latest/interface/undo_redo.html">Adjust Last Operation</a></p>
+</section>
+
+<section>
+<h2>Blender ↔ Godot</h2>
+<table>
+  <tr><th>Blender</th><th>Godot</th></tr>
+  <tr><td>Object</td><td>Node3D</td></tr>
+  <tr><td>Object origin (dot)</td><td>Node origin: put props' origins at the base</td></tr>
+  <tr><td>Object vs mesh data</td><td>Node vs Mesh resource. <kbd>Ctrl</kbd>+<kbd>A</kbd> applies transforms into the data</td></tr>
+  <tr><td>Principled BSDF</td><td>StandardMaterial3D (Base Color → albedo, Metallic, Roughness)</td></tr>
+  <tr><td>Z up</td><td>Y up (glTF export “+Y Up” converts)</td></tr>
+  <tr><td>1 unit, metric</td><td>1 unit = 1 m</td></tr>
+  <tr><td>Lights, camera, Eevee/Cycles</td><td>Not used in your game. Godot renders it</td></tr>
+</table>
+<p class="aside">Sources: <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/origin.html">Object origin</a>, <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/apply.html">Apply</a>, <a href="https://docs.blender.org/manual/en/latest/addons/scene_gltf2.html">glTF 2.0</a></p>
+</section>
+
+<section>
+<h2>Game-ready habits (so far)</h2>
+<ul>
+  <li>Model in real metres: coin r 0.4 m, character about 1.8 m, crate 1 m.</li>
+  <li>Low vertex counts (8–24 sides) give a clean low-poly look.</li>
+  <li>Name objects and materials in the Outliner. The names show up in Godot.</li>
+  <li>Keep materials to Base Color, Metallic and Roughness until you learn textures.</li>
+</ul>
+</section>
+
+</div>
+</main>
+</body>
+</html>
