@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 12: Linked copies, glow, and night</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 12 · Blender track</p>
+<h1>Linked copies, glow, and night</h1>
+<p class="subtitle">Grant's Parts 7–8, the last two videos of the course. Each is followed by a short exercise: a lantern fence, then your campfire at night.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Use linked duplicates and linked materials, make things glow with Emission, and light a scene with the world colour and a lamp.</dd>
+  <dt>Time</dt><dd>Two sessions. Each is one video (about 14 min, so 35–45 min when you follow along) plus one exercise (about 15–20 min).</dd>
+  <dt>The win</dt><dd>The finished course scene, a fence with glowing lanterns, and a night render of your own campfire</dd>
+  <dt>Format</dt><dd>Part 7 → <strong>Exercise A</strong> (fence) → Part 8 → <strong>Exercise B</strong> (campfire at night) → recall. Watched ahead? That's fine: A goes with Part 7, B with Part 8.</dd>
+  <dt>Links</dt><dd>Citations are optional. The videos are the primary source.</dd>
+</dl>
+
+<div class="figs">
+  <figure><a href="../assets/img/0012/a5-lanterns-glow.png"><img src="../assets/img/0012/a5-lanterns-glow.png" alt="A wooden fence at dusk with three glowing lantern cubes on its posts"></a>
+    <figcaption><b>Exercise A</b> a fence made of linked copies, with glowing lanterns</figcaption></figure>
+  <figure><a href="../assets/img/0012/b5-fire-light.png"><img src="../assets/img/0012/b5-fire-light.png" alt="Your campfire at night, lit warm orange from a light above the flame, logs casting shadows"></a>
+    <figcaption><b>Exercise B</b> your Lesson 11 campfire at night</figcaption></figure>
+</div>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">From Lesson 11: you want five copies of a log around a centre point. Which pivot, and which keys?</p>
+  <details><summary>Show answer</summary>Pivot = <strong>3D Cursor</strong> (at the centre). Then <kbd>Shift</kbd>+<kbd>D</kbd>, <kbd>RMB</kbd>, <kbd>R</kbd> <kbd>Z</kbd> <code>72</code>, four times.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 3 (Godot): what happened to every crate when you changed the material in <code>crate.tscn</code>?</p>
+  <details><summary>Show answer</summary>They all changed, because they shared one resource. Keep that in mind: Part 7's <em>linked duplicates</em> are Blender's version of the same idea.</details>
+</div>
+
+<h2>Session 1: Part 7, then the fence</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=ctBx6OQ4Ljg&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 7: The street</a> (14 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>03:20 Challenge: street lamp</td><td><strong>Do it before the solution.</strong></td></tr>
+  <tr><td>04:52 <strong>Linked duplicates</strong> (<kbd>Alt</kbd>+<kbd>D</kbd>)</td><td><strong>Key idea.</strong> The manual: <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/duplicate_linked.html">“If you modify one of the linked objects in Edit Mode, all linked copies are modified.”</a> But each copy keeps its own position, rotation and scale. It's the object vs data split again.</td></tr>
+  <tr><td>06:40 Roughness &amp; Metallic</td><td>Revision from Lesson 8. These are the values that reach Godot.</td></tr>
+  <tr><td>07:15 Raytracing</td><td>A Blender rendering setting. Godot has its own lighting, so just watch.</td></tr>
+  <tr><td>08:10 Linking materials</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> → Link Materials <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/link_transfer/link_data.html">“replaces the materials of the selected objects by those of the active object”</a>. The <em>active</em> object (selected last) is the source.</td></tr>
+  <tr><td>09:20 Emission</td><td>A material that gives off its own light: eyes, lamps, lava. It reaches Godot too (see below).</td></tr>
+  <tr><td>10:11 Slots for the lights</td><td>Material slots again, the Lesson 10 skill.</td></tr>
+</table>
+
+<h3>Exercise A: a fence of linked copies</h3>
+
+<p>Practises: <kbd>Alt</kbd>+<kbd>D</kbd> vs <kbd>Shift</kbd>+<kbd>D</kbd>, <kbd>Shift</kbd>+<kbd>R</kbd> (repeat last), Link Materials and Emission. Target: <strong>5 posts, 1 m apart, 1.1 m tall</strong>, with two rails and three lanterns.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0012/a1-one-post.png"><img src="../assets/img/0012/a1-one-post.png" alt="A single square wooden post with a pointed top"></a>
+    <figcaption><b>Steps 1–2</b> one post with a pointed top</figcaption></figure>
+  <figure><a href="../assets/img/0012/a2-row.png"><img src="../assets/img/0012/a2-row.png" alt="Five posts in a row joined by two horizontal rails"></a>
+    <figcaption><b>Steps 3–4</b> five linked posts and two rails</figcaption></figure>
+  <figure><a href="../assets/img/0012/a3-edit-one-all-change.png"><img src="../assets/img/0012/a3-edit-one-all-change.png" alt="The same fence with every post's tip much taller and sharper"></a>
+    <figcaption><b>Step 5</b> edit <em>one</em> post's tip and all five change</figcaption></figure>
+  <figure><a href="../assets/img/0012/a4-lanterns.png"><img src="../assets/img/0012/a4-lanterns.png" alt="The fence with small lantern cubes on the first, third and fifth posts"></a>
+    <figcaption><b>Step 6</b> lanterns on posts 1, 3 and 5 (Solid view)</figcaption></figure>
+  <figure><a href="../assets/img/0012/a5-lanterns-glow.png"><img src="../assets/img/0012/a5-lanterns-glow.png" alt="The fence at dusk in Rendered view: lanterns glow, the rest is dark"></a>
+    <figcaption><b>Step 7</b> Rendered view with a darker world: the Emission shows</figcaption></figure>
+</div>
+
+<ol class="checklist" id="fence">
+  <li>New file. Shape the post <em>in Edit Mode</em> from the default cube: <kbd>Tab</kbd>, <kbd>A</kbd>, <kbd>S</kbd> <code>0.05</code> (a 10 cm cube), <kbd>S</kbd> <kbd>Z</kbd> <code>10</code> (1 m tall), <kbd>G</kbd> <kbd>Z</kbd> <code>0.5</code>. The origin is now at the post's foot. Name it <code>Post</code> and give it a <code>Wood</code> material.</li>
+  <li>Pointed top: face mode, select the top face, <kbd>E</kbd> <code>0.1</code> <kbd>Enter</kbd>, then <kbd>S</kbd> <code>0</code> <kbd>Enter</kbd> to shrink it to a point. Clean up with <kbd>M</kbd> → <strong>At Center</strong> to merge the four stacked vertices into one. <kbd>Tab</kbd> out.</li>
+  <li>Object Mode: <kbd>Alt</kbd>+<kbd>D</kbd>, <kbd>X</kbd> <code>1</code> <kbd>Enter</kbd>. Then <kbd>Shift</kbd>+<kbd>R</kbd> three times. Repeat Last <a href="https://docs.blender.org/manual/en/latest/interface/undo_redo.html">“will repeat your last action”</a>, so you get five posts, 1 m apart.</li>
+  <li>Rails: add a cube and shape it in Edit Mode to 4 m × 4 cm × 8 cm (<kbd>S</kbd> <kbd>X</kbd> <code>2</code>, <kbd>S</kbd> <kbd>Y</kbd> <code>0.02</code>, <kbd>S</kbd> <kbd>Z</kbd> <code>0.04</code>), then move it to <code>X 2</code>, <code>Z 0.75</code>, just in front of the posts. <kbd>Shift</kbd>+<kbd>D</kbd> <kbd>Z</kbd> <code>-0.4</code> makes the lower rail. Give both rails the wood: select the rails, then a post <em>last</em>, then <kbd>Ctrl</kbd>+<kbd>L</kbd> → <strong>Link Materials</strong>.</li>
+  <li><strong>Experiment:</strong> select any <em>one</em> post, <kbd>Tab</kbd>, select its tip vertex, <kbd>G</kbd> <kbd>Z</kbd> <code>0.2</code>. Watch all five. Then <kbd>Ctrl</kbd>+<kbd>Z</kbd>. Now select a <em>rail</em> and try the same with one of its vertices. Why does only that rail change?</li>
+  <li>Lantern: a cube of <code>0.14</code> m on top of the first post (around <code>Z 1.17</code>). New material <code>LanternGlow</code>: set its <strong>Emission Color</strong> to warm yellow and <strong>Emission Strength</strong> to about <code>3</code>. <kbd>Alt</kbd>+<kbd>D</kbd> it onto posts 3 and 5 (<kbd>X</kbd> <code>2</code>, then <kbd>Shift</kbd>+<kbd>R</kbd>).</li>
+  <li><kbd>Z</kbd> → <strong>Rendered</strong> view. Lanterns glow, but against a bright default world it's subtle. Peek ahead: World Properties → Color, set a dark blue to see it properly. Save as <code>blender/fence.blend</code>.</li>
+</ol>
+<p class="progress" data-for="fence"></p>
+
+<div class="recall">
+  <p class="q">Answer to step 5: why did only that rail change?</p>
+  <details><summary>Show answer</summary>The second rail came from <kbd>Shift</kbd>+<kbd>D</kbd>, which makes a full copy with its own mesh. The posts came from <kbd>Alt</kbd>+<kbd>D</kbd>, so they share one mesh: one piece of data, five objects. That's exactly Godot's <em>one resource, many nodes</em>.</details>
+</div>
+
+<p class="aside">Checked in Godot 4.7.2: three <kbd>Alt</kbd>+<kbd>D</kbd> copies exported to glTF arrive as three <code>MeshInstance3D</code>s sharing <strong>one</strong> mesh resource. An Emission Strength of 5 arrives as a <code>StandardMaterial3D</code> with emission enabled and energy 5.0. So linked copies and glow both survive the trip.</p>
+
+<h2>Session 2: Part 8, then the campfire at night</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=7moxMNaRlk8&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 8: Lights &amp; compositing</a> (13 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>01:44 Fog material</td><td>Atmosphere in Blender renders. Godot does fog in its own way.</td></tr>
+  <tr><td>03:27 Torch light</td><td><strong>Point lights</strong>: a light that shines in every direction from one spot. You'll put one in your fire.</td></tr>
+  <tr><td>05:24 Street lights</td><td>More lights, placed with what you know.</td></tr>
+  <tr><td>06:30 World shader</td><td>The world colour is the “sky light” that fills the whole scene. Darken it to get night.</td></tr>
+  <tr><td>09:15–11:56 Compositing, Glare</td><td>Post-processing on the final image. It's how you'd make a nice picture of your work.</td></tr>
+</table>
+
+<p class="aside">Part 8 is the most Blender-specific video: lights, world, fog and compositing don't come along into Godot through your export. Godot has its own equivalents for when you get there (<code>OmniLight3D</code> for a point light, and a <code>WorldEnvironment</code> for sky, fog and glow). The <em>ideas</em> carry over completely.</p>
+
+<h3>Exercise B: your campfire at night</h3>
+
+<p>Practises: the world colour, Emission, point lights and rendering. Open <code>blender/campfire.blend</code> from Lesson 11.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0012/b1-day.png"><img src="../assets/img/0012/b1-day.png" alt="The campfire in grey daylight"></a>
+    <figcaption><b>Start</b> Rendered view, default bright world</figcaption></figure>
+  <figure><a href="../assets/img/0012/b2-dark-world.png"><img src="../assets/img/0012/b2-dark-world.png" alt="The campfire almost invisible against a near-black blue scene"></a>
+    <figcaption><b>Step 2</b> dark world: night, but nothing to see</figcaption></figure>
+  <figure><a href="../assets/img/0012/b3-emissive-flame.png"><img src="../assets/img/0012/b3-emissive-flame.png" alt="Only the flame is visible, glowing orange, everything else is black"></a>
+    <figcaption><b>Step 3</b> Emission: the flame glows, but it doesn't light the logs</figcaption></figure>
+  <figure><a href="../assets/img/0012/b4-light-inside-flame.png"><img src="../assets/img/0012/b4-light-inside-flame.png" alt="Looks the same as the previous image: the light has no visible effect"></a>
+    <figcaption><b>Step 4 trap</b> light placed <em>inside</em> the flame: the cone blocks it</figcaption></figure>
+  <figure><a href="../assets/img/0012/b5-fire-light.png"><img src="../assets/img/0012/b5-fire-light.png" alt="The light is above the flame now: logs, stones and ground are lit warm orange with shadows"></a>
+    <figcaption><b>Step 4 fixed</b> light just above the flame tip</figcaption></figure>
+</div>
+
+<ol class="checklist" id="night">
+  <li><kbd>Z</kbd> → <strong>Rendered</strong> view, with Render Engine <strong>EEVEE</strong> (Render Properties).</li>
+  <li>World Properties → <strong>Color</strong>: a very dark blue, Strength about <code>0.3</code>. It's night, and you can barely see anything.</li>
+  <li>Flame material: Emission Color orange, <strong>Emission Strength</strong> about <code>1</code>. Higher values wash the orange out to pale. The flame glows, but notice the logs stay dark.</li>
+  <li><kbd>Shift</kbd>+<kbd>A</kbd> → Light → <strong>Point</strong>. Colour warm orange, <strong>Power about 20 W</strong>. Put it <em>above</em> the flame tip, at about <kbd>G</kbd> <kbd>Z</kbd> <code>0.6</code>, not inside the cone: the solid cone would block it, like the trap picture.</li>
+  <li>Find a nice angle, <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Numpad0</kbd> to put the camera there, then <kbd>F12</kbd> to render. Save the image from the render window (Image → Save As).</li>
+  <li><em>Optional, Part 8 style:</em> add a <strong>Glare</strong> node in the Compositor for a soft glow around the flame.</li>
+</ol>
+<p class="progress" data-for="night"></p>
+
+<div class="recall">
+  <p class="q">Predict, then check: after step 3, the flame is bright orange. Why are the logs right next to it still black?</p>
+  <details><summary>Show answer</summary>In EEVEE, an emissive material mostly makes the <em>surface itself</em> bright. It doesn't throw much light onto nearby objects. To light the scene you add a real light, which is why every lamp in Part 8 is a light <em>plus</em> a glowing material. Godot works the same way: emission makes a mesh glow, and an <code>OmniLight3D</code> lights the surroundings.</details>
+</div>
+
+<p class="aside">All pictures on this page were rendered by Blender 5.2.2 (EEVEE) from a script that follows these steps, including the trap: a light inside the solid flame cone really does change nothing.</p>
+
+<h2>Recall: after both sessions</h2>
+
+<div class="quiz">
+  <p class="q">You <kbd>Alt</kbd>+<kbd>D</kbd> a post, then <em>move</em> the copy in Object Mode. What happens to the original?</p>
+  <button data-correct data-why="Linked duplicates share mesh data, but each object keeps its own transform.">Nothing, because each copy keeps its own transform</button>
+  <button data-why="Only Edit Mode changes (the shared data) are linked. Transforms are not.">It moves too, because linked copies share everything</button>
+  <button data-why="Moving never deletes anything.">It is deleted and replaced by the moved copy</button>
+  <button data-why="Moving an object never changes its shape.">Its shape changes to match the new position</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">For <kbd>Ctrl</kbd>+<kbd>L</kbd> → Link Materials, which object gives its materials?</p>
+  <button data-correct data-why="The active object (selected last) is the source. All other selected objects receive.">The active object, the one selected last</button>
+  <button data-why="The first-selected object receives. The last one gives.">The object you selected first, before others</button>
+  <button data-why="Origins don't matter here, only which object is active.">The object closest to the world origin point</button>
+  <button data-why="It uses the active object's materials, whatever their count.">The object with the most material slots</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Which of these reaches Godot through your usual glTF export?</p>
+  <button data-correct data-why="Verified: emission arrives on the StandardMaterial3D. Lights, world and compositing stay in Blender.">The Emission colour and strength of a material</button>
+  <button data-why="The world shader is Blender's environment. Godot uses its own WorldEnvironment.">The dark blue world colour from World Properties</button>
+  <button data-why="Compositing edits Blender's final image, so it never touches the model.">The Glare node you added in the Compositor</button>
+  <button data-why="Your export is Selected Objects (meshes). Godot lights the scene itself.">The orange point light placed over the fire</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Your point light seems to do nothing. Most likely cause in this lesson?</p>
+  <button data-correct data-why="Lights cast shadows. A light enclosed in a solid mesh lights only the inside of that mesh.">It sits inside a solid mesh that blocks it</button>
+  <button data-why="Point lights work in any colour.">Point lights only work with a white colour</button>
+  <button data-why="Lights work with or without emissive materials nearby.">The flame material has Emission turned on</button>
+  <button data-why="World colour adds ambient light. It doesn't switch lamps off.">The world colour is set to a very dark blue</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li><kbd>Alt</kbd>+<kbd>D</kbd> vs <kbd>Shift</kbd>+<kbd>D</kbd>: what's shared, what isn't, and the Godot equivalent.</li>
+  <li>Emission vs a light: what each one does to the scene.</li>
+  <li>From Lesson 11: what Mirror Clipping does.</li>
+</ul>
+
+<p><strong>That's the whole beginner course done.</strong> Next time we'll look back at what you can do now and decide <em>together</em> where to go: Grant's low-poly modelling playlist, back to the game in Godot with your new props, or something else.</p>
+
+<div class="source">
+  <strong>Primary source: the videos themselves</strong>
+  <a href="https://www.youtube.com/playlist?list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Grant Abbitt: Blender 5 Complete Beginners Guide</a>, Parts 7–8. For a tool's exact behaviour, use the <a href="https://docs.blender.org/manual/en/latest/">Blender 5.2 manual</a>.
+</div>
+
+<p class="ask">Lanterns not glowing, linked copies not updating together, or a render that comes out black? Tell me which step and what you see. A screenshot path works too.</p>
+
+<nav class="nav">
+  <span>← <a href="0011-monster-bench-campfire.html">Lesson 11</a> · <a href="0013-well-stones-and-frame.html">Lesson 13: The well's stones &amp; frame</a> →</span>
+  <span>Reference: <a href="../reference/blender-basics.html">Blender basics</a></span>
+</nav>
+
+</main>
+</body>
+</html>

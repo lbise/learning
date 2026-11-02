@@ -23,6 +23,7 @@
   <tr><td><code>CollisionShape3D</code>, <code>MeshInstance3D</code>, <code>Label</code></td><td><code>BoxShape3D</code>, <code>BoxMesh</code>, <code>StandardMaterial3D</code>, scripts, <code>.tscn</code></td></tr>
 </table>
 <p>In the Inspector, <strong>click a resource field to expand it</strong>. Instances of a scene share its resources, so one edit changes them all.</p>
+<p><strong>Need per-instance changes</strong> (e.g. each tree's collision size)? Tick the resource's <em>Resource → Local to Scene</em>: “the resource is duplicated for each instance of all scenes using it.” In code: <code>shape = shape.duplicate()</code>.</p>
 <p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/scripting/resources.html">Resources</a></p>
 </section>
 

@@ -81,7 +81,7 @@
 </div>
 <div class="recall">
   <p class="q">2. You forget <em>Selected Objects</em>. What's inside <code>coin.glb</code>?</p>
-  <details><summary>Show answer</summary>Everything in the file: coin, trunk, foliage, and the default camera and light if they're still in the scene (the exporter's Include panel decides what goes in). Every coin in your level would carry a tree.</details>
+  <details><summary>Show answer</summary>Every mesh in the file: coin, trunk and foliage. Every coin in your level would carry a tree around with it.</details>
 </div>
 
 <h2>② Completion: the tree</h2>
@@ -129,7 +129,7 @@
 <pre class="tree"><b>Tree</b> (StaticBody3D)
 ├─ tree (instance of tree.glb)        origin at the base, no transform
 └─ CollisionShape3D  CylinderShape3D  radius ≈ 0.2, height 1.5, position y = 0.75</pre>
-Trunk-only collision lets the player brush through the low branches, which feels fine for a pine. A taller cylinder or a <code>ConeShape</code>-like approximation makes the whole tree solid. The camera already pulls in because the <code>SpringArm3D</code> casts against physics shapes (Lesson 4), and your trunk now has one.
+Trunk-only collision lets the player brush through the low branches, which feels fine for a pine. A taller cylinder, or a <code>ConvexPolygonShape3D</code> generated from the mesh, makes the whole tree solid. The camera already pulls in because the <code>SpringArm3D</code> casts against physics shapes (Lesson 4), and your trunk now has one.
   </details>
 </div>
 
@@ -138,18 +138,18 @@ Trunk-only collision lets the player brush through the low branches, which feels
 <div class="quiz">
   <p class="q">After importing, your tree floats 0.75 m above the ground. What was skipped?</p>
   <button data-correct data-why="The joined object kept the trunk's centre as its origin. Set Origin → Origin to 3D Cursor (with the cursor at the base) fixes it.">Setting the origin to the base of the trunk</button>
-  <button data-why="+Y Up handles axis conversion, not the origin's height.">Ticking the +Y Up option in the exporter</button>
-  <button data-why="Selection only decides what gets exported, not where its origin is.">Limiting the export to only Selected Objects</button>
-  <button data-why="Materials don't affect position.">Assigning the Bark material to the tree trunk</button>
+  <button data-why="+Y Up handles axis conversion, not the origin's height.">Ticking the +Y Up option in the glTF exporter</button>
+  <button data-why="Selection only decides what gets exported, not where its origin is.">Limiting the glTF export to only the Selected Objects</button>
+  <button data-why="Materials don't affect position.">Assigning the Bark material to the tree's wooden trunk</button>
   <p class="feedback"></p>
 </div>
 
 <div class="quiz">
   <p class="q">Why apply transforms (<kbd>Ctrl</kbd>+<kbd>A</kbd>) before exporting?</p>
-  <button data-correct data-why="The shape moves into the mesh data and the node arrives with no rotation or scale, so nothing scaled ends up under your physics bodies.">So the node arrives clean, with the shape in the mesh</button>
+  <button data-correct data-why="The shape moves into the mesh data and the node arrives with no rotation or scale, so nothing scaled ends up under your physics bodies.">So the node arrives clean, shape stored in the mesh</button>
   <button data-why="Unapplied transforms export fine. They just come along as node transforms.">Because glTF cannot store any rotation or scale at all</button>
-  <button data-why="Materials are unaffected by applying transforms.">Because unapplied materials will not export into the glb</button>
-  <button data-why="Applying doesn't change the up axis. +Y Up does that.">So that Blender converts its Z axis into Godot's Y axis</button>
+  <button data-why="Materials are unaffected by applying transforms.">Because unapplied materials will not export into the glb file</button>
+  <button data-why="Applying doesn't change the up axis. +Y Up does that.">So Blender converts its Z axis into Godot's Y axis</button>
   <p class="feedback"></p>
 </div>
 
@@ -157,8 +157,8 @@ Trunk-only collision lets the player brush through the low branches, which feels
   <p class="q">You re-export <code>coin.glb</code> with a new shape. What happens to the 7 coins in your level?</p>
   <button data-correct data-why="They're instances of coin.tscn, which instances the reimported coin.glb. One source, every copy updates.">All of them update after Godot reimports the file</button>
   <button data-why="Instances stay linked to their source. That's the point of them.">None change until you delete and place them again</button>
-  <button data-why="All instances share the same source scene.">Only the coin you last selected changes in the level</button>
-  <button data-why="Reimporting a changed glb is routine. Nothing breaks.">Godot refuses because the file is already imported</button>
+  <button data-why="All instances share the same source scene.">Only the one coin you selected last gets changed</button>
+  <button data-why="Reimporting a changed glb is routine. Nothing breaks.">Godot refuses because that file is already imported once</button>
   <p class="feedback"></p>
 </div>
 
@@ -167,7 +167,7 @@ Trunk-only collision lets the player brush through the low branches, which feels
   <button data-correct data-why="Scaling a body scales its collision shapes. Lesson 2's docs quote: never scale collision shapes. Change the shape's size, or model a variant.">It scales the collision shape, which the docs warn against</button>
   <button data-why="Godot can scale nodes. It's the collision shape scaling that's the problem.">Godot does not allow any node to be scaled at all</button>
   <button data-why="The material would scale along with the mesh just fine.">The material from Blender would not scale along with it</button>
-  <button data-why="Scale has nothing to do with the glTF up axis.">The glTF up-axis conversion would undo the new scale</button>
+  <button data-why="Scale has nothing to do with the glTF up axis.">The glTF up-axis conversion would undo the new scale value</button>
   <p class="feedback"></p>
 </div>
 
@@ -190,7 +190,7 @@ Trunk-only collision lets the player brush through the low branches, which feels
 <p class="ask">Model arrives sideways, offset, giant or tiny, or grey instead of gold? Tell me which, and paste what the Sidebar (<kbd>N</kbd>) shows for the object in Blender. Each symptom maps to one of the three habits.</p>
 
 <nav class="nav">
-  <span>← <a href="0008-blender-shapes-and-materials.html">Lesson 8: Shapes &amp; materials</a></span>
+  <span>← <a href="0008-blender-shapes-and-materials.html">Lesson 8</a> · <a href="0010-edit-mode-treasure-chest.html">Lesson 10: Edit Mode &amp; chest</a> →</span>
   <span>Reference: <a href="../reference/blender-to-godot.html">Blender → Godot pipeline</a></span>
 </nav>
 

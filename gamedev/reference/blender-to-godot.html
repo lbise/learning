@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blender → Godot pipeline: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Blender 5.2 → Godot 4.7</p>
+<h1>Blender → Godot pipeline</h1>
+<p class="subtitle">The checklist for every prop. Built from <a href="../lessons/0009-blender-to-godot.html">Lesson 9</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>Before export (Blender)</h2>
+<table>
+  <tr><td>1. One object</td><td>Select the parts, <strong>active one last</strong> → <kbd>Ctrl</kbd>+<kbd>J</kbd> (keeps the active object's origin)</td></tr>
+  <tr><td>2. Origin at the base</td><td><kbd>Shift</kbd>+<kbd>S</kbd> → Cursor to World Origin, then Object → Set Origin → Origin to 3D Cursor</td></tr>
+  <tr><td>3. At world origin</td><td><kbd>Alt</kbd>+<kbd>G</kbd> (clear location)</td></tr>
+  <tr><td>3½. Modifiers first!</td><td>Deform modifiers (Simple Deform, Mirror…) use the object's transform. Apply them <em>before</em> transforms: modifier ˅ → Apply, or Object → Convert → Mesh. Otherwise the shape gets mangled</td></tr>
+  <tr><td>4. Clean transforms</td><td><kbd>Ctrl</kbd>+<kbd>A</kbd> → All Transforms (rotation 0, scale 1)</td></tr>
+  <tr><td>5. Names</td><td>Object and material names carry over to Godot</td></tr>
+</table>
+<p class="aside">Sources: manual, <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/join.html">Join</a>, <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/origin.html">Origin</a>, <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/clear.html">Clear</a>, <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/apply.html">Apply</a></p>
+</section>
+
+<section>
+<h2>Export settings</h2>
+<table>
+  <tr><td>Menu</td><td>File → Export → glTF 2.0</td></tr>
+  <tr><td>Format</td><td><code>.glb</code> (one binary file)</td></tr>
+  <tr><td>Include → Limit to</td><td><strong>Selected Objects</strong> ✔</td></tr>
+  <tr><td>Transform</td><td><strong>+Y Up</strong> ✔ (default)</td></tr>
+  <tr><td>Data → Mesh</td><td><strong>Apply Modifiers</strong> ✔ whenever you use modifiers (Mirror…). It's <em>off</em> by default</td></tr>
+  <tr><td>Destination</td><td><code>&lt;godot project&gt;/models/name.glb</code>. Re-export over it to update</td></tr>
+</table>
+<p class="aside">Source: <a href="https://docs.blender.org/manual/en/latest/addons/scene_gltf2.html">glTF 2.0 add-on</a></p>
+</section>
+
+<section>
+<h2>In Godot</h2>
+<pre class="tree"><b>Tree</b> (StaticBody3D)           ← your scene: physics
+├─ tree (tree.glb instance)     ← visuals, no transform
+└─ CollisionShape3D             ← sized via its shape, never scaled</pre>
+<table>
+  <tr><td>Import</td><td>Automatic when the file appears or changes</td></tr>
+  <tr><td>Materials</td><td>Principled BSDF Base Color / Metallic / Roughness → <code>StandardMaterial3D</code></td></tr>
+  <tr><td>Variety</td><td>Rotate freely. For size, model a variant or resize the shape, never scale the body</td></tr>
+  <tr><td>Shortcuts</td><td>Direct <code>.blend</code> import (needs Blender installed). The <code>-col</code> name suffix auto-generates a trimesh collision</td></tr>
+</table>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html">Available 3D formats</a>, <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/node_type_customization.html">Node type customization</a></p>
+</section>
+
+<section>
+<h2>Moving parts (Lesson 11)</h2>
+<table>
+  <tr><td>Own object</td><td>Edit Mode: select it (X-ray <kbd>Alt</kbd>+<kbd>Z</kbd>, <kbd>Shift</kbd>+<kbd>L</kbd> deselects a linked part) → <kbd>P</kbd> Selection</td></tr>
+  <tr><td>Close holes</td><td>Select → Select All by Trait → Non Manifold, then <kbd>F</kbd></td></tr>
+  <tr><td>Origin on the pivot</td><td>Select the hinge edge → <kbd>Shift</kbd>+<kbd>S</kbd> Cursor to Selected → Set Origin → Origin to 3D Cursor</td></tr>
+  <tr><td>Don't apply location</td><td>That moves the origin back to the world origin and loses the hinge</td></tr>
+  <tr><td>Test in Blender</td><td><kbd>R</kbd> <kbd>X</kbd> <code>-110</code>, then <kbd>Esc</kbd></td></tr>
+  <tr><td>X rotations</td><td>Carry over to Godot unchanged (the +Y Up conversion is itself a rotation about X)</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Non-destructive: import the .blend directly</h2>
+<table>
+  <tr><td>Setup (once)</td><td>Editor Settings → Filesystem → Import → Blender → Blender Path = <code>~/.local/opt/blender-5.2.2-linux-x64/blender</code></td></tr>
+  <tr><td>Where</td><td>Keep the <code>.blend</code> inside the Godot project (e.g. <code>models/</code>)</td></tr>
+  <tr><td>Import dock (per file)</td><td>Blender → Nodes: <strong>Visible = Visible Only</strong> (skips hidden Spares), untick <strong>Cameras</strong> and <strong>Punctual Lights</strong> → Reimport</td></tr>
+  <tr><td>Result</td><td>Modifiers applied at import, so the .blend stays live. Each object becomes its own node, with transforms kept on the nodes</td></tr>
+  <tr><td>Iterate</td><td>Edit in Blender, <kbd>Ctrl</kbd>+<kbd>S</kbd>, and Godot reimports</td></tr>
+</table>
+<p>Prefer .glb? Bake a <em>copy</em> (an Export collection), never your working objects.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html">Available 3D formats → Importing .blend files directly</a>. Tested in 4.7.2 + Blender 5.2.2: by default, hidden objects and lights <em>are</em> imported.</p>
+</section>
+
+<section>
+<h2>Symptom → cause</h2>
+<table>
+  <tr><td>Floats / sinks</td><td>Origin not at the base</td></tr>
+  <tr><td>Offset from its pickup or collision</td><td>Not at world origin when exported</td></tr>
+  <tr><td>Rotated or oddly scaled node</td><td>Transforms not applied</td></tr>
+  <tr><td>Extra objects inside</td><td>Selected Objects not ticked</td></tr>
+  <tr><td>Half a model / one mirrored part missing</td><td>Apply Modifiers not ticked</td></tr>
+  <tr><td>Shape collapses after Apply Transforms</td><td>A modifier was still live: undo, apply the modifiers first, then the transforms</td></tr>
+  <tr><td>Faces the wrong way</td><td>Blender front (−Y) → Godot +Z: rotate the instance</td></tr>
+  <tr><td>Lying on its side</td><td>+Y Up unticked</td></tr>
+  <tr><td>Grey, not coloured</td><td>Material not on a Principled BSDF / not assigned</td></tr>
+</table>
+</section>
+
+</div>
+</main>
+</body>
+</html>

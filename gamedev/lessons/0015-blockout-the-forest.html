@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 15: Block out the forest</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 15 · Level design</p>
+<h1>Block out the forest</h1>
+<p class="subtitle">Before any pretty trees: measure your rabbit, sketch a route, build the whole level from grey blocks, and watch your daughters play it.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Use the blockout process: work from player metrics, design a route with a landmark and a carrot trail, build it with Godot's CSG shapes, and playtest it.</dd>
+  <dt>Time</dt><dd>About 60 min, plus a 10-minute playtest with the girls. Split it however you like: plan, block, test.</dd>
+  <dt>The win</dt><dd>A playable grey forest in <code>levels/forest.tscn</code> where every carrot is reachable and your daughters know where to go</dd>
+  <dt>Setup</dt><dd>Done for you: <code>levels/forest.tscn</code> has the rabbit, the follow camera, the HUD and an empty grey <code>Blockout</code> node with collision switched on. You only design.</dd>
+  <dt>Cheat sheet</dt><dd><a href="../reference/godot-level-blockout.html"><strong>Godot level blockout</strong></a>: navigating without a numpad, CSG, and tested recipes for paths, hills, ramps and streams. Keep it open next to Godot.</dd>
+  <dt>Links</dt><dd>Citations are optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<figure class="hero" style="max-width: 32rem">
+  <a href="../assets/img/0015/01-top.png"><img src="../assets/img/0015/01-top.png" alt="Top-down map of an example blockout: a winding sand-coloured path from a start clearing at the bottom, through a central clearing with a landmark, over a bridge across a blue stream, up a ramp onto a hill, to a final clearing at the top. Grey dots are trees, orange dots are carrots."></a>
+  <figcaption><b>An example blockout</b>, seen from above (north is up). A start clearing at the bottom, a winding path, a central clearing with a landmark, a bridge over a stream, a hill reached by a ramp, and a final clearing. Grey dots are tree trunks, orange dots are carrots. It's an example to learn from, not one to copy: design your own.</figcaption>
+</figure>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">From Lesson 2: which Godot node type is right for a tree trunk the rabbit must walk around?</p>
+  <details><summary>Show answer</summary><code>StaticBody3D</code>: solid, and never moved by physics. Today the CSG node's <em>Use Collision</em> option creates that for you.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 3: when you watched your daughters play the coin game, what did they enjoy, and where did they struggle?</p>
+  <details><summary>Show answer</summary>Only you know. Write it down: that's your first design input. (You told me they laughed a lot at the dance.)</details>
+</div>
+
+<h2>The ideas (short)</h2>
+
+<p class="aside">From <a href="https://book.leveldesignbook.com/process/blockout">The Level Design Book</a>: “A shape might start as a gray block -- then after months of playtesting and art passing, the block becomes a stack of barrels.”</p>
+
+<p><strong>Blockout.</strong> <a href="https://book.leveldesignbook.com/process/blockout">“A blockout (also blockmesh or graybox) is a 3D rough draft level built with simple 3D shapes, but without any details or polished art assets.”</a> The book is direct about why: <a href="https://book.leveldesignbook.com/process/blockout">“The purpose of the blockout is to experiment.”</a> Moving a grey box takes seconds. Moving a forest you've decorated takes an evening. So the layout gets fixed while it's still cheap to change.</p>
+
+<p><strong>Metrics.</strong> <a href="https://book.leveldesignbook.com/process/blockout/metrics">“In level design, metrics are the sense of scale, distance, and measurements across the entire level / game.”</a> Player metrics are <a href="https://book.leveldesignbook.com/process/blockout/metrics">“factual numbers measured in-engine like player size, movement speed, maximum jump height”</a>. I measured yours in Godot 4.7.2:</p>
+
+<table>
+  <tr><th>Your rabbit</th><th>Measured</th><th>Design rule for a 4- and 6-year-old (my suggestion)</th></tr>
+  <tr><td>Running speed</td><td>4.5 m/s</td><td>A 30 m path takes about 7 s, so space things out but never leave long empty stretches</td></tr>
+  <tr><td>Running jump height</td><td>1.89 m</td><td>Ledges at most <strong>1.0 m</strong>. A small child's jump is late and imprecise, so stay well below the maximum</td></tr>
+  <tr><td>Running jump distance</td><td>5.7 m</td><td>Gaps at most <strong>2.5 m</strong>, and falling in should be harmless (shallow water, not a pit)</td></tr>
+  <tr><td>Steepest walkable slope</td><td>45° (Godot's default)</td><td>Ramps at <strong>15–25°</strong>. Steeper than 45° is a wall</td></tr>
+  <tr><td>Steps</td><td>The rabbit can't climb steps</td><td>Every height change needs a ramp or a deliberate jump</td></tr>
+  <tr><td>Rabbit size</td><td>1.15 m tall, 0.6 m wide</td><td>Paths at least <strong>3 m</strong> wide: young kids steer in big zigzags</td></tr>
+  <tr><td>Camera</td><td>Fixed: 6 m up, 8 m behind, always looking “north”</td><td>See the camera rule below</td></tr>
+</table>
+
+<p><strong>The camera rule.</strong> Your camera always sits south of the rabbit and looks north. So anything tall <em>south</em> of a path (between the path and the camera) will hide the rabbit. Progress should go <em>up the screen</em>, with tall things beside or ahead of the path:</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0015/02-view-start.png"><img src="../assets/img/0015/02-view-start.png" alt="Game camera view from the start: the white rabbit in a clearing, the path winding ahead between trunks, the landmark visible in the distance"></a>
+    <figcaption><b>Through the game camera</b> at the start: the path leads up the screen and the landmark is already visible</figcaption></figure>
+  <figure><a href="../assets/img/0015/03-view-clearing.png"><img src="../assets/img/0015/03-view-clearing.png" alt="Game camera view near the central clearing: the landmark large ahead, carrots on the path, the stream behind it"></a>
+    <figcaption><b>Near the landmark:</b> carrots lead to it, and the next goal (the stream and bridge) is visible beyond</figcaption></figure>
+  <figure><a href="../assets/img/0015/04-tree-hides-rabbit.png"><img src="../assets/img/0015/04-tree-hides-rabbit.png" alt="Same start view but a big tree trunk in the foreground completely hides the rabbit"></a>
+    <figcaption><b>The trap:</b> a single trunk between the camera and the path, and the rabbit is gone</figcaption></figure>
+</div>
+
+<p><strong>Flow and the critical path.</strong> <a href="https://book.leveldesignbook.com/process/layout/flow">“In level design, flow is how it generally feels to move along different paths / between different parts of a level.”</a> The <a href="https://book.leveldesignbook.com/process/layout/criticalpath">critical path</a> is “the ideal player route to progress”. For your players, the critical path <em>is</em> the carrot trail. Carrots work like breadcrumbs: the next one should always be in view of the last.</p>
+
+<p><strong>Landmarks.</strong> A big, unique thing visible from far away (your well) gives everyone a place to aim for and a way to say where they are (“I'm at the well!”). In the example, the well is visible from the start.</p>
+
+<h2>Step 1: Sketch a route (10 min, on paper)</h2>
+
+<p>Draw your forest from above, like the map. Keep it small: about <strong>40 × 60 m</strong> and <strong>4 areas</strong>. Mark:</p>
+<ol class="checklist" id="sketch">
+  <li>The start (south) and the end (north). Progress goes up the screen.</li>
+  <li>One <strong>landmark</strong> in the middle, visible from the start (the well).</li>
+  <li>One <strong>small challenge</strong> using your metrics: a ramp onto a 1 m hill, or a 2 m gap over a stream.</li>
+  <li>One <strong>secret</strong>: a carrot slightly off the path, behind something. Kids love finding things.</li>
+  <li>The carrot trail: roughly one carrot every 4–6 m along the path, 12–15 in total.</li>
+</ol>
+<p class="progress" data-for="sketch"></p>
+
+<h2>Step 2: Block it out in Godot (CSG)</h2>
+
+<p class="aside">The Godot docs: <a href="https://docs.godotengine.org/en/stable/tutorials/3d/csg_tools.html">“Level prototyping is one of the main uses of CSG in Godot.”</a> And: “In the interest of performance, make sure CSG geometry remains relatively simple.” That's fine for a blockout.</p>
+
+<p>CSG nodes are simple shapes (box, cylinder…) that combine with each other. Every shape under the <code>Blockout</code> node is solid for the rabbit, because <em>Use Collision</em> is switched on there. The editor UI is new to you, so here are the full steps:</p>
+
+<ol class="checklist" id="block">
+  <li>Open <code>levels/forest.tscn</code>. Select <code>Blockout</code> and look at <code>Ground</code> (a 60 × 60 m grey box). Resize it to your sketch in the Inspector (<em>Size</em>).</li>
+  <li><strong>Get a map view:</strong> click the green <strong>Y</strong> circle of the axis gizmo (top right of the 3D view) to look straight down. Middle-mouse drag orbits. Hold right-mouse and use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to fly. No numpad needed.</li>
+  <li><strong>The path</strong> (it's paint, not a wall): in the <code>Paths</code> node (no collision) there's a <code>PathSegment</code> strip and a <code>Clearing</code> disc ready for you. Duplicate the strip (<kbd>Ctrl</kbd>+<kbd>D</kbd>), set its length with <em>Size</em> z, turn it with <em>Rotation Y</em>, and slide its end onto the previous strip. Then drop a small disc (Clearing with Radius about 1.6) on each corner to round it off. Big discs make clearings. Pictures and numbers are in the <a href="../reference/godot-level-blockout.html">cheat sheet</a>.</li>
+  <li><strong>Hills and platforms:</strong> select <code>Blockout</code>, <kbd>Ctrl</kbd>+<kbd>A</kbd> → <code>CSGBox3D</code>. Set its <em>Size</em> (for example 8 × 1 × 8 for a 1 m high hill) and its <em>Position</em> (Y = half its height, so it sits on the ground).</li>
+  <li><strong>Ramps:</strong> a thin CSGBox3D (say 3 × 0.2 × 3.5) rotated about 15–20° around X, with its low end touching the ground and its high end meeting the hill. Tested: a 20° ramp takes the rabbit onto a 1 m hill without jumping.</li>
+  <li><strong>Tree trunks:</strong> <code>CSGCylinder3D</code> with <em>Radius</em> 0.5, <em>Height</em> 5, and Y = 2.5. Duplicate with <kbd>Ctrl</kbd>+<kbd>D</kbd>. Put them <em>beside</em> the path, never between it and the camera.</li>
+  <li><strong>A stream bed:</strong> a CSGBox3D <em>under</em> <code>Ground</code> in the tree, with <em>Operation</em> set to <strong>Subtraction</strong>. The docs: “The second shape is subtracted from the first, leaving a dent with its shape.” Make it 2–2.5 m wide and 0.5 m deep, so it's harmless to fall into. Node order matters: the subtracting box must come after <code>Ground</code>.<br><strong>Important (tested):</strong> the rabbit <em>can't walk out</em> of a dent with vertical sides. It can only jump out, and a 4-year-old may not think to. So add a way out: a small ramp <em>inside</em> the bed (a CSGBox3D tilted about 20°, from the bed floor up to the far bank), placed <strong>after</strong> the subtracting box in the tree so it isn't cut away. Or put a bridge over the stream, as in the example. In my test the rabbit walked straight out up such a ramp.</li>
+  <li><strong>Landmark placeholder:</strong> a big CSGCylinder3D plus a box “roof”, about 3 m tall. Later it becomes your real well.</li>
+  <li><strong>Snapping:</strong> toggle grid snapping with the magnet icon in the toolbar or <kbd>Y</kbd> (<a href="https://docs.godotengine.org/en/stable/tutorials/3d/introduction_to_3d.html">“Use Snap (Y): If enabled, movement, and rotation snap to grid.”</a>), or hold <kbd>Ctrl</kbd> while dragging. That keeps hills and ramps lined up.</li>
+  <li><strong>Start position:</strong> move the <code>Rabbit</code> node to your start. The camera follows automatically, from anywhere.</li>
+</ol>
+<p class="progress" data-for="block"></p>
+
+<p class="aside">Want colours to tell areas apart? Give a CSG node a <em>Material</em> (new StandardMaterial3D, Albedo colour): blue for water, sand for paths. Keep everything else grey. Grey is the point.</p>
+
+<h2>Step 3: Lay the carrot trail</h2>
+
+<ol class="checklist" id="trail">
+  <li>Drag <code>carrot/carrot.tscn</code> from the FileSystem dock onto the <code>Carrots</code> node, then <kbd>Ctrl</kbd>+<kbd>D</kbd> to place more along your path. The level counts them automatically.</li>
+  <li>Check the breadcrumb rule: press <kbd>F6</kbd> and walk the route. At every carrot, can you see the next one?</li>
+  <li>Put one or two carrots on top of your challenge (the hill) and one as the secret. Leave a little group at the end, so the finale happens somewhere nice.</li>
+</ol>
+<p class="progress" data-for="trail"></p>
+
+<h2>Step 4: Check it like a level designer</h2>
+
+<p>Play it yourself before the girls do. Go through these and fix anything that fails:</p>
+<ol class="checklist" id="check">
+  <li>Every carrot is reachable without a perfect jump (try with sloppy input, as a 4-year-old would).</li>
+  <li>The rabbit is never hidden behind something for more than a moment.</li>
+  <li>You can't get stuck: every dip has a way out, and every ledge has a ramp or an easy jump.</li>
+  <li>From the start, you can see the landmark or the first few carrots.</li>
+  <li>The level edge is obvious. Falling off just respawns the rabbit, but a row of trunks or a hill at the border is friendlier.</li>
+</ol>
+<p class="progress" data-for="check"></p>
+
+<h2>Step 5: Playtest with your daughters</h2>
+
+<p class="aside"><a href="https://book.leveldesignbook.com/process/blockout/playtesting">“Playtesting is a foundational skill and process in game design.”</a></p>
+
+<p>A grey forest is enough: kids play shapes, not textures. Same rules as Lesson 3:</p>
+<ol class="checklist" id="playtest">
+  <li>Say only “find all the carrots”. Don't explain the map.</li>
+  <li>Watch without helping (as long as they're not getting upset). Note <strong>where</strong> they hesitate, get lost or fail a jump, and <strong>what</strong> makes them laugh or point.</li>
+  <li>Let each of them play. A 4-year-old and a 6-year-old will struggle in different places.</li>
+  <li>Bring your notes to the next session. They decide what changes before any art goes in.</li>
+</ol>
+<p class="progress" data-for="playtest"></p>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">Why build the forest from grey blocks before using your real trees and props?</p>
+  <button data-correct data-why="The blockout is for experimenting: changes are cheap until art is in.">Changing the layout is cheap while it's still blocks</button>
+  <button data-why="CSG is for prototyping. The final level uses your models.">CSG shapes look better than models in the end</button>
+  <button data-why="Your .blend props import fine. That's not the reason.">Imported Blender props cannot have collision</button>
+  <button data-why="Godot handles your props easily. The reason is iteration speed.">Godot cannot run levels made only of models</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Your rabbit jumps 1.89 m high. How high should a ledge be for a 4-year-old?</p>
+  <button data-correct data-why="Stay well below the maximum: small kids jump late and imprecisely.">About 1 m, well below the maximum</button>
+  <button data-why="Right at the limit, only a perfect jump works. That's frustrating for a child.">About 1.85 m, right at the maximum</button>
+  <button data-why="Any step needs a jump or ramp. Too low is just a bump to jump over.">About 5 cm, so the rabbit walks up it</button>
+  <button data-why="The rabbit can't reach 2 m at all.">About 2 m, so it feels like a challenge</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">With your fixed camera, where should big trees <em>not</em> go?</p>
+  <button data-correct data-why="The camera sits south of the rabbit. Anything tall between them hides the rabbit.">South of the path, between it and the camera</button>
+  <button data-why="Trees north of the path are behind the rabbit as seen from the camera. That's fine.">North of the path, ahead of the rabbit</button>
+  <button data-why="Beside the path is the safe place for trees.">Beside the path, along its left and right</button>
+  <button data-why="The edge is a good place for trees: they mark the border.">Along the edges of the level, as a border</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">What does the carrot trail do for a player who can't read a map?</p>
+  <button data-correct data-why="Each carrot in view of the last pulls the player along the route.">It's the route: each carrot leads to the next</button>
+  <button data-why="The counter shows progress, but it doesn't show the way.">It shows how much time is left to play</button>
+  <button data-why="Carrots never block anything. They're pickups.">It blocks the way into areas that aren't finished</button>
+  <button data-why="Collision comes from the Blockout, not from carrots.">It marks where the walls of the level are</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session</h2>
+<ul>
+  <li>Bring your playtest notes: where they got stuck, and what they loved.</li>
+  <li>From memory: three of your rabbit's metrics and the design rule each one implies.</li>
+  <li>From Lesson 14: the lattice workflow in four steps.</li>
+</ul>
+
+<p>Next, alternating as agreed: a <strong>Blender</strong> lesson making the forest's real assets (low-poly trees and props at a scale that fits these metrics, each prop its own object), then an <strong>art pass</strong> swapping grey blocks for them.</p>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://book.leveldesignbook.com/process/blockout">The Level Design Book: Blockout</a> and its <a href="https://book.leveldesignbook.com/process/blockout/metrics">Metrics</a> page. It's free and online, founded by indie developer Robert Yang, and written for people who want to make levels. Today's process comes from there.
+</div>
+
+<p class="ask">Ramp the rabbit slides off, a stream it can't climb out of, or a camera angle that hides everything? Tell me which, or save the scene and I'll inspect it. Physics fixes are my job now. Your job is the design.</p>
+
+<nav class="nav">
+  <span>← <a href="0014-well-roof-winch-carrot.html">Lesson 14: Finishing the well</a></span>
+  <span>Reference: <a href="../reference/godot-level-blockout.html">Godot level blockout</a> · Project: <code>~/gitrepo/carrot-game/README.md</code></span>
+</nav>
+
+</main>
+</body>
+</html>

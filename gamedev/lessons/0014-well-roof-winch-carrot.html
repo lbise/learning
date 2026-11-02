@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 14: Finishing the well, and the first rabbit-game props</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 14 · Blender track</p>
+<h1>Finishing the well, and the first rabbit-game props</h1>
+<p class="subtitle">Grant's well, Parts 3–5. After each video comes a small exercise that makes something for your daughters' game: a carrot, then a forest-floor kit.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Finish the well, and use its techniques on your first rabbit-game assets: randomized copies, lattice bending, proportional editing, quick rocks, and snapping objects onto the ground.</dd>
+  <dt>Time</dt><dd>Three short sessions. Each video is 13–15 min (about 35–45 min when you follow along). The two exercises take about 20 min each.</dd>
+  <dt>The win</dt><dd>A finished well for the forest, a bendy cartoon carrot (the thing the rabbit collects), and rocks plus a mushroom to decorate the level</dd>
+  <dt>Format</dt><dd>Part 3 → <strong>Exercise A</strong> (carrot) → Part 4 → <strong>Exercise B</strong> (forest floor) → Part 5 → colour your props → recall.</dd>
+  <dt>Files</dt><dd>Save the props in a new folder, <code>~/learning/gamedev/blender/rabbit/</code>. In Lesson 15 they go straight into the new rabbit game.</dd>
+</dl>
+
+<div class="figs">
+  <figure><a href="../assets/img/0014/a6-carrot-done.png"><img src="../assets/img/0014/a6-carrot-done.png" alt="A cartoon carrot, slightly bent, with three green leaves"></a>
+    <figcaption><b>Exercise A</b> a bendy cartoon carrot: the rabbit's collectible</figcaption></figure>
+  <figure><a href="../assets/img/0014/b3-floor-kit.png"><img src="../assets/img/0014/b3-floor-kit.png" alt="Three low-poly grey rocks and a red-capped mushroom on the ground"></a>
+    <figcaption><b>Exercise B</b> a forest-floor kit: rocks and a mushroom</figcaption></figure>
+</div>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">From Lesson 13: what does an Empty do when it's used as a Mirror modifier's Mirror Object?</p>
+  <details><summary>Show answer</summary>The Empty's position sets the mirror line, so the object's own origin can stay where it is. Grant uses it again in Part 3 to mirror the roof tiles.</details>
+</div>
+<div class="recall">
+  <p class="q">From your campfire export: you have a modifier and unapplied transforms. Which do you apply first, and why?</p>
+  <details><summary>Show answer</summary>The <strong>modifiers</strong> first. Deform modifiers depend on the object's transform, so applying the transforms first scrambles the shape. (With direct <code>.blend</code> import into Godot you don't need to apply either.)</details>
+</div>
+
+<h2>Session 1: Part 3, then the carrot</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=yBwV3CLG2uM&list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-">Part 3: Roof tiles</a> (13 min)</h3>
+<p class="aside">Timings come from the video's captions, so they're approximate.</p>
+<table>
+  <tr><th>Around</th><th>Watch for</th></tr>
+  <tr><td>00:00 Challenge</td><td>He suggests trying a tile yourself first. Do it: it's a scaled cube with a couple of loop cuts.</td></tr>
+  <tr><td>01:00–02:30 One tile, then variants</td><td>Apply scale, loop cuts, a bevel, a small Randomize. Then a <em>split</em> tile: delete faces and refill them with <kbd>F</kbd>.</td></tr>
+  <tr><td>04:30 Individual Origins</td><td>Rotating every tile around its own centre in one go. That's the Lesson 11 pivot point again.</td></tr>
+  <tr><td>05:00–06:30 <strong>Randomize Transform</strong></td><td><strong>Key idea.</strong> Object → Transform → Randomize Transform nudges the location, rotation and scale of all selected objects by small random amounts. Lots of copies stop looking identical in one click.</td></tr>
+  <tr><td>06:30 <kbd>H</kbd> / <kbd>Alt</kbd>+<kbd>H</kbd></td><td>Hide and unhide objects.</td></tr>
+  <tr><td>08:30 Mirror via the Empty</td><td>Your Lesson 13 sign technique, on the Y axis this time.</td></tr>
+  <tr><td>09:30–13:00 <strong>Lattice</strong></td><td><strong>Key idea.</strong> A Lattice is a cage. Objects with a Lattice modifier pointing at it bend when you move the cage's points. The manual: it <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/deform/lattice.html">“deforms the base object according to the shape of a Lattice object”</a>. Grant makes the roof sag with it, using <strong>proportional editing</strong> (<kbd>O</kbd>, the circle of influence) so neighbouring points follow smoothly.</td></tr>
+</table>
+
+<h3>Exercise A: a bendy carrot</h3>
+
+<p>Practises: loop cuts and Randomize, Individual Origins (from Lesson 11), and the <strong>Lattice</strong>. Target: about <strong>35 cm long plus leaves</strong>. That's big for a carrot, but it's a collectible a 4-year-old needs to spot from far away. Save it as <code>blender/rabbit/carrot.blend</code>.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0014/a1-cone.png"><img src="../assets/img/0014/a1-cone.png" alt="An orange cone standing on its tip"></a>
+    <figcaption><b>Step 1</b> a cone with its point at the bottom</figcaption></figure>
+  <figure><a href="../assets/img/0014/a2-loop-cuts.png"><img src="../assets/img/0014/a2-loop-cuts.png" alt="The cone with three horizontal edge rings, slightly lumpy"></a>
+    <figcaption><b>Step 2</b> three loop cuts, made a little lumpy</figcaption></figure>
+  <figure><a href="../assets/img/0014/a3-leaves.png"><img src="../assets/img/0014/a3-leaves.png" alt="Three thin green leaves fanning out from the top of the carrot"></a>
+    <figcaption><b>Step 3</b> three leaves fanned out at the top</figcaption></figure>
+  <figure><a href="../assets/img/0014/a4-lattice.png"><img src="../assets/img/0014/a4-lattice.png" alt="A tall box-shaped cage (orange lines) around the carrot"></a>
+    <figcaption><b>Step 4</b> a lattice cage around everything (orange lines)</figcaption></figure>
+  <figure><a href="../assets/img/0014/a5-bent.png"><img src="../assets/img/0014/a5-bent.png" alt="The cage's upper rows pushed sideways in a curve; the carrot bends with it"></a>
+    <figcaption><b>Step 5</b> move the cage's upper points and the carrot bends with them</figcaption></figure>
+</div>
+
+<ol class="checklist" id="carrot">
+  <li>New file, delete the cube. <kbd>Shift</kbd>+<kbd>A</kbd> → Mesh → <strong>Cone</strong>. In Adjust Last Operation set Vertices <code>8</code>, <strong>Radius 1</strong> <code>0</code> (the bottom becomes the point), <strong>Radius 2</strong> <code>0.07</code>, Depth <code>0.35</code>. Then <kbd>G</kbd> <kbd>Z</kbd> <code>0.175</code> so the tip touches the ground. Give it an orange <code>Carrot</code> material.</li>
+  <li><kbd>Tab</kbd>. <kbd>Ctrl</kbd>+<kbd>R</kbd> over a vertical edge, scroll the mouse wheel up to <strong>3</strong> cuts, click, then <kbd>RMB</kbd>. Select the middle ring with <kbd>Alt</kbd>+click and press <kbd>S</kbd> <code>1.1</code> for a slight bulge. Then <kbd>A</kbd>, and Mesh → Transform → Randomize with a <em>tiny</em> amount, about <code>0.004</code>. The carrot is small, so Grant's 0.01 would be too much.</li>
+  <li><strong>Leaves</strong> (Object Mode): add a cube and shape it in Edit Mode into a thin leaf about <strong>3.5 × 1 × 16 cm</strong> (use Dimensions, then <kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale). Narrow its top end a little with <kbd>S</kbd> <kbd>X</kbd>. Put it on top of the carrot (Z about 0.42). Green <code>Leaves</code> material. Then the Lesson 11 trick: set the 3D cursor to the carrot's top centre, set the pivot to <strong>3D Cursor</strong>, and <kbd>Shift</kbd>+<kbd>D</kbd> / <kbd>RMB</kbd> / <kbd>R</kbd> <kbd>Z</kbd> <code>120</code> twice. Select all three leaves, set the pivot to <strong>Individual Origins</strong>, and tilt them outwards a bit (<kbd>R</kbd> <kbd>Y</kbd>, about <code>20</code>). Some will lean the wrong way: fix those one at a time.</li>
+  <li><strong>Lattice:</strong> set the pivot back to <strong>Median Point</strong>. <kbd>Shift</kbd>+<kbd>A</kbd> → <strong>Lattice</strong>, scale it with <kbd>S</kbd> / <kbd>S</kbd> <kbd>Z</kbd> until the cage surrounds the carrot and leaves. In its <strong>Lattice</strong> properties tab (the cage-shaped icon), set the resolution along the carrot's height to <strong>4</strong> (Grant explains U, V and W at 10:30: click each value and watch which direction gets more cuts). Then select the carrot: Add Modifier → Deform → <strong>Lattice</strong>, Object = <code>Lattice</code>. Select the leaves, then the carrot <em>last</em>, and <kbd>Ctrl</kbd>+<kbd>L</kbd> → <strong>Copy Modifiers</strong>.</li>
+  <li><strong>Bend:</strong> select the Lattice, <kbd>Tab</kbd>, front view, X-ray (<kbd>Alt</kbd>+<kbd>Z</kbd>). Turn on proportional editing (<kbd>O</kbd>). Box-select the <strong>top row</strong> of points and press <kbd>G</kbd> <kbd>X</kbd>. Scroll the wheel to grow or shrink the circle of influence until the carrot curves smoothly instead of kinking. Save.</li>
+</ol>
+<p class="progress" data-for="carrot"></p>
+
+<div class="recall">
+  <p class="q">Predict: you forget <kbd>Ctrl</kbd>+<kbd>L</kbd> → Copy Modifiers in step 4, then bend the lattice. What do you see?</p>
+  <details><summary>Show answer</summary>The carrot bends but the leaves don't, so the leaves float off the bent top. Only objects with a Lattice modifier follow the cage. Same idea as Grant's roof at 12:00: the wooden beam poked through until it got the modifier too.</details>
+</div>
+<div class="recall">
+  <p class="q">Why bend with a lattice instead of moving the carrot's own vertices?</p>
+  <details><summary>Show answer</summary>The lattice bends several objects at once (carrot and leaves) and stays editable: move the cage again later, or delete the modifier to get the straight carrot back. That's the non-destructive idea from your campfire question again.</details>
+</div>
+
+<p class="aside">The carrot pictures were rendered from a Blender 5.2.2 script that follows these steps, including the lattice: moving the top row about 26 cm sideways tips the carrot's top about 15–20 cm over.</p>
+
+<h2>Session 2: Part 4, then the forest floor</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=P_OKJ-CreLU&list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-">Part 4: Winch, rope and rocks</a> (13 min)</h3>
+<table>
+  <tr><th>Around</th><th>Watch for</th></tr>
+  <tr><td>00:00 Challenge</td><td>He shows the winch and asks you to try it first. Have a go, even roughly.</td></tr>
+  <tr><td>00:30–01:00 Low-sided cylinders</td><td>5–6 sides make chunky, cartoon wood. Fewer sides means a stronger low-poly style.</td></tr>
+  <tr><td>02:00 Frame Selected</td><td>He uses numpad <kbd>.</kbd>. You: View → <strong>Frame Selected</strong>.</td></tr>
+  <tr><td>04:30 Rotate perpendicular to the view</td><td><kbd>R</kbd> with no axis rotates around the axis pointing at you. In top view that's Z.</td></tr>
+  <tr><td>05:00–08:30 <strong>Rope</strong></td><td><strong>Key idea.</strong> No fancy spiral needed: loop cuts, bevel them with an extra cut, scale the middle loops in, randomize. This is also where the order of Apply Scale and Randomize matters (07:30): with unapplied scale, “0.1” doesn't mean 10 cm.</td></tr>
+  <tr><td>09:00 <kbd>Alt</kbd>+<kbd>G</kbd></td><td>Clear location. You know it from Lesson 9.</td></tr>
+  <tr><td>09:30–11:00 <strong>Rocks from an Icosphere</strong></td><td>Subdivision 1, Randomize, then slide vertices into each other with <kbd>G</kbd><kbd>G</kbd> and <strong>Auto Merge</strong> on. The manual: Auto Merge joins vertices <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/tools/tool_settings.html">“as soon as a vertex moves closer to another one than the Threshold setting”</a>.</td></tr>
+  <tr><td>11:30–12:30 <strong>Snapping to the floor</strong></td><td>The magnet icon in the header, set to snap to <strong>Face</strong>. Grant's “Snap With: Center” is called <a href="https://docs.blender.org/manual/en/latest/editors/3dview/controls/snapping.html"><strong>Snap Base</strong></a> in your 5.2. Holding <kbd>Ctrl</kbd> while moving temporarily turns snapping on or off. This is how you'll place props on the forest ground.</td></tr>
+</table>
+
+<h3>Exercise B: a forest-floor kit</h3>
+
+<p>Practises: Grant's rock method, low-sided cylinders, deleting half a mesh, and snapping. Save it as <code>blender/rabbit/forest_floor.blend</code>.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0014/b1-rock.png"><img src="../assets/img/0014/b1-rock.png" alt="A single faceted grey rock, slightly flattened"></a>
+    <figcaption><b>Steps 1–2</b> one rock: icosphere, randomized, flattened</figcaption></figure>
+  <figure><a href="../assets/img/0014/b2-mushroom.png"><img src="../assets/img/0014/b2-mushroom.png" alt="A mushroom: a six-sided pale stem and a red dome cap"></a>
+    <figcaption><b>Steps 4–5</b> a mushroom: 6-sided stem and half-sphere cap</figcaption></figure>
+  <figure><a href="../assets/img/0014/b3-floor-kit.png"><img src="../assets/img/0014/b3-floor-kit.png" alt="Three rocks of different sizes and the mushroom placed on the ground"></a>
+    <figcaption><b>Step 6</b> everything snapped onto the ground</figcaption></figure>
+</div>
+
+<ol class="checklist" id="floor">
+  <li>New file. Add a <strong>Plane</strong> as the ground and make it 4 m across. Then add an <strong>Ico Sphere</strong>: Subdivisions <code>1</code>, Radius <code>0.22</code>. Apply its scale before anything else (Grant's 07:30 lesson).</li>
+  <li><kbd>Tab</kbd>, <kbd>A</kbd>, Randomize (try <code>0.03</code>–<code>0.05</code>), then <kbd>S</kbd> <kbd>Z</kbd> <code>0.7</code> to flatten it. Optional: switch Auto Merge on (Sidebar <kbd>N</kbd> → Tool → Options) and <kbd>G</kbd><kbd>G</kbd>-slide one or two vertices onto their neighbours for a less regular shape. Grey <code>Stone</code> material.</li>
+  <li>Two more rocks: <kbd>Shift</kbd>+<kbd>D</kbd> the first, scale them smaller, and rotate them differently, as Grant does at 11:00. One rock rotated three ways already looks like three rocks.</li>
+  <li><strong>Stem:</strong> Cylinder with Vertices <code>6</code>, Radius <code>0.035</code>, Depth <code>0.16</code>. Pale <code>Stem</code> material.</li>
+  <li><strong>Cap:</strong> UV Sphere with Segments <code>8</code>, Rings <code>6</code>, Radius <code>0.11</code>. In Edit Mode, front view and X-ray: box-select the <strong>bottom half</strong> of the vertices and press <kbd>X</kbd> → Vertices. Then select all and <kbd>S</kbd> <kbd>Z</kbd> <code>0.75</code> for a flatter dome. Put it on top of the stem. Red <code>Cap</code> material. (Want white spots later? Small flattened icospheres on the cap. Your girls will have opinions.)</li>
+  <li><strong>Snap everything onto the ground:</strong> switch on snapping (magnet), choose <strong>Face</strong>, set Snap Base to <strong>Center</strong> for the rocks so they sink in a little, as Grant shows. Then <kbd>G</kbd> each prop over the plane. Arrange a little group like the picture. Save.</li>
+</ol>
+<p class="progress" data-for="floor"></p>
+
+<div class="recall">
+  <p class="q">Predict: you skip applying the scale in step 1, but you'd scaled the icosphere ×3 in Object Mode. What does Randomize <code>0.05</code> do?</p>
+  <details><summary>Show answer</summary>The jitter is about 3× bigger than you expect, because the object's scale multiplies it. The rock comes out mangled. Grant demonstrates exactly this on the rope at 07:30.</details>
+</div>
+
+<h2>Session 3: Part 5, then colour</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=CTNPJoB6MC8&list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-">Part 5</a> (15 min)</h3>
+
+<p>I couldn't get this video's captions (YouTube kept blocking the download), so there's no chapter table this time. What I know: Part 4 ends with Grant saying the model is <em>“ready for the texturing”</em>, so Part 5 colours the well. Watch it the usual way, pausing and copying. Then hold it up against one fact from Lessons 8 and 12:</p>
+
+<table>
+  <tr><th>Reaches Godot</th><th>Stays in Blender</th></tr>
+  <tr><td>Base Color, Metallic, Roughness, Emission on a Principled BSDF. An <strong>image texture</strong> plugged into Base Color also comes across (the glTF exporter <a href="https://docs.blender.org/manual/en/latest/addons/scene_gltf2.html">reads it from the Principled BSDF node</a>)</td><td>Procedural node setups (noise, mixes, colour ramps…), lights, world, compositing</td></tr>
+</table>
+
+<p>If Grant builds colour from complex node trees, that's fine for the render, but use simpler flat colours for game props. If he uses an image or colour palette with UVs, that technique <em>does</em> carry into your game.</p>
+
+<h3>Colour your props</h3>
+
+<ol class="checklist" id="colour">
+  <li>Apply whichever Part 5 technique fits your carrot, rocks and mushroom, keeping to what reaches Godot (table above). Kid-friendly rule: <strong>bright and saturated</strong>. The carrot must pop against a green-brown forest.</li>
+  <li>Save all three files in <code>blender/rabbit/</code>. Don't apply modifiers or join anything: in Lesson 15 Godot imports the <code>.blend</code> files directly, and the lattice bend comes along on its own.</li>
+</ol>
+<p class="progress" data-for="colour"></p>
+
+<p class="aside">If you'd like a proper “watch for” table for Part 5, tell me after watching. I'll try the captions again, or you can tell me what surprised you.</p>
+
+<h2>Recall: after all three sessions</h2>
+
+<div class="quiz">
+  <p class="q">Which tool makes a whole row of copied tiles stop looking identical in one go?</p>
+  <button data-correct data-why="It nudges the location, rotation and scale of every selected object by small random amounts.">Object → Transform → Randomize Transform</button>
+  <button data-why="Mesh Randomize jitters vertices inside one mesh, not whole objects.">Mesh → Transform → Randomize on the vertices</button>
+  <button data-why="Linked copies share one mesh. They look even more identical.">Alt+D, so every copy becomes a linked duplicate</button>
+  <button data-why="Decimate removes faces. It doesn't move or rotate copies.">A Decimate modifier copied onto all the tiles</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You moved a lattice point but nothing bent. Most likely cause?</p>
+  <button data-correct data-why="Only objects with a Lattice modifier whose Object field points at the cage follow it.">The object has no Lattice modifier pointing at it</button>
+  <button data-why="Proportional editing only spreads the move to nearby points. A single point still bends things.">Proportional editing was switched off at the time</button>
+  <button data-why="Lattices don't need snapping.">Snapping to Face was not turned on beforehand</button>
+  <button data-why="X-ray only helps you select points. It doesn't affect the bend.">X-ray mode was still turned on while editing</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">What does the circle you resize with the mouse wheel do during proportional editing?</p>
+  <button data-correct data-why="Points inside the circle follow the move, fading with distance, so the shape curves instead of kinking.">Sets how far the move spreads to neighbouring points</button>
+  <button data-why="The circle is about influence, not about where things snap.">Sets the snapping distance to the nearest face</button>
+  <button data-why="Selection stays the same. The circle only shapes the falloff.">Selects every vertex that lies inside the circle</button>
+  <button data-why="That's Auto Merge, a different setting.">Merges vertices that come closer than the circle</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You want a rock to sit <em>into</em> the ground a little, not on top of it. Which snapping setup?</p>
+  <button data-correct data-why="Snapping the object's centre (Snap Base = Center) to the face sinks its lower half into the ground, as Grant does.">Snap to Face, with Snap Base set to Center</button>
+  <button data-why="Snapping to vertices grabs points, not the ground surface.">Snap to Vertex, with Snap Base set to Closest</button>
+  <button data-why="Increment snapping moves in grid steps, ignoring the ground.">Snap to Increment, with the grid at 1 metre</button>
+  <button data-why="Auto Merge welds vertices together. It has nothing to do with placing objects.">Auto Merge on, then G to move the rock down</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>The lattice workflow in four steps: add, fit, modifier, bend.</li>
+  <li>Grant's rock method, and why scale is applied first.</li>
+  <li>From Lesson 13: the rule Simple Deform depends on.</li>
+</ul>
+
+<p>Next: <strong>Lesson 15</strong>, the rabbit game begins in Godot. A new project, your player code copied over, a fixed follow camera, keyboard and gamepad, carrots to collect, and the first sounds. Your carrot and forest-floor files go straight in.</p>
+
+<div class="source">
+  <strong>Primary source: the videos themselves</strong>
+  <a href="https://www.youtube.com/playlist?list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-">Grant Abbitt: Modelling a Low-Poly Well</a>, Parts 3–5. Tool details are in the <a href="https://docs.blender.org/manual/en/latest/">Blender 5.2 manual</a>.
+</div>
+
+<p class="ask">Lattice won't bend, leaves fly off, a rock looks melted, or a menu differs from Grant's 4.2? Tell me the step, or save and say “saved” and I'll inspect the file.</p>
+
+<nav class="nav">
+  <span>← <a href="0013-well-stones-and-frame.html">Lesson 13</a> · <a href="0015-blockout-the-forest.html">Lesson 15: Block out the forest</a> →</span>
+  <span>Reference: <a href="../reference/blender-basics.html">Blender basics</a></span>
+</nav>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 11: The Monster, a bench and a campfire</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 11 · Blender track</p>
+<h1>The Monster, a bench and a campfire</h1>
+<p class="subtitle">Grant's Parts 5–6, each followed by a short exercise that practises the same skills on something new.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Get comfortable with the Mirror modifier and clipping, selecting in X-ray, local axes, the 3D cursor and pivot points.</dd>
+  <dt>Time</dt><dd>Two sessions. Each is one video (about 14 min, so 35–45 min when you follow along) plus one exercise (about 15–20 min).</dd>
+  <dt>The win</dt><dd>The Monster from the course, plus a bench and a campfire you built yourself</dd>
+  <dt>Format</dt><dd>Watch Part 5 → <strong>Exercise A</strong> (bench) → watch Part 6 → <strong>Exercise B</strong> (campfire) → recall. Blender only, no Godot this time.</dd>
+  <dt>Links</dt><dd>Citations are optional. The videos are the primary source.</dd>
+</dl>
+
+<div class="figs">
+  <figure><a href="../assets/img/0011/a5-bench-done.png"><img src="../assets/img/0011/a5-bench-done.png" alt="A simple wooden bench with four legs"></a>
+    <figcaption><b>Exercise A</b> a bench, built as one quarter and mirrored</figcaption></figure>
+  <figure><a href="../assets/img/0011/b4-campfire-done.png"><img src="../assets/img/0011/b4-campfire-done.png" alt="Five logs leaning together over an orange flame, ringed by grey stones"></a>
+    <figcaption><b>Exercise B</b> a campfire, built from one log copied around a centre point</figcaption></figure>
+</div>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">From Lesson 10: what decides where a Mirror modifier puts the copy?</p>
+  <details><summary>Show answer</summary>The object's <strong>origin</strong>: it mirrors “across the Object Origin”.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 10: you want two materials on one object. What do you need before you can press Assign?</p>
+  <details><summary>Show answer</summary>Two material <strong>slots</strong> (add one with <strong>+</strong>), and in Edit Mode only the faces you want selected.</details>
+</div>
+
+<h2>Session 1: Part 5, then the bench</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=YaWGsX1IyTk&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 5: Monster's body</a> (14 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>00:20 Collections</td><td>Collections are folders in the Outliner. Hiding one hides everything in it.</td></tr>
+  <tr><td>01:15 3D cursor (<kbd>Shift</kbd>+<kbd>S</kbd>)</td><td>New objects appear at the cursor. Snapping it back to the centre is a habit worth building.</td></tr>
+  <tr><td>04:38 Torso with Mirror</td><td>Model half, see the whole thing.</td></tr>
+  <tr><td>06:25 Selecting in X-ray</td><td><kbd>Alt</kbd>+<kbd>Z</kbd>: box select now reaches vertices <em>behind</em> the front ones. You need this in the exercise.</td></tr>
+  <tr><td>08:29 Mirror Clipping</td><td><strong>Key idea.</strong> The manual: Clipping <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/generate/mirror.html">“prevents vertices from moving through the mirror plane(s) when you transform them in Edit Mode”</a>. It keeps the two halves stitched together.</td></tr>
+  <tr><td>09:58 Local axes</td><td>An object has its own axes that turn with it. You'll use them in Exercise B.</td></tr>
+  <tr><td>03:30, 11:25 Challenges</td><td><strong>Do both before watching the solutions.</strong></td></tr>
+</table>
+
+<h3>Exercise A: a bench, built as one quarter</h3>
+
+<p>Practises: Mirror on <em>two</em> axes, Clipping, X-ray selection, plus loop cuts and extrude from Lesson 10. Target: <strong>1.2 m long, 0.4 m deep, 0.5 m tall</strong>. You model one corner and the mirror makes the other three.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0011/a1-quarter-selected.png"><img src="../assets/img/0011/a1-quarter-selected.png" alt="Flat seat cut into four quarters; three quarters are orange (selected), the back right quarter is not"></a>
+    <figcaption><b>Step 3</b> three quarters selected (orange). Keep the back-right one.</figcaption></figure>
+  <figure><a href="../assets/img/0011/a2-quarter-only.png"><img src="../assets/img/0011/a2-quarter-only.png" alt="Only one quarter of the seat remains"></a>
+    <figcaption><b>Step 3</b> after deleting: a single quarter</figcaption></figure>
+  <figure><a href="../assets/img/0011/a3-mirrored.png"><img src="../assets/img/0011/a3-mirrored.png" alt="The full seat is back, produced by the mirror modifier"></a>
+    <figcaption><b>Step 4</b> Mirror on X and Y: the full seat is back</figcaption></figure>
+  <figure><a href="../assets/img/0011/a4-corner-face-below.png"><img src="../assets/img/0011/a4-corner-face-below.png" alt="The seat seen from below, with a small lighter face at each corner"></a>
+    <figcaption><b>Step 5–6</b> from below: the small corner faces (lighter) after two more loop cuts</figcaption></figure>
+  <figure><a href="../assets/img/0011/a5-bench-done.png"><img src="../assets/img/0011/a5-bench-done.png" alt="Bench with four legs"></a>
+    <figcaption><b>Step 6</b> extrude <em>one</em> corner down and four legs appear</figcaption></figure>
+</div>
+
+<ol class="checklist" id="bench">
+  <li>New file. Select the cube, <kbd>Tab</kbd>, <kbd>A</kbd>. Shape the seat <em>in Edit Mode</em>: <kbd>S</kbd> <kbd>X</kbd> <code>0.6</code>, <kbd>S</kbd> <kbd>Y</kbd> <code>0.2</code>, <kbd>S</kbd> <kbd>Z</kbd> <code>0.05</code>, then <kbd>G</kbd> <kbd>Z</kbd> <code>0.45</code>. You get a 1.2 × 0.4 × 0.1 m seat whose top is at 0.5 m, and the origin is still at the world centre. (It's the same trick as the chest.)</li>
+  <li>Two centred loop cuts: <kbd>Ctrl</kbd>+<kbd>R</kbd> over a long edge, then <kbd>RMB</kbd> to keep it in the middle. Repeat over a short edge. The top now shows four quarters.</li>
+  <li>Top view (<kbd>Numpad7</kbd>), X-ray on (<kbd>Alt</kbd>+<kbd>Z</kbd>), vertex mode (<kbd>1</kbd>). Box-select the <strong>left half</strong>, stopping just short of the middle line. Then hold <kbd>Shift</kbd> and box-select the <strong>front half</strong> (the bottom of the screen in top view), again stopping short of the middle. Compare with the first picture, then <kbd>X</kbd> → Vertices.</li>
+  <li>Properties editor → Modifiers tab (the wrench) → <strong>Add Modifier → Generate → Mirror</strong>. Tick axis <strong>X</strong> <em>and</em> <strong>Y</strong>, and turn on <strong>Clipping</strong>. X-ray off.</li>
+  <li>Two more loop cuts on <em>your</em> quarter: one about 10 cm from the outer short end, and one about 10 cm from the back edge. Click to place it, sliding by eye; it doesn't have to be exact. This makes a small corner face underneath.</li>
+  <li>Orbit underneath. In face mode (<kbd>3</kbd>), click that corner face, then <kbd>E</kbd> <code>-0.4</code> <kbd>Enter</kbd> extrudes it down to the ground. Save as <code>blender/bench.blend</code>.</li>
+</ol>
+<p class="progress" data-for="bench"></p>
+
+<div class="recall">
+  <p class="q">Predict: with Clipping <em>on</em>, you select the whole quarter and press <kbd>G</kbd> <kbd>X</kbd> <code>-0.2</code>. What happens to the vertices on the middle line?</p>
+  <details><summary>Show answer</summary>They stay stuck on the mirror plane while the rest moves, so the seat gets shorter instead of splitting in two. Without Clipping, the two halves would overlap through each other in the middle. Try it, then <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</details>
+</div>
+
+<p class="aside">I built this exact bench with a script in Blender 5.2.2: it came out at 1.2 × 0.4 × 0.5 m, with four legs from a single extrude.</p>
+
+<h2>Session 2: Part 6, then the campfire</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=jZvSIupp53E&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 6: Monster's arms</a> (12 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>00:48–02:21 Arms, fingers, hand</td><td>More building from primitives. By now you know the G/R/S grammar.</td></tr>
+  <tr><td>02:57 <strong>Pivot points</strong></td><td><strong>Key idea.</strong> The pivot (<kbd>.</kbd> key opens its pie menu) <a href="https://docs.blender.org/manual/en/latest/editors/3dview/controls/pivot_point/index.html">“determines the location of the Object Gizmo”</a>, which is the point things rotate and scale around. <em>3D Cursor</em> and <em>Individual Origins</em> are the two you'll use next.</td></tr>
+  <tr><td>07:26 Mirroring the arm</td><td>Mirror again: which origin is used?</td></tr>
+  <tr><td>08:00–09:39 Head and eyes</td><td>Placing small parts precisely.</td></tr>
+  <tr><td>11:25 New collection</td><td><kbd>M</kbd>: <a href="https://docs.blender.org/manual/en/latest/scene_layout/collections/collections.html">“Moves the selected objects to a different collection.”</a></td></tr>
+</table>
+
+<h3>Exercise B: a campfire from one log</h3>
+
+<p>Practises: the 3D cursor as a pivot, duplicating (<kbd>Shift</kbd>+<kbd>D</kbd>), Individual Origins, local axes and collections. A Valheim-style prop for later.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0011/b1-one-log-cursor.png"><img src="../assets/img/0011/b1-one-log-cursor.png" alt="One log lying on the ground, its inner end at an orange ring marking the 3D cursor at the centre"></a>
+    <figcaption><b>Step 2</b> one log, inner end at the 3D cursor (orange ring)</figcaption></figure>
+  <figure><a href="../assets/img/0011/b2-five-logs.png"><img src="../assets/img/0011/b2-five-logs.png" alt="Five logs lying flat in a star pattern around the centre"></a>
+    <figcaption><b>Step 3</b> four copies, each rotated 72° around the cursor</figcaption></figure>
+  <figure><a href="../assets/img/0011/b3-tilted.png"><img src="../assets/img/0011/b3-tilted.png" alt="The five logs leaning inwards, inner ends raised like a teepee"></a>
+    <figcaption><b>Step 4</b> each log tilted around its <em>own</em> axis, then lifted</figcaption></figure>
+  <figure><a href="../assets/img/0011/b5-campfire-top.png"><img src="../assets/img/0011/b5-campfire-top.png" alt="Top view of the finished campfire: five logs, a flame in the middle, eight stones in a ring"></a>
+    <figcaption><b>Done, top view</b> (<kbd>Numpad7</kbd>): five logs, a flame, eight stones</figcaption></figure>
+</div>
+
+<ol class="checklist" id="fire">
+  <li>New file, delete the cube. <kbd>Shift</kbd>+<kbd>S</kbd> → Cursor to World Origin.</li>
+  <li>Add a <strong>Cylinder</strong>: Vertices 8, Radius 0.06, Depth 0.6. Lay it down with <kbd>R</kbd> <kbd>Y</kbd> <code>90</code>, then <kbd>G</kbd> <kbd>X</kbd> <code>0.3</code> (so its inner end touches the centre) and <kbd>G</kbd> <kbd>Z</kbd> <code>0.06</code> (resting on the ground). Give it a brown <code>Bark</code> material.</li>
+  <li>Set the pivot to <strong>3D Cursor</strong> (<kbd>.</kbd> pie). <kbd>Shift</kbd>+<kbd>D</kbd>, then <kbd>RMB</kbd> to leave the copy in place, then <kbd>R</kbd> <kbd>Z</kbd> <code>72</code> <kbd>Enter</kbd>. Repeat 3 more times. Why 72? Five logs share 360°.</li>
+  <li>Select all five logs. Set the pivot to <strong>Individual Origins</strong>. Then <kbd>R</kbd> <kbd>Y</kbd> <kbd>Y</kbd> <code>35</code> <kbd>Enter</kbd>: pressing Y a second time switches to each log's <em>local</em> axis (<a href="https://docs.blender.org/manual/en/latest/editors/3dview/controls/orientation.html">“the Local orientation if it was Global previously”</a>). The inner ends should rise; if the outer ends rise instead, <kbd>Esc</kbd> and use <code>-35</code>. Finally <kbd>G</kbd> <kbd>Z</kbd> until the outer ends sit on the ground (about <code>0.17</code>).</li>
+  <li><strong>Flame:</strong> add a Cone (Vertices 6, Radius 0.16, Depth 0.45), <kbd>G</kbd> <kbd>Z</kbd> <code>0.225</code>, with an orange material.</li>
+  <li><strong>Stones</strong> (same trick as the logs): an Ico Sphere (Subdivisions 1, Radius 0.08) at <kbd>G</kbd> <kbd>X</kbd> <code>0.55</code>, squashed a little with <kbd>S</kbd> <kbd>Z</kbd> <code>0.7</code>. Pivot back to <strong>3D Cursor</strong>, then <kbd>Shift</kbd>+<kbd>D</kbd> / <kbd>RMB</kbd> / <kbd>R</kbd> <kbd>Z</kbd> <code>45</code>, seven times.</li>
+  <li>Select everything, <kbd>M</kbd> → <strong>New Collection</strong>, name it <code>Campfire</code>. Save as <code>blender/campfire.blend</code>.</li>
+</ol>
+<p class="progress" data-for="fire"></p>
+
+<div class="recall">
+  <p class="q">Predict: in step 4, you forget to switch to Individual Origins, so the pivot is still the 3D Cursor. What does <kbd>R</kbd> <kbd>Y</kbd> <kbd>Y</kbd> <code>35</code> do?</p>
+  <details><summary>Show answer</summary>Every log swings around the <em>centre</em> instead of around its own middle, and the whole star tips and scatters. Pivot point is the question “around <em>what</em>?”, and it changes everything about R and S. If that happens, <kbd>Ctrl</kbd>+<kbd>Z</kbd> and set the pivot first.</details>
+</div>
+
+<p class="aside">Tested with a script in Blender 5.2.2: after the 35° tilt and the 0.17 m lift, every log's inner end sits at 0.40 m and its outer end rests on the ground.</p>
+
+<p><em>Optional:</em> want the campfire or bench in your game? The <a href="../reference/blender-to-godot.html">pipeline checklist</a> from Lesson 9 still applies. Join the parts first (<kbd>Ctrl</kbd>+<kbd>J</kbd>) and tick Apply Modifiers for the bench. No pressure: practising in Blender is the point this time.</p>
+
+<h2>Recall: after both sessions</h2>
+
+<div class="quiz">
+  <p class="q">What does Mirror <strong>Clipping</strong> do?</p>
+  <button data-correct data-why="It pins vertices to the mirror plane in Edit Mode, so the halves stay joined.">Stops vertices crossing the mirror plane in Edit Mode</button>
+  <button data-why="Clipping is about the mirror plane. It doesn't hide anything.">Hides the mirrored half while you edit the mesh</button>
+  <button data-why="That's Apply Modifiers at export, not Clipping.">Bakes the mirrored half into the mesh right away</button>
+  <button data-why="The plane is set by the origin, not by Clipping.">Moves the mirror plane to the selected vertices</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You want to rotate copies of a log around the centre of the fire. Which pivot point?</p>
+  <button data-correct data-why="With the cursor at the centre, every rotation happens around the fire's middle.">3D Cursor, placed at the centre of the fire</button>
+  <button data-why="That rotates each log around its own middle. You need that for the tilt, not the circle.">Individual Origins, so each log uses its own centre</button>
+  <button data-why="Median Point uses the middle of the selection. With one log, that's the log itself.">Median Point of the currently selected objects</button>
+  <button data-why="Active Element uses the active object's origin, which is the log again.">Active Element, so it uses the active object</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">In <kbd>R</kbd> <kbd>Y</kbd> <kbd>Y</kbd>, what does the second <kbd>Y</kbd> do?</p>
+  <button data-correct data-why="Pressing the axis again switches from Global to the object's Local orientation.">Switches to the object's own local Y axis</button>
+  <button data-why="Pressing it a third time does that. The second press switches orientation.">Cancels the axis lock and frees the rotation</button>
+  <button data-why="The number you type sets the angle. Repeating Y doesn't.">Doubles the rotation angle you type in next</button>
+  <button data-why="There's no mirror involved in a rotation.">Mirrors the rotation onto the opposite side</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why delete three quarters of the bench instead of keeping the whole seat with a Mirror?</p>
+  <button data-correct data-why="Mirror copies what's there. A full seat would be doubled, with overlapping faces.">The mirror would otherwise double existing geometry</button>
+  <button data-why="Mirror works on any mesh, any size.">Mirror modifiers only work on very small meshes</button>
+  <button data-why="Materials are copied along with the mirror.">The materials would not carry over to the copy</button>
+  <button data-why="Extrude works on full meshes too. The issue is the doubled geometry.">Extrude refuses to work on a full mirrored mesh</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>Pivot points: what 3D Cursor and Individual Origins each do, with one use for each.</li>
+  <li>Why the bench needed X-ray to select the vertices to delete.</li>
+  <li>From Lesson 9: the three habits before exporting a prop.</li>
+</ul>
+
+<p>Next up: <a href="0012-street-lights-night.html"><strong>Parts 7–8</strong></a>, with exercises in the same style. Animation, including the chest lid, is <a href="later/chest-that-opens.html">parked for later</a> until Blender feels comfortable.</p>
+
+<div class="source">
+  <strong>Primary source: the videos themselves</strong>
+  <a href="https://www.youtube.com/playlist?list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Grant Abbitt: Blender 5 Complete Beginners Guide</a>, Parts 5–6. For a tool's exact behaviour, use the <a href="https://docs.blender.org/manual/en/latest/">Blender 5.2 manual</a>.
+</div>
+
+<p class="ask">Mirror landing in the wrong place, logs flying off when you rotate, or not sure your result matches a picture? Tell me which step and what you see. A screenshot path works too.</p>
+
+<nav class="nav">
+  <span>← <a href="0010-edit-mode-treasure-chest.html">Lesson 10</a> · <a href="0012-street-lights-night.html">Lesson 12: Linked copies, glow &amp; night</a> →</span>
+  <span>Reference: <a href="../reference/blender-basics.html">Blender basics</a></span>
+</nav>
+
+</main>
+</body>
+</html>

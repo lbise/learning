@@ -30,6 +30,10 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
 - [Importing 3D scenes: available formats](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html)
   glTF 2.0 is recommended. Includes a section on exporting from Blender. Use for: the Blender → Godot pipeline.
 
+### Level design
+- [The Level Design Book](https://book.leveldesignbook.com/) (free, online, founded by indie dev Robert Yang). Pages used: [Blockout](https://book.leveldesignbook.com/process/blockout), [Metrics](https://book.leveldesignbook.com/process/blockout/metrics), [Flow](https://book.leveldesignbook.com/process/layout/flow), [Critical path](https://book.leveldesignbook.com/process/layout/criticalpath), [Playtesting](https://book.leveldesignbook.com/process/blockout/playtesting). Use for: every level-design lesson.
+- [Godot Docs: Prototyping levels with CSG](https://docs.godotengine.org/en/stable/tutorials/3d/csg_tools.html). "Level prototyping is one of the main uses of CSG in Godot." Use for: blockout tooling.
+
 ### Godot: other trusted teachers
 - [GDQuest: Your first 3D game with Godot 4 (arena FPS)](https://www.gdquest.com/library/first_3d_game_godot4_arena_fps/)
   A free, well-produced 3D project. Use for: a second 3D project after Squash the Creeps.
@@ -47,6 +51,8 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
   The standard beginner course (about 4 h of video). Use for: first contact with Blender.
 - [Grant Abbitt: Blender 5 Complete Beginners Guide (free, 8 parts)](https://www.youtube.com/playlist?list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8)
   Published Nov 2025, about 100 min of video in total (parts are 11-14 min). 1 Interface, 2 Materials, 3-4 Old Man, 5-6 Monster, 7 Street, 8 Lights & Compositing (renders: least relevant to Godot). Chosen by the learner as his primary Blender course. Use for: the Blender fundamentals track.
+- [Grant Abbitt: Modelling a Low-Poly Well (5 parts, Blender 4.2, Sep 2024)](https://www.youtube.com/playlist?list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-)
+  About 75 min in total. Grant's own suggested follow-up to the beginner course. P1 stone base (bevel, randomize, Simple Deform bend, decimate), P2 wooden frame (vertex bevel notches, knife, mirror via Empty), P3 roof tiles, P4 winch and rope, P5 likely materials. The videos have no chapter lists: get captions with yt-dlp (works through a temp venv, may hit HTTP 429 rate limits) to build the "watch for" tables. Use for: L13-L14.
 - [Grant Abbitt: Low-poly modelling](https://www.youtube.com/playlist?list=PLn3ukorJv4vsPy9J9x4--pat6jaPqNm11)
   32 videos. Use for: game-ready props after the beginner course.
 - [Blender Studio: Blender 2.8 Fundamentals](https://studio.blender.org/training/blender-2-8-fundamentals/)
@@ -57,6 +63,7 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
 - [Quaternius](https://quaternius.com/) ([FAQ](https://quaternius.com/faq.html)): low-poly characters and props, often rigged.
   - [Universal Animation Library (Standard)](https://quaternius.itch.io/universal-animation-library): a 1.83 m mannequin with 43 clips in one `.glb` (use `Unreal-Godot/UAL1_Standard.glb`, not `_RM`). Tested in 4.7.2. Used in L6.
 - [Kenney Mini Characters](https://kenney.nl/assets/mini-characters): 12 small (0.67 m) CC0 characters, 32 clips each. Every clip imports non-looping, so set looping in Advanced Import Settings. Backup option.
+- Kenney audio (CC0): [Impact Sounds](https://kenney.nl/assets/impact-sounds), [Interface Sounds](https://kenney.nl/assets/interface-sounds), [Music Jingles](https://kenney.nl/assets/music-jingles), [Digital Audio](https://kenney.nl/assets/digital-audio). All four are in carrot-game/sounds/kenney. Use for: game SFX and jingles.
 - [Poly Haven](https://polyhaven.com/) ([licence](https://polyhaven.com/license)): HDRI skies, textures, models.
 
 ## Wisdom (Communities)
@@ -73,5 +80,6 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
   Use for: finding other jams, and hosting games for the kids to play.
 
 ## Gaps
+- No trusted source yet for designing games for very young children (ages 4-6). L15 rules are my own suggestions, flagged as such.
 - No trusted tutorial yet for third-person survival (Valheim-like) or isometric action games in Godot 4. Search when the mission reaches that stage.
 - No current free official Blender fundamentals course (the Blender Studio one is from the 2.8 era).

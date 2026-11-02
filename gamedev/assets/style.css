@@ -126,6 +126,33 @@ td { border-bottom: 1px solid var(--rule); padding: 0.35rem 0.5rem 0.35rem 0; ve
 }
 .tree b { color: var(--accent); font-weight: 600; }
 
+/* ---------- Figures (rendered step images) ----------
+   <div class="figs">                      grid of thumbnails, any count
+     <figure><a href="img.png"><img src="img.png" alt="…"></a>
+       <figcaption><b>Step 5</b> two loop cuts</figcaption></figure>
+   </div>
+   <figure class="hero">…</figure>        single wide image                */
+.figs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 1.5rem;
+}
+main > .figs, main > figure.hero { max-width: calc(var(--measure) + 6rem); clear: both; }
+figure { margin: 0; }
+figure.hero { margin: 1.5rem 0; }
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: #ddd;
+}
+figure a { text-decoration: none; }
+figcaption { font-size: 0.8rem; line-height: 1.35; color: var(--muted); margin-top: 0.35rem; }
+figcaption b { color: var(--ink); font-weight: 600; }
+
 /* ---------- Callouts ---------- */
 .source {
   border-top: 1px solid var(--ink);
@@ -214,6 +241,6 @@ body.reference pre { white-space: pre-wrap; }
   .aside { float: none; width: auto; margin: 0.25rem 0 0.75rem; border-left: 2px solid var(--rule); padding-left: 0.5rem; }
   .quiz button { border: 1px solid #ccc; }
   .nav, .ask { display: none; }
-  pre, .quiz, .recall, table { break-inside: avoid; }
+  pre, .quiz, .recall, table, figure { break-inside: avoid; }
   a { color: inherit; }
 }

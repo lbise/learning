@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Godot level blockout: cheat sheet</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body class="reference">
+<main>
+
+<p class="kicker">Reference · Godot 4.7 · Carrot Game</p>
+<h1>Godot level blockout</h1>
+<p class="subtitle">Navigating the 3D editor without a numpad, building with CSG, and tested recipes for paths, hills, ramps and streams. Built for <a href="../lessons/0015-blockout-the-forest.html">Lesson 15</a>.</p>
+
+<div class="cols">
+
+<section>
+<h2>Navigate the 3D view (no numpad)</h2>
+<table>
+  <tr><td><kbd>MMB</kbd> drag</td><td>Orbit around the centre of the view</td></tr>
+  <tr><td>Hold <kbd>RMB</kbd> (or <kbd>Shift</kbd>+<kbd>F</kbd>)</td><td>Free-look: move the mouse to look, <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to fly, <kbd>E</kbd> up, <kbd>Q</kbd> down, <kbd>Shift</kbd> faster, <kbd>Alt</kbd> slower</td></tr>
+  <tr><td>Axis gizmo (top right)</td><td>Click a coloured circle to get a straight Top / Front / Side view. Click the green <strong>Y</strong> circle for a top-down map view</td></tr>
+  <tr><td>Viewport menu (⋮ three dots)</td><td>Perspective / Orthogonal and view settings. In orthogonal views, <kbd>RMB</kbd> drag pans</td></tr>
+</table>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/3d/introduction_to_3d.html">Introduction to 3D</a> (navigation section). The docs' “Keypad 5” toggle needs a numpad, so use the viewport menu instead.</p>
+</section>
+
+<section>
+<h2>Move, rotate, size</h2>
+<table>
+  <tr><td><kbd>W</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Move / rotate / scale mode, then drag the gizmo handles</td></tr>
+  <tr><td><kbd>Y</kbd></td><td>Toggle grid snap (also the magnet icon). Or hold <kbd>Ctrl</kbd> while dragging</td></tr>
+  <tr><td>Inspector → Transform</td><td>Type an exact <strong>Position</strong> and <strong>Rotation</strong> (degrees). Usually faster than dragging</td></tr>
+  <tr><td>Inspector → Size / Radius / Height</td><td>Resize CSG shapes here, <strong>not</strong> with scale (same rule as collision shapes)</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Duplicate the selected node</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Add a child node to the selection</td></tr>
+  <tr><td>Blender-style <kbd>G</kbd>/<kbd>R</kbd>/<kbd>S</kbd></td><td>Optional: Editor Settings → Shortcuts → Spatial Editor, bind Begin Translate/Rotate/Scale Transformation. Then e.g. <kbd>G</kbd> <kbd>Y</kbd> <code>2.5</code> <kbd>Enter</kbd> moves 2.5 m up (Y is up in Godot)</td></tr>
+</table>
+<p class="aside">Sources: <a href="https://docs.godotengine.org/en/stable/tutorials/3d/introduction_to_3d.html">Introduction to 3D</a>, <a href="https://docs.godotengine.org/en/stable/tutorials/3d/csg_tools.html">CSG tools</a></p>
+</section>
+
+<section>
+<h2>Godot axes for this game</h2>
+<table>
+  <tr><td>+Y</td><td>Up</td></tr>
+  <tr><td>−Z</td><td><strong>North</strong> = up the screen = the direction the camera looks. Progress goes this way</td></tr>
+  <tr><td>+X</td><td>East (right on screen)</td></tr>
+  <tr><td>Units</td><td>1 = 1 metre (same as Blender)</td></tr>
+</table>
+<p>The camera sits 6 m up and 8 m <em>south</em> (+Z) of the rabbit. Never put tall things between a path and the camera.</p>
+</section>
+
+<section>
+<h2>Your forest scene</h2>
+<pre class="tree"><b>Forest</b>            level.gd
+├─ <b>Blockout</b>       collision ✔ (solid)
+│  └─ Ground      box 60 × 1 × 60
+├─ <b>Paths</b>          collision ✘ (paint)
+│  ├─ PathSegment box 3 × 0.02 × 10
+│  └─ Clearing    cylinder r 4
+├─ Rabbit         start position
+├─ FollowCamera   follows by itself
+├─ HUD, WinJingle
+└─ Carrots        drop carrots here</pre>
+<p>Add shapes as <em>children</em> of Blockout or Paths: select the parent, then <kbd>Ctrl</kbd>+<kbd>A</kbd>.</p>
+</section>
+
+<section>
+<h2>CSG building blocks</h2>
+<table>
+  <tr><th>Node</th><th>Key properties</th></tr>
+  <tr><td><code>CSGBox3D</code></td><td><em>Size</em> (x, y, z)</td></tr>
+  <tr><td><code>CSGCylinder3D</code></td><td><em>Radius</em>, <em>Height</em>, <em>Sides</em> (default 8), <em>Cone</em></td></tr>
+  <tr><td><code>CSGSphere3D</code></td><td><em>Radius</em>: rounded bushes and boulders</td></tr>
+  <tr><td><code>CSGCombiner3D</code></td><td>A group. <em>Use Collision</em> makes everything inside solid</td></tr>
+</table>
+<table>
+  <tr><th>Operation (on each shape)</th><th>Effect</th></tr>
+  <tr><td>Union (default)</td><td>Adds the shape</td></tr>
+  <tr><td>Subtraction</td><td>“The second shape is subtracted from the first, leaving a dent with its shape.” <strong>Order matters</strong>: it cuts the shapes <em>above</em> it in the tree</td></tr>
+  <tr><td>Intersection</td><td>Keeps only the overlap (rarely needed)</td></tr>
+</table>
+<p>Colour a shape: <em>Material</em> → New StandardMaterial3D → Albedo colour. Keep most things grey. Colour only meaning: water blue, path sand.</p>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/3d/csg_tools.html">Prototyping levels with CSG</a>. Keep CSG simple; it's for prototyping.</p>
+</section>
+
+<section>
+<h2>Recipe: the path</h2>
+<div class="figs" style="grid-template-columns: repeat(3, 1fr); gap: 0.5rem">
+  <figure><img src="../assets/img/ref/path-1-strip.png" alt="One straight sand strip"><figcaption><b>1</b> a straight strip</figcaption></figure>
+  <figure><img src="../assets/img/ref/path-2-turn.png" alt="A second strip rotated, leaving a notch at the corner"><figcaption><b>2</b> next strip, rotated: a notch at the corner</figcaption></figure>
+  <figure><img src="../assets/img/ref/path-3-disc.png" alt="A round disc covering the corner"><figcaption><b>3</b> a disc hides the corner</figcaption></figure>
+</div>
+<ol>
+  <li>Select <code>PathSegment</code>, <kbd>Ctrl</kbd>+<kbd>D</kbd>. Set <em>Size</em> z to the length you want (keep x = 3 m wide, y = 0.02).</li>
+  <li>Inspector → Rotation <strong>Y</strong> to turn it (e.g. 30). Move it so its end touches the previous strip. Work in the top view (green Y circle).</li>
+  <li>Duplicate <code>Clearing</code>, set <em>Radius</em> about 1.6, and put it on the joint to round the corner. Larger radius (4–7 m) = a clearing.</li>
+  <li>Keep everything at <strong>Y = 0.01</strong>, in <code>Paths</code> (no collision).</li>
+</ol>
+<p><strong>Why no collision?</strong> Tested: the rabbit walks over bumps of 2–5 cm, but a <strong>10 cm</strong> lip stops it. A path is just paint on the ground. The rabbit walks on <code>Ground</code> underneath.</p>
+</section>
+
+<section>
+<h2>Recipe: hill and ramp (tested)</h2>
+<table>
+  <tr><td>Hill</td><td>CSGBox3D in Blockout, e.g. Size 8 × <strong>1</strong> × 8, Position Y = <strong>0.5</strong> (half its height)</td></tr>
+  <tr><td>Ramp length</td><td>height ÷ sin(angle), plus 0.3 m. For 1 m at 20°: about <strong>3.2 m</strong></td></tr>
+  <tr><td>Ramp</td><td>CSGBox3D Size 3 × 0.2 × 3.2, Rotation X = <strong>20</strong> makes it rise toward north (up the screen), −20 toward south, Position Y ≈ 0.4. Then nudge it until the high edge meets the hill's top and the low edge touches the ground</td></tr>
+  <tr><td>Check</td><td>Look from the side (red X circle): no step at either end</td></tr>
+</table>
+<p>Tested in the game: a 20° ramp takes the rabbit onto a 1 m hill without jumping.</p>
+</section>
+
+<section>
+<h2>Recipe: stream (tested)</h2>
+<ol>
+  <li>CSGBox3D in Blockout, <em>after</em> Ground: Size 60 × 0.5 × 2.5, Position Y = −0.25, <strong>Operation = Subtraction</strong>. That digs a 0.5 m deep bed.</li>
+  <li><strong>Way out:</strong> the rabbit can't walk up the vertical bank. Add a ramp CSGBox3D <em>after</em> the stream box (so it isn't cut away), from the bed floor up to the far bank at about 20°. Or put a bridge (a box on top, at Y ≈ 0.15) across.</li>
+  <li>Blue water: add a thin box in <code>Paths</code> (no collision) at the bed bottom, with a blue material.</li>
+</ol>
+</section>
+
+<section>
+<h2>Recipe: trees, landmark, borders</h2>
+<table>
+  <tr><td>Trunk</td><td>CSGCylinder3D Radius 0.5, Height 5, Position Y = 2.5. <kbd>Ctrl</kbd>+<kbd>D</kbd> to plant more</td></tr>
+  <tr><td>Bush / boulder</td><td>CSGSphere3D Radius 0.6–1.2, sunk halfway into the ground</td></tr>
+  <tr><td>Landmark</td><td>Big and unique: a cylinder r 1.6 h 1.4 + box roof at Y ≈ 3.3 (your future well). Visible from the start</td></tr>
+  <tr><td>Level border</td><td>A row of trunks or a long low hill. Friendlier than falling off the edge</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Your rabbit's metrics (measured)</h2>
+<table>
+  <tr><th>Metric</th><th>Value</th><th>Design rule (my suggestion)</th></tr>
+  <tr><td>Speed</td><td>4.5 m/s</td><td>No long empty stretches</td></tr>
+  <tr><td>Running jump</td><td>1.89 m high, 5.7 m long</td><td>Ledges ≤ 1 m, gaps ≤ 2.5 m</td></tr>
+  <tr><td>Max slope</td><td>45°</td><td>Ramps 15–25°</td></tr>
+  <tr><td>Bumps</td><td>≤ 5 cm OK, 10 cm blocks</td><td>Anything taller needs a ramp or a jump</td></tr>
+  <tr><td>Size</td><td>1.15 m tall, 0.6 m wide</td><td>Paths ≥ 3 m wide</td></tr>
+</table>
+<p class="aside">Metrics idea: <a href="https://book.leveldesignbook.com/process/blockout/metrics">The Level Design Book: Metrics</a>. Rules for 4–6-year-olds are my suggestions, not from a source.</p>
+</section>
+
+<section>
+<h2>Carrots</h2>
+<ul>
+  <li>Drag <code>carrot/carrot.tscn</code> onto <code>Carrots</code>, then <kbd>Ctrl</kbd>+<kbd>D</kbd>. They're counted automatically.</li>
+  <li>Breadcrumbs: every 4–6 m, and from each carrot the next is visible.</li>
+  <li>On a hill: carrot Position Y = the hill's height.</li>
+  <li>One secret, one group at the finale.</li>
+</ul>
+</section>
+
+<section>
+<h2>Before the playtest</h2>
+<ul>
+  <li>Every carrot reachable with sloppy input</li>
+  <li>The rabbit is never hidden from the camera for long</li>
+  <li>No dent without a way out, no step without a ramp</li>
+  <li>The landmark or the first carrots are visible from the start</li>
+  <li>The border is obvious</li>
+</ul>
+<p class="aside">Process: <a href="https://book.leveldesignbook.com/process/blockout">Blockout</a> → <a href="https://book.leveldesignbook.com/process/blockout/playtesting">Playtesting</a> (The Level Design Book)</p>
+</section>
+
+</div>
+</main>
+</body>
+</html>

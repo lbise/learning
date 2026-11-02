@@ -23,10 +23,11 @@
   <tr><td><kbd>Wheel</kbd> / <kbd>Ctrl</kbd>+<kbd>MMB</kbd></td><td>Zoom</td></tr>
   <tr><td><kbd>Numpad1</kbd> / <kbd>3</kbd> / <kbd>7</kbd></td><td>Front / right / top (<kbd>Ctrl</kbd> = opposite side)</td></tr>
   <tr><td><kbd>Numpad5</kbd></td><td>Toggle perspective / orthographic</td></tr>
-  <tr><td><kbd>Numpad .</kbd></td><td>Frame selected</td></tr>
+  <tr><td><kbd>Numpad .</kbd></td><td>Frame selected. It also moves the zoom/orbit point onto the selection</td></tr>
+  <tr><td><kbd>Shift</kbd>+<kbd>Ctrl</kbd>+<kbd>MMB</kbd> drag</td><td>Dolly: move forward when the wheel zoom “hits a wall” (zoom never passes the point of interest)</td></tr>
   <tr><td><kbd>Z</kbd></td><td>Shading pie (Solid, Material Preview, Rendered)</td></tr>
 </table>
-<p>No numpad: Preferences → Input → Emulate Numpad.</p>
+<p><strong>No numpad:</strong> View menu → Frame Selected / Viewpoint / Perspective-Orthographic, or right-click a menu item → <em>Assign Shortcut</em>. Emulate Numpad (Preferences → Input) remaps the number row, but then <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> no longer switch select modes: use the header buttons instead.</p>
 <p class="aside">Sources: manual, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/navigate/navigation.html">Navigation</a>, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/navigate/viewpoint.html">Viewpoint</a>, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/display/shading.html">Shading</a></p>
 </section>
 
@@ -41,7 +42,83 @@
   <tr><td><kbd>X</kbd> / <kbd>Delete</kbd></td><td>Delete selected</td></tr>
 </table>
 <p><strong>Grammar:</strong> verb → axis → amount → confirm. <kbd>G</kbd> <kbd>Z</kbd> <code>0.75</code> <kbd>Enter</kbd>.</p>
+<p><strong>Exact size:</strong> Sidebar (<kbd>N</kbd>) → Item → <em>Dimensions</em>, typed with units (<code>5m</code>, <code>50cm</code>), then <strong><kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale</strong>. Typing Dimensions sets the object's <em>scale</em>, so always apply it afterwards. Dimensions are in the object's local axes and cover the whole object. Alternative: resize in Edit Mode (<kbd>S</kbd> <kbd>X</kbd> <code>new/old</code>), which never touches the scale.</p>
 <p class="aside">Source: <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/transform/control/axis_locking.html">Axis locking</a>, <a href="https://docs.blender.org/manual/en/latest/interface/undo_redo.html">Adjust Last Operation</a></p>
+</section>
+
+<section>
+<h2>Edit Mode (Lesson 10)</h2>
+<table>
+  <tr><td><kbd>Tab</kbd></td><td>Object ↔ Edit Mode. Edit Mode changes mesh <em>data</em>, so there's nothing to apply afterwards</td></tr>
+  <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>Vertex / edge / face select</td></tr>
+  <tr><td><kbd>A</kbd> · <kbd>Alt</kbd>+click</td><td>Select all · select loop</td></tr>
+  <tr><td><kbd>E</kbd></td><td>Extrude: grow new geometry</td></tr>
+  <tr><td><kbd>I</kbd></td><td>Inset: border ring inside a face (then <kbd>E</kbd> for a panel)</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>Loop cut: click to slide, <kbd>RMB</kbd> to keep it centred</td></tr>
+  <tr><td><kbd>Shift</kbd>+<kbd>A</kbd> (in Edit)</td><td>Adds the shape into the same mesh</td></tr>
+  <tr><td><kbd>Numpad /</kbd></td><td>Local view: isolate the selection</td></tr>
+  <tr><td>Mirror modifier</td><td>Mirrors across the <strong>object origin</strong>. Keep the origin on the mirror line</td></tr>
+  <tr><td>Per-face material</td><td>Add a slot (+), select faces, <strong>Assign</strong></td></tr>
+</table>
+<p class="aside">Sources: manual, <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/selecting/introduction.html">Select modes</a>, <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/face/inset_faces.html">Inset</a>, <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/edge/loopcut_slide.html">Loop cut</a>, <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/generate/mirror.html">Mirror</a>, <a href="https://docs.blender.org/manual/en/latest/render/materials/assignment.html">Material assignment</a></p>
+</section>
+
+<section>
+<h2>Mirror, pivots &amp; organising (Lesson 11)</h2>
+<table>
+  <tr><td>Mirror Clipping</td><td>Keeps vertices on the mirror plane in Edit Mode: the halves stay joined</td></tr>
+  <tr><td>Model a quarter</td><td>Centred loop cuts, delete the other parts, Mirror on X and Y</td></tr>
+  <tr><td><kbd>Alt</kbd>+<kbd>Z</kbd></td><td>X-ray: box select reaches hidden vertices</td></tr>
+  <tr><td><kbd>.</kbd> (pivot pie)</td><td>Rotate and scale around: 3D Cursor, Individual Origins, Median, Active</td></tr>
+  <tr><td><kbd>Shift</kbd>+<kbd>D</kbd>, <kbd>RMB</kbd></td><td>Duplicate in place (<kbd>RMB</kbd> cancels the move)</td></tr>
+  <tr><td><kbd>R</kbd> <kbd>Y</kbd> <kbd>Y</kbd></td><td>Second axis press = the object's <em>local</em> axis</td></tr>
+  <tr><td>Radial copies</td><td>Pivot = 3D Cursor at the centre, then <kbd>Shift</kbd>+<kbd>D</kbd>, <kbd>RMB</kbd>, <kbd>R</kbd> <kbd>Z</kbd> 360/n</td></tr>
+  <tr><td><kbd>M</kbd></td><td>Move to collection (Outliner folders)</td></tr>
+</table>
+<p class="aside">Sources: manual, <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/generate/mirror.html">Mirror</a>, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/controls/pivot_point/index.html">Pivot point</a>, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/controls/orientation.html">Orientation</a>, <a href="https://docs.blender.org/manual/en/latest/scene_layout/collections/collections.html">Collections</a></p>
+</section>
+
+<section>
+<h2>Copies, materials &amp; light (Lesson 12)</h2>
+<table>
+  <tr><td><kbd>Shift</kbd>+<kbd>D</kbd></td><td>Full copy: its own mesh</td></tr>
+  <tr><td><kbd>Alt</kbd>+<kbd>D</kbd></td><td>Linked copy: shares the mesh (an Edit Mode change affects all), with its own transform. Arrives in Godot as one shared mesh resource</td></tr>
+  <tr><td><kbd>Shift</kbd>+<kbd>R</kbd></td><td>Repeat the last action (great for evenly spaced copies)</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> → Link Materials</td><td>Copies the <em>active</em> (last-selected) object's materials to the others</td></tr>
+  <tr><td><kbd>M</kbd> → At Center (Edit)</td><td>Merges selected vertices into one</td></tr>
+  <tr><td>Emission</td><td>The surface glows (and reaches Godot), but it barely lights its neighbours</td></tr>
+  <tr><td>Point light</td><td>Lights the surroundings. Keep it outside solid meshes</td></tr>
+  <tr><td>World colour</td><td>Fill light for the whole scene. Dark = night</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Numpad0</kbd> · <kbd>F12</kbd></td><td>Camera to view · render</td></tr>
+</table>
+<p class="aside">Sources: manual, <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/duplicate_linked.html">Linked duplicates</a>, <a href="https://docs.blender.org/manual/en/latest/interface/undo_redo.html">Repeat Last</a>, <a href="https://docs.blender.org/manual/en/latest/scene_layout/object/editing/link_transfer/link_data.html">Link data</a></p>
+</section>
+
+<section>
+<h2>Low-poly techniques (Lesson 13)</h2>
+<table>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td><td>Bevel edges (chiselled stone)</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></td><td>Bevel a <em>vertex</em> (start of a notch)</td></tr>
+  <tr><td><kbd>J</kbd></td><td>Join two vertices with an edge</td></tr>
+  <tr><td><kbd>G</kbd><kbd>G</kbd></td><td>Slide a vertex or edge along its edges</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>X</kbd></td><td>Dissolve: remove edges but keep the faces (<kbd>X</kbd> deletes faces too)</td></tr>
+  <tr><td><kbd>K</kbd></td><td>Knife: cut your own edges</td></tr>
+  <tr><td>Mesh → Transform → Randomize</td><td>Wobble the vertices. Keep the amount small</td></tr>
+  <tr><td>Simple Deform → Bend, Z, 360°</td><td>A line along X becomes a ring (radius = length / 2π). The rotation must be applied</td></tr>
+  <tr><td>Decimate</td><td>Fewer faces, more jagged look</td></tr>
+  <tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> → Copy Modifiers</td><td>From the active object to the selected ones</td></tr>
+  <tr><td>Empty as Mirror Object</td><td>Sets the mirror line without moving the origin</td></tr>
+  <tr><td><kbd>Shift</kbd>+<kbd>RMB</kbd></td><td>Place the 3D cursor</td></tr>
+  <tr><td>Object → Transform → Randomize Transform</td><td>Random location, rotation and scale for many objects at once (Lesson 14)</td></tr>
+  <tr><td>Lattice + Lattice modifier</td><td>Bend one or more objects by moving a cage's points. Non-destructive (Lesson 14)</td></tr>
+  <tr><td><kbd>O</kbd> proportional editing</td><td>Neighbours follow the move. The mouse wheel sizes the circle</td></tr>
+  <tr><td><kbd>H</kbd> / <kbd>Alt</kbd>+<kbd>H</kbd></td><td>Hide / unhide</td></tr>
+  <tr><td>Snapping (magnet) → Face, Snap Base Center</td><td>Drop props onto the ground. <kbd>Ctrl</kbd> while moving toggles snapping</td></tr>
+  <tr><td>Auto Merge (Sidebar → Tool)</td><td>Vertices slid onto each other become one</td></tr>
+  <tr><td>Spares collection</td><td>Hidden copies of the originals before destructive steps (Join)</td></tr>
+  <tr><td>Grey concentric rings around an object</td><td>A <strong>Force Field</strong> (Physics tab, next to the Modifiers wrench). Remove it with the X in Physics → Force Field. Duplicates copy it</td></tr>
+</table>
+<p>Quads (4-sided faces) let loop cuts pass. N-gons stop them, but they're fine in a game engine.</p>
 </section>
 
 <section>

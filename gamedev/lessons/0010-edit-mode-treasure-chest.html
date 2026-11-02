@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 10: Edit Mode and a treasure chest</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 10 · Blender track</p>
+<h1>Edit Mode and a treasure chest</h1>
+<p class="subtitle">Grant's Parts 3–4: Mirror modifier, then real modelling with vertices, edges and faces. You'll use it to build the reward at the end of your coin hunt.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Shape geometry in Edit Mode (extrude, loop cut, inset), use the Mirror modifier, and export modifiers correctly.</dd>
+  <dt>Time</dt><dd>About 25 min of video, which takes 60–75 min when you follow along, plus about 40 min for the chest. Two sessions is fine.</dd>
+  <dt>The win</dt><dd>A wood-and-gold treasure chest you modelled, standing in your level where the coin hunt ends</dd>
+  <dt>Format</dt><dd><strong>① watch</strong> (the videos are the worked example) → <strong>② recall</strong> → <strong>③ completion</strong> (the chest body) → <strong>④ on your own</strong> (handles, lock, into Godot).</dd>
+  <dt>Links</dt><dd>Citations are optional. The videos are the primary source.</dd>
+</dl>
+
+<figure class="hero">
+  <a href="../assets/img/0010/07-final.png"><img src="../assets/img/0010/07-final.png" alt="Finished treasure chest: brown wooden box with a recessed lid, a thin gold band around it, a gold lock on the front and gold handles on both sides"></a>
+  <figcaption><b>What you'll build:</b> 1.0 × 0.6 × 0.6 m, wood with a gold band, a recessed lid, a lock and two handles. Rendered in Blender's Solid view, so it should look like your screen. Click any image to enlarge.</figcaption>
+</figure>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">The three habits before exporting a prop, with shortcuts.</p>
+  <details><summary>Show answer</summary>Origin at the base (Set Origin → Origin to 3D Cursor), at the world origin (<kbd>Alt</kbd>+<kbd>G</kbd>), transforms applied (<kbd>Ctrl</kbd>+<kbd>A</kbd> → All Transforms). Then export with <em>Selected Objects</em> and <em>+Y Up</em>.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 7: what does a state machine's <code>change_state</code> guard against?</p>
+  <details><summary>Show answer</summary>Re-running enter actions every tick when the state hasn't actually changed.</details>
+</div>
+
+<h2>① Watch, and do every step</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=ut9_RRf1-hM&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 3: The Old Man</a> (11 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>00:34–03:45 Torso, head, arm</td><td>Building from primitives, plus <em>duplicating</em> objects. Same G/R/S grammar as Lesson 8.</td></tr>
+  <tr><td>03:45 Challenge: the leg</td><td><strong>Do it before watching the solution.</strong></td></tr>
+  <tr><td>05:18 Mirror modifier</td><td><strong>Key idea:</strong> <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/generate/mirror.html">“The Mirror modifier mirrors a mesh along its local X, Y and/or Z axes, across the Object Origin.”</a> Where the <em>origin</em> sits decides where the mirror plane is.</td></tr>
+  <tr><td>09:51 Copying modifiers</td><td>A modifier is a setting stacked on top of the mesh, not baked into it yet. That matters at export (part ④).</td></tr>
+</table>
+
+<h3><a href="https://www.youtube.com/watch?v=GB6xDutIOx0&list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Part 4: Old Man Details</a> (14 min)</h3>
+<table>
+  <tr><th>Chapter</th><th>Watch for</th></tr>
+  <tr><td>01:31 Edit Mode (<kbd>Tab</kbd>)</td><td><strong>The big one.</strong> Object Mode moves the <em>object</em>. Edit Mode reshapes its <em>mesh data</em>. That's the object vs data split from Lesson 8.</td></tr>
+  <tr><td>01:40 Local View</td><td>Isolate the selection: <kbd>Numpad /</kbd>.</td></tr>
+  <tr><td>02:00 Vertex / Edge / Face</td><td><a href="https://docs.blender.org/manual/en/latest/modeling/meshes/selecting/introduction.html"><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></a> in Edit Mode.</td></tr>
+  <tr><td>02:38 Extrude (<kbd>E</kbd>)</td><td><a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/face/extrude_faces.html">“a square gets turned into a box, a disc into a cylinder”</a>. This is how new geometry grows.</td></tr>
+  <tr><td>04:47 Adding objects in Edit Mode</td><td><kbd>Shift</kbd>+<kbd>A</kbd> in Edit Mode adds the shape <em>into the same mesh</em>. You'll use this for the chest's lock.</td></tr>
+  <tr><td>06:00 Loop Cut (<kbd>Ctrl</kbd>+<kbd>R</kbd>)</td><td>Hover to pick the ring, click, then slide. The manual: <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/edge/loopcut_slide.html">“Click LMB to create the cut at the chosen location, or RMB to create it at the center.”</a></td></tr>
+  <tr><td>07:40 Inset (<kbd>I</kbd>)</td><td><a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/face/inset_faces.html">“creates a border of faces around the selected faces”</a>. Inset, then extrude, gives you panels and recesses.</td></tr>
+  <tr><td>09:19–12:50 Delete, bridge, face loops</td><td><kbd>Alt</kbd>+click selects a whole loop. You'll use it for the chest's metal band.</td></tr>
+</table>
+
+<h2>② Recall: after watching, from memory</h2>
+
+<div class="quiz">
+  <p class="q">You scale a cube in <strong>Edit Mode</strong> (all selected). What does the object's Scale in the Sidebar show?</p>
+  <button data-correct data-why="Edit Mode changes the mesh data. The object's transform is untouched, so there's nothing to apply later.">Still 1, 1, 1, because only the mesh data changed</button>
+  <button data-why="That would be Object Mode scaling, which changes the object.">The new scale, because the object itself was also scaled</button>
+  <button data-why="Scale is never reset by switching modes.">Zero, because entering Edit Mode resets the whole object transform</button>
+  <button data-why="The Sidebar works in both modes, and the object's scale didn't change.">Nothing, because the Sidebar is always hidden in Edit Mode</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">A Mirror modifier (X axis) produces a copy far from where you expected. Most likely cause?</p>
+  <button data-correct data-why="It mirrors “across the Object Origin”. Move the origin, or move the geometry in Edit Mode, so the origin sits on the mirror line.">The object's origin is not on the mirror line</button>
+  <button data-why="Any axis works. The plane goes through the origin.">The X axis cannot be used for mirror modifiers</button>
+  <button data-why="Materials don't affect geometry.">The material is still missing on the mirrored half</button>
+  <button data-why="Clipping only stops vertices crossing the plane. It doesn't move the plane.">Clipping was enabled before any of the geometry existed</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">You want a recessed panel on a face. Which sequence?</p>
+  <button data-correct data-why="Inset makes a border ring. Extruding the inner face inwards sinks it.">Select face, I to inset, then E inwards</button>
+  <button data-why="Extruding first just makes the box taller.">Select face, E outwards, then I to inset</button>
+  <button data-why="A loop cut adds an edge ring around the mesh, not a panel on one face.">Select face, Ctrl+R, then G along its axis</button>
+  <button data-why="Object Mode scaling resizes the whole object.">Object Mode, S on an axis, then apply</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>③ Completion: the chest body</h2>
+
+<p>Target: <strong>1.0 m wide (X), 0.6 m deep (Y), 0.6 m tall (Z)</strong>, with its origin at the base, a metal band around it, and a recessed lid. Fill in the blanks as you go. Rough positions are fine: this is art, not engineering.</p>
+
+<p>Check your model against these after each step. The dark lines are the mesh edges, like in Edit Mode.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0010/01-body.png"><img src="../assets/img/0010/01-body.png" alt="A plain grey box sitting on the ground"></a>
+    <figcaption><b>After step 3</b> scaled and lifted: a box sitting on the ground</figcaption></figure>
+  <figure><a href="../assets/img/0010/02-loop-cuts.png"><img src="../assets/img/0010/02-loop-cuts.png" alt="Grey box with two horizontal edge rings close together at about two thirds of its height"></a>
+    <figcaption><b>Step 5</b> two loop cuts close together, about ⅔ up</figcaption></figure>
+  <figure><a href="../assets/img/0010/03-lid-inset.png"><img src="../assets/img/0010/03-lid-inset.png" alt="View from above: the top face has a thin border ring and the inner face is slightly lowered"></a>
+    <figcaption><b>Step 6</b> top face inset, then pushed down a little</figcaption></figure>
+  <figure><a href="../assets/img/0010/04-band-selected.png"><img src="../assets/img/0010/04-band-selected.png" alt="The thin ring of faces between the two loop cuts highlighted in orange"></a>
+    <figcaption><b>Step 7</b> <kbd>Alt</kbd>+click selects the band's face loop (orange)</figcaption></figure>
+  <figure><a href="../assets/img/0010/05-materials.png"><img src="../assets/img/0010/05-materials.png" alt="Brown box with a gold band"></a>
+    <figcaption><b>Step 7</b> Wood on the box, Gold assigned to the band</figcaption></figure>
+</div>
+
+<ol class="checklist" id="body">
+  <li>New file (General). Keep the default cube. <kbd>Tab</kbd> into Edit Mode, <kbd>A</kbd> to select everything.</li>
+  <li>Scale <em>in Edit Mode</em>: <kbd>S</kbd> <kbd>X</kbd> <code>0.5</code>, <kbd>S</kbd> <kbd>Y</kbd> <code>0.3</code>, <kbd>S</kbd> <kbd>Z</kbd> <code>0.3</code>. <em>Blank 1: the default cube is 2 m, so what size is it now?</em></li>
+  <li>Still in Edit Mode, lift it so its bottom sits on the ground: <kbd>G</kbd> <kbd>Z</kbd> <code>___</code>. <em>Blank 2.</em> The origin stays where it was, at the world origin, which is now the base. No Set Origin needed.</li>
+  <li><kbd>Tab</kbd> back and check the Sidebar (<kbd>N</kbd>): Scale is still 1, 1, 1. <em>Blank 3: why don't you need <kbd>Ctrl</kbd>+<kbd>A</kbd> this time?</em></li>
+  <li><strong>Band:</strong> in Edit Mode, <kbd>Ctrl</kbd>+<kbd>R</kbd> over a vertical edge, slide up to about ⅔ height and click. Do a second cut just below it, so you get a thin ring of faces (about 4 cm tall).</li>
+  <li><strong>Lid recess:</strong> face mode (<kbd>3</kbd>), select the top face, <kbd>I</kbd> ≈ <code>0.05</code>, then <kbd>E</kbd> ≈ <code>-0.04</code>.</li>
+  <li><strong>Materials per face</strong> (Material Properties tab, the red sphere icon). Two <em>slots</em>, then assign one to the band:
+    <ol>
+      <li><em>Slot 1:</em> the cube already has a material. Rename it <code>Wood</code>, brown, Roughness 0.8. Every face uses slot 1 for now.</li>
+      <li>Press <strong>+</strong> on the right of the slot list. A second, <strong>empty</strong> slot appears. With it highlighted, click <strong>New</strong> and name it <code>Gold</code> (Metallic 1, Roughness 0.3). <em>Don't</em> pick Gold from slot 1's dropdown: that replaces the whole object's material.</li>
+      <li><kbd>Tab</kbd> into Edit Mode, face mode (<kbd>3</kbd>). Click empty space to deselect, so nothing is still selected from step 1.</li>
+      <li><kbd>Alt</kbd>+click a <strong>short vertical edge</strong> of the band: the manual says this selects <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/selecting/loops.html">“the row of faces that's perpendicular to that edge”</a>. Only the band turns orange (like the step 7 picture above).</li>
+      <li>Highlight the <strong>Gold</strong> slot, then press <strong>Assign</strong> (it appears under the slot list only in Edit Mode). <a href="https://docs.blender.org/manual/en/latest/render/materials/assignment.html">“Click the Assign button, and the material will appear on the selected object faces.”</a></li>
+    </ol>
+  </li>
+  <li>Name the object <code>Chest</code> and save as <code>~/learning/gamedev/blender/chest.blend</code>.</li>
+</ol>
+<p class="progress" data-for="body"></p>
+
+<div class="recall">
+  <p class="q">Answers</p>
+  <details><summary>Show answers</summary><strong>1.</strong> 1.0 × 0.6 × 0.6 m. <strong>2.</strong> <code>0.3</code>, half the height. <strong>3.</strong> You scaled and moved the <em>mesh data</em>, not the object, so the object's transform is already clean. Doing work in Edit Mode is often the cleanest way to get export-ready props.</details>
+</div>
+
+<h2>④ On your own: handles, lock, and into the game</h2>
+
+<div class="figs">
+  <figure><a href="../assets/img/0010/06-one-handle.png"><img src="../assets/img/0010/06-one-handle.png" alt="Chest with a single gold handle on its right side"></a>
+    <figcaption><b>Before the mirror</b> one handle, on the +X side only</figcaption></figure>
+  <figure><a href="../assets/img/0010/08-final-front.png"><img src="../assets/img/0010/08-final-front.png" alt="Front orthographic view: gold lock centred on the band, handles sticking out equally on both sides"></a>
+    <figcaption><b>Done, front view</b> (<kbd>Numpad1</kbd>): lock centred on the band, handles equal on both sides</figcaption></figure>
+  <figure><a href="../assets/img/0010/09-final-back-left.png"><img src="../assets/img/0010/09-final-back-left.png" alt="Chest from the back left, showing the mirrored handle on the left side"></a>
+    <figcaption><b>Done, from behind</b> the mirrored handle on −X</figcaption></figure>
+</div>
+
+<ol class="checklist" id="own">
+  <li><strong>Handles with Mirror:</strong> a gold handle on each side (±X), built <em>once</em> and mirrored with a Mirror modifier. Think about where the handle object's origin must be.</li>
+  <li><strong>Lock:</strong> a small gold block on the front, centred on the band, added <em>into the Chest mesh</em> (Edit Mode <kbd>Shift</kbd>+<kbd>A</kbd>). The front is −Y in Blender (the side you see in <kbd>Numpad1</kbd> front view).</li>
+  <li><strong>Export</strong> <code>chest.glb</code> into your Godot project's <code>models/</code>, so that <strong>both handles</strong> arrive in Godot.</li>
+  <li><strong>In Godot:</strong> a solid <code>chest.tscn</code> (the Lesson 9 pattern: body type, collision shape sized to the box, no scaling), placed where the coin hunt should end, with its front facing the way the player arrives.</li>
+</ol>
+<p class="progress" data-for="own"></p>
+
+<div class="recall">
+  <p class="q">Hint 1: where the handle's origin goes</p>
+  <details><summary>Show hint</summary>Add the handle cube in <em>Object Mode</em> with the 3D cursor at the world origin, so its origin is at (0, 0, 0), the chest's centre line. Then <kbd>Tab</kbd> and shape and move it to the +X side <em>in Edit Mode</em> (say <kbd>G</kbd> <kbd>X</kbd> <code>0.53</code>). The origin stays on the centre line, so the X mirror lands exactly on the other side.</details>
+</div>
+<div class="recall">
+  <p class="q">Hint 2: only one handle shows up in Godot</p>
+  <details><summary>Show hint</summary>Modifiers aren't part of the mesh until they're applied. The glTF exporter's <strong>Data → Mesh → Apply Modifiers</strong> option, which <a href="https://docs.blender.org/manual/en/latest/addons/scene_gltf2.html">“Export[s] objects using the evaluated mesh, meaning the resulting mesh after all Modifiers have been calculated”</a>, is <strong>off by default</strong>. Tick it. (I checked the default in Blender 5.2.2: <code>False</code>.)</details>
+</div>
+<div class="recall">
+  <p class="q">Hint 3: which way the chest faces in Godot</p>
+  <details><summary>Show hint</summary>Blender's front (−Y) becomes <strong>+Z</strong> in Godot after the +Y Up conversion, the same as <code>MODEL_FRONT</code> from Lesson 6. Rotate the chest <em>instance</em> in the world around Y so +Z points toward the player's approach.</details>
+</div>
+<div class="recall">
+  <p class="q">What I tested</p>
+  <details><summary>Show results</summary>I built this chest with a script in Blender 5.2.2 (body scaled and moved in Edit Mode, a two-cut band, an inset lid, the lock added into the mesh, and handles on a separate object with an X Mirror modifier), selected Chest and Handles, and exported twice:
+  <table>
+    <tr><th>Apply Modifiers</th><th>Handles in Godot 4.7.2</th></tr>
+    <tr><td>off (default)</td><td>one handle only: x from 0.50 to 0.56</td></tr>
+    <tr><td>on</td><td>both: x from −0.56 to 0.56 ✔</td></tr>
+  </table>
+  The chest's base was at y = 0, the lock stuck out toward +Z, and the body kept two surfaces, <code>Wood</code> and <code>Gold</code>. Object scale stayed 1, 1, 1 throughout, with no Apply needed.</details>
+</div>
+
+<p class="aside">This chest is also the natural first prop to <em>animate</em>: a lid that opens when the last coin is collected. That needs the lid as its own object with its origin on the hinge line, so keep that in mind if you feel like experimenting.</p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>Edit Mode vs Object Mode: which one changes the data, and why that saves you an Apply.</li>
+  <li>What decides where a Mirror modifier mirrors, and which export option it needs.</li>
+  <li>From Lesson 9: whose origin survives a Join?</li>
+</ul>
+
+<p><strong>Kids:</strong> a chest at the end of the coin trail gives them a goal to run toward. Watch whether they spot it, and whether they want it to <em>do</em> something. That answer can shape Lesson 11.</p>
+
+<div class="source">
+  <strong>Primary source: the videos themselves</strong>
+  <a href="https://www.youtube.com/playlist?list=PLn3ukorJv4vv9_e-htADGsPX9TMaQpHV8">Grant Abbitt: Blender 5 Complete Beginners Guide</a>, Parts 3–4. For any tool's exact behaviour, the <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/index.html">manual's mesh editing section</a>.
+</div>
+
+<p class="ask">A loop cut going the wrong way, a mirror that lands somewhere odd, or a face that won't take its material? Tell me which step and what you see. These are all quick fixes once we know the symptom.</p>
+
+<nav class="nav">
+  <span>← <a href="0009-blender-to-godot.html">Lesson 9</a> · <a href="0011-monster-bench-campfire.html">Lesson 11: Monster, bench &amp; campfire</a> →</span>
+  <span>Reference: <a href="../reference/blender-basics.html">Blender basics</a> · <a href="../reference/blender-to-godot.html">Pipeline</a></span>
+</nav>
+
+</main>
+</body>
+</html>

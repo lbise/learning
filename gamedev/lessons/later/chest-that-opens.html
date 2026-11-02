@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 11: A chest that opens</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 11 · Blender track × Godot</p>
+<h1>A chest that opens</h1>
+<p class="subtitle">Split the lid off at a hinge in Blender, animate it in Godot, and make it the reward that ends the coin hunt.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Prepare a moving part (separate object, origin on the pivot) and animate it with keyframes in Godot's <code>AnimationPlayer</code>.</dd>
+  <dt>Time</dt><dd>About 50 minutes. No video this time.</dd>
+  <dt>The win</dt><dd>Collect every coin, walk up to the chest, and the lid swings open on a pile of gold. Then your character dances.</dd>
+  <dt>Format</dt><dd><strong>① worked example</strong> (Blender: lid and hinge, with pictures) → <strong>② completion</strong> (Godot: animation and <code>open()</code>) → <strong>③ on your own</strong> (open only when the player walks up).</dd>
+  <dt>Links</dt><dd>Citations are optional. The one recommended reading is in the box at the end.</dd>
+</dl>
+
+<figure class="hero">
+  <a href="../../assets/img/later-chest/05-open.png"><img src="../../assets/img/later-chest/05-open.png" alt="The treasure chest with its lid swung open backwards, showing a gold top surface inside"></a>
+  <figcaption><b>What you'll build:</b> your Lesson 10 chest with the lid as its own object, hinged on the back edge, and a gold “treasure” surface inside. Click any image to enlarge.</figcaption>
+</figure>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">From Lesson 10: why did the whole chest turn gold instead of just the band?</p>
+  <details><summary>Show answer</summary>Either Gold replaced the material in the <em>only</em> slot (you need a second slot via <strong>+</strong>), or every face was still selected when you pressed Assign.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 8: what does a Blender object's origin decide?</p>
+  <details><summary>Show answer</summary>Where the object “is”, and the pivot for rotation and scaling. Today that's the whole trick: the lid rotates around its origin, so the origin goes on the hinge.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 6: <code>animation_finished</code> on a looping clip: does it fire?</p>
+  <details><summary>Show answer</summary>No, looping clips never finish. Your lid animation won't loop.</details>
+</div>
+
+<h2>① Worked example: lid and hinge in Blender</h2>
+
+<p>A part that moves on its own must be its <strong>own object</strong>, because Godot animates nodes and each Blender object becomes one node. It also rotates around its <strong>origin</strong>, so the origin must sit on the hinge line. Everything below serves those two rules.</p>
+
+<div class="figs">
+  <figure><a href="../../assets/img/later-chest/01-lid-selected.png"><img src="../../assets/img/later-chest/01-lid-selected.png" alt="Front view: everything above the gold band highlighted orange, except the gold lock"></a>
+    <figcaption><b>Steps 1–3</b> lid vertices selected (orange). The band and lock stay unselected.</figcaption></figure>
+  <figure><a href="../../assets/img/later-chest/02-separated-holes.png"><img src="../../assets/img/later-chest/02-separated-holes.png" alt="Lid lifted above the chest: both have an open hole where they used to join"></a>
+    <figcaption><b>Step 4</b> separated (lifted here to show it): both parts now have a hole</figcaption></figure>
+  <figure><a href="../../assets/img/later-chest/03-filled.png"><img src="../../assets/img/later-chest/03-filled.png" alt="Lid lifted; the chest's top is now closed with a gold face"></a>
+    <figcaption><b>Step 5</b> holes filled. The chest's new top is Gold: the treasure.</figcaption></figure>
+  <figure><a href="../../assets/img/later-chest/04-hinge-origin.png"><img src="../../assets/img/later-chest/04-hinge-origin.png" alt="Chest from the back right; an orange dot marks the lid's origin on the back edge, with an orange line along the hinge"></a>
+    <figcaption><b>Step 6</b> the lid's origin (dot) on the back edge. The line is the hinge axis (X).</figcaption></figure>
+  <figure><a href="../../assets/img/later-chest/06-open-side.png"><img src="../../assets/img/later-chest/06-open-side.png" alt="Side view of the chest with the lid rotated open about its back edge"></a>
+    <figcaption><b>Step 7</b> test: <kbd>R</kbd> <kbd>X</kbd> <code>-110</code> swings it open around the hinge</figcaption></figure>
+</div>
+
+<ol class="checklist" id="blender">
+  <li>Open <code>chest.blend</code>. Select <code>Chest</code>, <kbd>Tab</kbd> into Edit Mode, vertex mode (<kbd>1</kbd>), and deselect everything with <kbd>Alt</kbd>+<kbd>A</kbd>.</li>
+  <li>Front orthographic view (<kbd>Numpad1</kbd>), then <strong>X-ray</strong> with <kbd>Alt</kbd>+<kbd>Z</kbd>. The manual: it makes objects transparent, <a href="https://docs.blender.org/manual/en/latest/editors/3dview/display/shading.html">“allowing you to see and select items that would otherwise be occluded”</a>. Without it, a box selection only grabs the vertices you can see from the front, not the ones at the back.</li>
+  <li>Drag a box from just <em>above</em> the gold band to above the top, wide enough to include both sides. The lock's upper corners get caught too: hover over the lock and press <kbd>Shift</kbd>+<kbd>L</kbd>, which <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/selecting/linked.html">deselects the linked part under the cursor</a>. Compare with the first picture.</li>
+  <li><kbd>P</kbd> → <strong>Selection</strong>. Separate <a href="https://docs.blender.org/manual/en/latest/modeling/meshes/editing/mesh/separate.html">“splits the mesh into two or more new, separate mesh objects”</a>. <kbd>Tab</kbd> out, and rename the new <code>Chest.001</code> in the Outliner to <code>Lid</code>. <kbd>Alt</kbd>+<kbd>Z</kbd> turns X-ray off again.</li>
+  <li><strong>Fill the holes</strong>, once per object. Select it, <kbd>Tab</kbd>, then <strong>Select → Select All by Trait → Non Manifold</strong> (this selects the open hole's border edges), and press <kbd>F</kbd> to make a face. For the <code>Chest</code>, also highlight the <strong>Gold</strong> slot and <strong>Assign</strong> while that new face is selected: the treasure. <kbd>Tab</kbd> out.</li>
+  <li><strong>Hinge origin:</strong> select <code>Lid</code>, <kbd>Tab</kbd>, edge mode (<kbd>2</kbd>), and click the lid's <strong>bottom back edge</strong> (back is +Y: the side you see with <kbd>Ctrl</kbd>+<kbd>Numpad1</kbd>). <kbd>Shift</kbd>+<kbd>S</kbd> → <strong>Cursor to Selected</strong>. <kbd>Tab</kbd> out, then <strong>Object → Set Origin → Origin to 3D Cursor</strong>. Then <kbd>Shift</kbd>+<kbd>S</kbd> → Cursor to World Origin, to tidy up.</li>
+  <li><strong>Test the hinge:</strong> with the Lid selected, <kbd>R</kbd> <kbd>X</kbd> <code>-110</code>. The lid should swing back and open like the last picture. Then <kbd>RMB</kbd> (or <kbd>Esc</kbd>) to cancel, so it stays closed.</li>
+  <li><strong>Export:</strong> select <code>Chest</code>, <code>Lid</code> and <code>Handles</code>, then export over your existing <code>chest.glb</code> with the usual settings (Selected Objects, +Y Up, <strong>Apply Modifiers</strong>).</li>
+</ol>
+<p class="progress" data-for="blender"></p>
+
+<div class="recall">
+  <p class="q">Trap check: why must you <em>not</em> press <kbd>Ctrl</kbd>+<kbd>A</kbd> → All Transforms on the Lid?</p>
+  <details><summary>Show answer</summary>Applying <em>location</em> sets the object's location to (0, 0, 0) by moving its origin back to the world origin. That undoes your hinge. Lesson 9's “apply transforms” habit is for static props. A moving part keeps its origin where it pivots. (Applying only rotation and scale is harmless here, because they're already clean.)</details>
+</div>
+
+<p class="aside">I ran these steps with a script in Blender 5.2.2 and imported the result in Godot 4.7.2. The glb contains three nodes, <code>Chest</code>, <code>Handles</code> and <code>Lid</code>, with the Lid at <code>(0, 0.42, −0.3)</code>. That's the hinge, converted to Godot's axes.</p>
+
+<h2>② Completion: animate it in Godot</h2>
+
+<h3>New editor steps (full instructions)</h3>
+
+<p class="aside">The docs: <a href="https://docs.godotengine.org/en/stable/tutorials/animation/introduction.html">“A keyframe defines the value of a property at a point in time.”</a> And: “Two keyframes are all it takes to obtain a smooth motion.”</p>
+
+<ol class="checklist" id="anim">
+  <li>Open <code>chest.tscn</code>. Godot has reimported <code>chest.glb</code>, so the instance now contains a Lid. To reach it, right-click the glb instance → <strong>Editable Children</strong>. Its child nodes appear in the tree.</li>
+  <li>Add an <code>AnimationPlayer</code> as a child of the <code>Chest</code> root. Selecting it opens the <strong>Animation</strong> panel at the bottom.</li>
+  <li>In that panel: <strong>Animation → New</strong>, name it <code>open</code>. Set the length field (top right of the panel, default 1 s) to <code>0.6</code>.</li>
+  <li>Select the <code>Lid</code> node, with the timeline cursor at 0. In the Inspector, open <strong>Transform</strong> and click the small <strong>key icon</strong> next to <strong>Rotation</strong>. Confirm <strong>Create</strong> for the new track, keeping “Create RESET Track(s)” ticked. RESET stores the closed pose.</li>
+  <li>Click the timeline at <code>0.6</code>. Set the Lid's <strong>Rotation x = -110</strong>, and click the Rotation key icon again.</li>
+  <li>Press the panel's play button: the lid swings open. Drag the cursor back to 0 before saving.</li>
+</ol>
+<p class="progress" data-for="anim"></p>
+
+<p>The −110° is the same as in Blender: the export's axis conversion is itself a rotation around X, so X rotations carry over unchanged. Tested: the front edge of the lid rose from 0.52 m to 0.95 m.</p>
+
+<h3>The code: fill in the TODOs</h3>
+
+<p>Attach this to the <code>Chest</code> root (the <code>StaticBody3D</code> from Lesson 10):</p>
+
+<pre><code>extends StaticBody3D
+
+signal opened
+
+@onready var anim: AnimationPlayer = $AnimationPlayer
+
+var is_open := false
+
+func open() -> void:
+	if is_open:
+		return            <span class="c"># TODO 1: explain to yourself why this guard is here</span>
+	is_open = true
+	<span class="c"># TODO 2: play the "open" animation</span>
+	<span class="c"># TODO 3: tell whoever is listening that the chest opened</span></code></pre>
+
+<p>Then in <code>world.gd</code>, the node that knows both sides (Lesson 6):</p>
+
+<pre><code>	<span class="c"># TODO 4: connect all_coins_collected to the chest's open()</span></code></pre>
+
+<p>Done when: collecting the last coin makes the lid swing open.</p>
+
+<div class="recall">
+  <p class="q">Solution</p>
+  <details><summary>Show solution</summary>
+<pre><code>	anim.play("open")                                  <span class="c"># TODO 2</span>
+	opened.emit()                                      <span class="c"># TODO 3</span>
+
+	all_coins_collected.connect($Chest.open)           <span class="c"># TODO 4 (world.gd _ready)</span></code></pre>
+TODO 1: calling <code>open()</code> twice would replay the animation and emit <code>opened</code> twice, so the player would celebrate twice. It's the same reason <code>change_state</code> returns early in Lesson 7.
+  </details>
+</div>
+
+<h2>③ On your own: open it by walking up</h2>
+
+<p>Right now the chest pops open wherever the player happens to be. Make the player walk to it. Everything you need comes from Lessons 3, 6 and 7.</p>
+
+<ol class="checklist" id="own">
+  <li>Before every coin is collected, walking up to the chest does nothing.</li>
+  <li>After the last coin, the chest is <em>unlocked</em>. Walking within about 1.5 m opens it.</li>
+  <li>The player dances when the <strong>chest opens</strong>, not when the last coin is collected.</li>
+  <li><code>chest.tscn</code> never references the world or the player's script. All connections are made in <code>world.gd</code>.</li>
+</ol>
+<p class="progress" data-for="own"></p>
+
+<div class="recall">
+  <p class="q">Hint 1: the shape of the solution</p>
+  <details><summary>Show hint</summary>An <code>Area3D</code> child of the chest (name it <code>OpenZone</code>) with a sphere shape of radius 1.5. An <code>unlock()</code> method that sets a flag. The zone's <code>body_entered</code> calls <code>open()</code> only if unlocked and the body is in the <code>"player"</code> group, exactly like your coin.</details>
+</div>
+<div class="recall">
+  <p class="q">Hint 2: the world's wiring</p>
+  <details><summary>Show hint</summary>Two connections: <code>all_coins_collected</code> → <code>$Chest.unlock</code>, and <code>$Chest.opened</code> → <code>$Player.celebrate</code>. Remove the old <code>all_coins_collected</code> → <code>celebrate</code> and → <code>open</code> connections.</details>
+</div>
+<div class="recall">
+  <p class="q">Solution (tested in Godot 4.7.2)</p>
+  <details><summary>Show solution</summary>
+<pre><code><span class="c"># chest.gd: additions</span>
+@onready var open_zone: Area3D = $OpenZone
+var unlocked := false
+
+func _ready() -> void:
+	open_zone.body_entered.connect(_on_open_zone_body_entered)
+
+func unlock() -> void:
+	unlocked = true
+
+func _on_open_zone_body_entered(body: Node3D) -> void:
+	if unlocked and body.is_in_group("player"):
+		open()
+
+<span class="c"># world.gd, in _ready</span>
+	all_coins_collected.connect($Chest.unlock)
+	$Chest.opened.connect($Player.celebrate)</code></pre>
+Test results: player next to a locked chest → stayed closed. Unlocked, player walks up → opened, <code>opened</code> fired, lid at −110°.
+  </details>
+</div>
+
+<div class="recall">
+  <p class="q">Edge case to predict: the player is <em>already standing</em> next to the chest when they collect the last coin. What happens, and how would you fix it?</p>
+  <details><summary>Show answer</summary>Nothing happens until they step out and back in, because <code>body_entered</code> only fires on <em>entering</em>. Fix: in <code>unlock()</code>, check <code>open_zone.get_overlapping_bodies()</code> for the player and open right away. Or decide it's fine: place the chest away from the coins.</details>
+</div>
+
+<h2>Check yourself</h2>
+
+<div class="quiz">
+  <p class="q">Why did the lid have to become a separate object in Blender?</p>
+  <button data-correct data-why="Each Blender object becomes one Godot node. An animation track moves a node, so the moving part needs its own.">Godot animates nodes, and each object becomes one node</button>
+  <button data-why="Materials work per face. The band proved that in Lesson 10.">A single object can only hold one material slot</button>
+  <button data-why="glTF exports joined meshes fine. The issue is moving one part independently.">glTF cannot export meshes made of many parts</button>
+  <button data-why="Collision is set up in Godot and is unrelated to this.">The collision shape needs a separate lid mesh</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">The lid opens by spinning around its middle instead of the back edge. Cause?</p>
+  <button data-correct data-why="Rotation pivots around the origin. Put it on the hinge: Cursor to Selected, then Origin to 3D Cursor.">Its origin is still at the centre, not the hinge</button>
+  <button data-why="+Y Up changes axes, not the pivot point.">The +Y Up option was ticked during the export</button>
+  <button data-why="The key only stores the value. The pivot comes from the origin.">The rotation key was placed at the wrong time</button>
+  <button data-why="Apply Modifiers affects the mirrored handles, not the lid's pivot.">Apply Modifiers was left unticked when exporting</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why does Lesson 9's “apply all transforms” habit not apply to the lid?</p>
+  <button data-correct data-why="Applying location resets the origin to the world origin, which throws away the hinge you just set.">Applying location would move the origin off the hinge</button>
+  <button data-why="Applying works on any mesh object.">Separated objects cannot have their transforms applied</button>
+  <button data-why="Animation happens in Godot, and Blender has no say in it.">Blender forbids applying transforms on animated objects</button>
+  <button data-why="The habit is about clean static props, and it was never about materials.">Applying transforms would remove the lid's materials</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why does the chest emit <code>opened</code> instead of calling <code>player.celebrate()</code> itself?</p>
+  <button data-correct data-why="The chest stays reusable. The world, which knows both sides, connects it (Lesson 6).">So the chest scene never depends on the player</button>
+  <button data-why="Direct calls are just as fast. This is about coupling.">Signals run faster than ordinary method calls do</button>
+  <button data-why="StaticBody3D scripts can call any method. It's a design choice.">A StaticBody3D cannot call methods on other nodes</button>
+  <button data-why="It plays immediately. The signal is about who knows whom.">The animation only starts after a signal fires</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>The two rules for a moving part, and the Blender steps that satisfy them.</li>
+  <li>How many keyframes a simple open animation needs, and where the RESET track comes from.</li>
+  <li>From Lesson 9: whose origin survives a Join? (It's the opposite operation of today's Separate.)</li>
+</ul>
+
+<p><strong>Kids:</strong> this is a real game loop now: search, collect, run to the chest, celebrate. Watch whether they find the chest without being told. If not, that's the next design problem.</p>
+
+<div class="source">
+  <strong>Primary source: read this next</strong>
+  <a href="https://docs.godotengine.org/en/stable/tutorials/animation/introduction.html">Godot Docs: Introduction to the animation features</a>. It walks through the same AnimationPlayer workflow (in 2D), plus the extras: easing curves, track loop modes and autoplay.
+</div>
+
+<p class="ask">Lid flies off sideways, spins around the wrong edge, or nothing appears in the Animation panel? Tell me which step and what you see. Each of these maps to a single step above.</p>
+
+<nav class="nav">
+  <span>← <a href="../0010-edit-mode-treasure-chest.html">Lesson 10: Edit Mode &amp; chest</a></span>
+  <span>Reference: <a href="../../reference/blender-to-godot.html">Pipeline</a> · <a href="../../reference/animation-and-import.html">Animation</a></span>
+</nav>
+
+</main>
+</body>
+</html>

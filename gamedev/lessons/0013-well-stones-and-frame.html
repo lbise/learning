@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 13: The well's stones and frame</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/components.js" defer></script>
+</head>
+<body>
+<main>
+
+<p class="kicker">Lesson 13 · Blender track</p>
+<h1>The well's stones and frame</h1>
+<p class="subtitle">Grant's low-poly well, Parts 1–2, each followed by an exercise: a proper stone ring for your campfire, then a village sign.</p>
+
+<dl class="meta">
+  <dt>Goal</dt><dd>Model in the low-poly game style: chiselled stones, bending a line into a ring, notched wood, and mirroring across an Empty.</dd>
+  <dt>Time</dt><dd>Two sessions. Part 1 is 15 min and Part 2 is 17 min of video (about 40–50 min each when you follow along), plus a 20-minute exercise each.</dd>
+  <dt>The win</dt><dd>The well's stone base and wooden frame, your campfire with a real stone ring, and a sign for your village</dd>
+  <dt>Format</dt><dd>Part 1 → <strong>Exercise A</strong> (stone ring) → Part 2 → <strong>Exercise B</strong> (village sign) → recall.</dd>
+  <dt>Note</dt><dd>This series uses <strong>Blender 4.2</strong> and you have 5.2. Menus are almost the same. If a button isn't where Grant's is, tell me what you see.</dd>
+</dl>
+
+<div class="figs">
+  <figure><a href="../assets/img/0013/a4-campfire-ring.png"><img src="../assets/img/0013/a4-campfire-ring.png" alt="The campfire from Lesson 11 surrounded by a ring of chiselled grey stones"></a>
+    <figcaption><b>Exercise A</b> your campfire with a stone ring, built the way Grant builds the well base</figcaption></figure>
+  <figure><a href="../assets/img/0013/b3-sign-done.png"><img src="../assets/img/0013/b3-sign-done.png" alt="A wooden village sign: two notched posts, a top beam and a pale plank board"></a>
+    <figcaption><b>Exercise B</b> a village sign with notched posts, the second post mirrored</figcaption></figure>
+</div>
+
+<h2>Warm-up: from memory</h2>
+
+<div class="recall">
+  <p class="q">From Lesson 12: you typed 5 m into Dimensions. What else changed, and what do you do next?</p>
+  <details><summary>Show answer</summary>The object's <strong>scale</strong> changed. Press <kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale to bake it into the mesh. Grant makes the same point at the start of Part 1: always have scale at 1 before Edit Mode or modifiers.</details>
+</div>
+<div class="recall">
+  <p class="q">From Lesson 11: which pivot point rotates copies around a centre?</p>
+  <details><summary>Show answer</summary><strong>3D Cursor</strong>, with the cursor at the centre. Grant uses it to rotate each ring of stones in Part 1.</details>
+</div>
+
+<h2>Session 1: Part 1, then the stone ring</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=QPh8h0hWkg0&list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-">Part 1: The stone base</a> (15 min)</h3>
+<p class="aside">This video has no chapter list. I made the timings below from its captions, so they're approximate.</p>
+<table>
+  <tr><th>Around</th><th>Watch for</th></tr>
+  <tr><td>01:30 Scale, then apply</td><td>Non-uniform scale makes modifiers and bevels behave oddly. So: <kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale before Edit Mode. Same rule as Lesson 12.</td></tr>
+  <tr><td>02:30 Bevel (<kbd>Ctrl</kbd>+<kbd>B</kbd>)</td><td>All edges selected, bevel, and the cube becomes a chiselled stone.</td></tr>
+  <tr><td>03:00–04:00 Loop cuts and <strong>Randomize</strong></td><td>Mesh → Transform → Randomize. Keep the amount small: a bit wobbly, not melted.</td></tr>
+  <tr><td>04:30 <kbd>Ctrl</kbd>+<kbd>X</kbd> dissolve edges</td><td><strong>Dissolve</strong> removes edges but keeps the faces. <kbd>X</kbd> → Edges deletes the faces around them too.</td></tr>
+  <tr><td>05:30 X-ray to select the back</td><td>The Lesson 11 skill again.</td></tr>
+  <tr><td>08:00 <strong>Spares</strong> collection</td><td>Duplicate the originals into a hidden “Spares” collection before a <em>destructive</em> step like Join. A habit worth stealing.</td></tr>
+  <tr><td>09:30–11:30 Join, then <strong>Simple Deform → Bend</strong></td><td><strong>Key idea.</strong> A straight line of stones along X, bent 360° around Z, becomes a ring. It only works if the line runs along X with its rotation applied.</td></tr>
+  <tr><td>11:30–13:30 More rings</td><td>Duplicate, rotate around the 3D cursor, scale. Pivot point again.</td></tr>
+  <tr><td>14:00 Decimate, copy modifiers</td><td>Decimate removes faces for extra jaggedness. <kbd>Ctrl</kbd>+<kbd>L</kbd> → Copy Modifiers copies from the <em>active</em> object, like Link Materials in Lesson 12.</td></tr>
+</table>
+<p>Grant uses the numpad for views. Without one: View → Viewpoint → Front. He places the 3D cursor with <kbd>Shift</kbd>+<kbd>RMB</kbd>, which needs no numpad.</p>
+
+<h3>Exercise A: a stone ring for your campfire</h3>
+
+<p>Practises the whole Part 1 technique on your own prop. Open <code>blender/campfire.blend</code>. The stone ring goes where the eight ico-sphere stones were, at a radius of about <strong>0.55 m</strong>.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0013/a1-one-stone.png"><img src="../assets/img/0013/a1-one-stone.png" alt="A single grey stone: a bevelled box with a few loop cuts and slightly uneven vertices"></a>
+    <figcaption><b>Step 2</b> one stone: bevelled, loop-cut, randomized</figcaption></figure>
+  <figure><a href="../assets/img/0013/a2-line.png"><img src="../assets/img/0013/a2-line.png" alt="A straight row of about fourteen stones of slightly different sizes"></a>
+    <figcaption><b>Step 3</b> a line of varied stones, about 3.5 m long along X</figcaption></figure>
+  <figure><a href="../assets/img/0013/a3-bent-ring.png"><img src="../assets/img/0013/a3-bent-ring.png" alt="The row of stones bent into a closed ring"></a>
+    <figcaption><b>Step 5</b> joined and bent 360°: a ring</figcaption></figure>
+  <figure><a href="../assets/img/0013/a4-campfire-ring.png"><img src="../assets/img/0013/a4-campfire-ring.png" alt="The ring moved over the campfire, decimated for jagged stones"></a>
+    <figcaption><b>Step 6</b> moved over the fire, with Decimate added</figcaption></figure>
+</div>
+
+<ol class="checklist" id="ring">
+  <li>Grant's habit: make a <code>Spares</code> collection (<kbd>M</kbd> → New Collection), move the old ico-sphere stones into it, and hide it with the eye icon in the Outliner.</li>
+  <li><strong>One stone</strong> away from the fire: <kbd>Shift</kbd>+<kbd>RMB</kbd> to put the 3D cursor on empty ground, then <kbd>Shift</kbd>+<kbd>A</kbd> → Cube. Make it about <strong>28 × 20 × 16 cm</strong> (Dimensions, as in Lesson 12), then <kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale. In Edit Mode: bevel all edges with <kbd>Ctrl</kbd>+<kbd>B</kbd> (a few cm), add three loop cuts, then Mesh → Transform → Randomize. These stones are smaller than Grant's, so start with a small amount (around <code>0.01</code>–<code>0.02</code>) and raise it until they look chiselled.</li>
+  <li><strong>A line along X:</strong> <kbd>Shift</kbd>+<kbd>D</kbd> <kbd>X</kbd> to copy stones side by side, overlapping slightly. Vary two or three of them in Edit Mode, as Grant does (shorter, taller, a loop removed with <kbd>Ctrl</kbd>+<kbd>X</kbd>). Keep going until the line is about <strong>3.5 m</strong> long. <em>Why 3.5? Work it out: what length of line wraps into a circle of radius 0.55 m?</em></li>
+  <li>Copy the whole line into <code>Spares</code> (the originals). Then select the line, <kbd>Shift</kbd>-click the stone at the <strong>start</strong> of it so it's active, and <kbd>Ctrl</kbd>+<kbd>J</kbd>.</li>
+  <li>Modifiers → Add Modifier → Deform → <strong>Simple Deform</strong>: <strong>Bend</strong>, axis <strong>Z</strong>, angle <strong>360°</strong>. The line closes into a ring.</li>
+  <li>The ring forms <em>beside</em> the object's origin, not around it. Move it with <kbd>G</kbd> until it surrounds the fire (check in top view). Then add <strong>Decimate</strong> (ratio about 0.5) for jagged stones. Save.</li>
+</ol>
+<p class="progress" data-for="ring"></p>
+
+<div class="recall">
+  <p class="q">Answer to step 3: why 3.5 m?</p>
+  <details><summary>Show answer</summary>The line becomes the ring's circumference: 2π × 0.55 ≈ <strong>3.46 m</strong>. Make it longer and the ring gets bigger. In my test, a 3.46 m line bent 360° gave a ring about 1.1 m across, so radius 0.55 ✔.</details>
+</div>
+
+<h2>Session 2: Part 2, then the village sign</h2>
+
+<h3><a href="https://www.youtube.com/watch?v=gyr59jaWT0U&list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-">Part 2: The wooden frame</a> (17 min)</h3>
+<table>
+  <tr><th>Around</th><th>Watch for</th></tr>
+  <tr><td>00:30–02:00 First beam</td><td>X-ray, face mode, pull the top up. Then he switches the pivot back from 3D Cursor to <strong>Median Point</strong> before rotating, because Part 1 left it on the cursor. Watch for that.</td></tr>
+  <tr><td>02:00 <strong>Notches</strong></td><td><strong>Key idea.</strong> <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> bevels a <em>vertex</em>, <kbd>J</kbd> joins two vertices with an edge, and <kbd>G</kbd><kbd>G</kbd> slides a vertex along its edge. Together they make a “bashed wood” notch.</td></tr>
+  <tr><td>03:00 Quads vs n-gons</td><td>Loop cuts only pass through four-sided faces. N-gons still work in a game engine, but they limit further modelling.</td></tr>
+  <tr><td>03:30 Knife (<kbd>K</kbd>)</td><td>Cut your own edges where a loop cut can't go.</td></tr>
+  <tr><td>06:30 Varying a copy</td><td>Rotate a duplicate 180° and it looks like a different beam.</td></tr>
+  <tr><td>07:30 Challenge</td><td><strong>Try the struts and top beam before watching.</strong></td></tr>
+  <tr><td>12:00 Unapplied scale</td><td>A bevel stretched further one way than the other is the symptom of unapplied scale.</td></tr>
+  <tr><td>13:00–16:30 <strong>Mirror across an Empty</strong></td><td>An Empty is an invisible helper object. Used as the Mirror Object, it sets the mirror line instead of the object's own origin. That's the fix for the Lesson 10 “where's my mirror?” problem.</td></tr>
+</table>
+
+<h3>Exercise B: a village sign</h3>
+
+<p>Practises notches, the Empty as mirror object, and Dimensions plus Apply. Target: two posts <strong>1.2 m apart</strong>, <strong>1.6 m tall</strong>, a top beam and a sign board. Save it as <code>blender/village_sign.blend</code>.</p>
+
+<div class="figs">
+  <figure><a href="../assets/img/0013/b1-post-notches.png"><img src="../assets/img/0013/b1-post-notches.png" alt="A single square post with two small notches cut into its corners"></a>
+    <figcaption><b>Steps 1–2</b> one post at X 0.6, with two notches</figcaption></figure>
+  <figure><a href="../assets/img/0013/b2-mirrored-post.png"><img src="../assets/img/0013/b2-mirrored-post.png" alt="Two identical posts with an orange cross marking the Empty halfway between them"></a>
+    <figcaption><b>Step 3</b> mirrored across an Empty (orange cross) at the centre</figcaption></figure>
+  <figure><a href="../assets/img/0013/b3-sign-done.png"><img src="../assets/img/0013/b3-sign-done.png" alt="Finished sign: posts, top beam and a pale board"></a>
+    <figcaption><b>Steps 4–5</b> top beam and board</figcaption></figure>
+</div>
+
+<ol class="checklist" id="sign">
+  <li><strong>Post:</strong> a cube with Dimensions <strong>14 × 14 × 160 cm</strong>, then <kbd>Ctrl</kbd>+<kbd>A</kbd> → Scale. Move it to <strong>X 0.6</strong>, with its bottom on the ground (<strong>Z 0.8</strong>). Wood material.</li>
+  <li><strong>Two notches</strong>, Grant's way: a loop cut where you want one, select a corner vertex on it, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> a little, <kbd>J</kbd> the two new vertices, then <kbd>G</kbd><kbd>G</kbd> to slide. One near the top, one lower on a different corner.</li>
+  <li><strong>Mirror across an Empty:</strong> Cursor to World Origin, <kbd>Shift</kbd>+<kbd>A</kbd> → Empty → Plain Axes, name it <code>MirrorEmpty</code>. On the post: Mirror modifier, <strong>Mirror Object</strong> = <code>MirrorEmpty</code>. The second post appears at X −0.6. Test it: move the Empty along X and watch the copy follow, then <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</li>
+  <li><strong>Top beam:</strong> 160 × 16 × 14 cm at <strong>Z 1.55</strong>, resting on both posts. Tilt it a degree or two (<kbd>R</kbd> <kbd>Y</kbd> <code>2</code>) and give it one notch, for character.</li>
+  <li><strong>Board:</strong> 100 × 5 × 40 cm at about <strong>Z 1.15</strong>, just in front of the posts, with a second, lighter <code>Plank</code> material. Save.</li>
+</ol>
+<p class="progress" data-for="sign"></p>
+
+<div class="recall">
+  <p class="q">Predict: in step 3, why not just add the Mirror modifier without an Empty?</p>
+  <details><summary>Show answer</summary>The post's origin sits in its own middle (X 0.6), so it would mirror onto itself and nothing visible would happen. That's exactly what Grant shows at 13:00. The Empty puts the mirror line at X 0, without moving the post's origin.</details>
+</div>
+
+<p class="aside">Taking these into Godot, as you did with the other props? Join the sign's parts, or select them all, and tick <strong>Apply Modifiers</strong> so the mirrored post comes along (Lesson 10). The ring's Simple Deform and Decimate also need Apply Modifiers.</p>
+
+<p class="aside">All pictures were rendered from a Blender 5.2.2 script that follows these steps. The notches in the pictures are approximate: yours will be shaped by hand.</p>
+
+<h2>Recall: after both sessions</h2>
+
+<div class="quiz">
+  <p class="q">Your line of stones bends into a twisted mess instead of a ring. Most likely cause?</p>
+  <button data-correct data-why="Simple Deform bends along the object's own X. Line it up along X and apply the rotation (Grant, around 10:30).">The line doesn't run along the object's X axis</button>
+  <button data-why="Decimate runs after the bend and only removes faces.">The Decimate modifier was added before the bend</button>
+  <button data-why="Bend works with any number of stones. Length only changes the ring size.">There are too few stones to form a full circle</button>
+  <button data-why="Materials have no effect on deformation.">The stones still had different materials applied</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q"><kbd>Ctrl</kbd>+<kbd>X</kbd> versus <kbd>X</kbd> → Edges on an edge loop: the difference?</p>
+  <button data-correct data-why="Dissolve merges the faces either side. Delete removes the edges and the faces touching them.">Dissolve keeps the faces, delete leaves holes</button>
+  <button data-why="They differ: Delete leaves holes, Dissolve doesn't.">There is none, both shortcuts do the same thing</button>
+  <button data-why="Both work in Edit Mode on the selection.">Dissolve only works in Object Mode on whole meshes</button>
+  <button data-why="Neither moves vertices.">Delete keeps the faces, dissolve moves the vertices</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">Why does Grant copy the stones into a hidden Spares collection before joining?</p>
+  <button data-correct data-why="Join is destructive. The spare copies let you go back to separate stones later.">Joining is destructive, so originals are kept safe</button>
+  <button data-why="Join works the same whether other collections exist or not.">Join only works on objects inside a collection</button>
+  <button data-why="Hidden objects still use memory. It's about being able to go back.">Hidden collections make the scene render faster</button>
+  <button data-why="Modifiers copy with Ctrl+L. Spares are for undoing a join later.">Modifiers can only be copied from hidden objects</button>
+  <p class="feedback"></p>
+</div>
+
+<div class="quiz">
+  <p class="q">What does an Empty add when used as the Mirror Object?</p>
+  <button data-correct data-why="The Empty's position sets the mirror plane, so the object's own origin can stay where it is.">It sets the mirror line without moving any origin</button>
+  <button data-why="Empties never render. They're invisible helpers.">It renders as a visible pole between the halves</button>
+  <button data-why="Empties have no mesh to mirror.">It adds its own mesh to the mirrored result</button>
+  <button data-why="Clipping is a separate tick box on the modifier.">It switches Clipping on for the Mirror modifier</button>
+  <p class="feedback"></p>
+</div>
+
+<p class="score" id="score"></p>
+
+<h2>For next session (spaced recall)</h2>
+<ul>
+  <li>The four steps from a single stone to a ring, and the one rule Simple Deform depends on.</li>
+  <li>How to make a notch: three shortcuts, in order.</li>
+  <li>From Lesson 12: <kbd>Alt</kbd>+<kbd>D</kbd> vs <kbd>Shift</kbd>+<kbd>D</kbd>.</li>
+</ul>
+
+<p>Next: <strong>Lesson 14</strong>, the well's Parts 3–5 (roof tiles, winch and rope, and the finish). Then <strong>Lesson 15</strong> is back in Godot with the finished well.</p>
+
+<div class="source">
+  <strong>Primary source: the videos themselves</strong>
+  <a href="https://www.youtube.com/playlist?list=PLn3ukorJv4vvMwZPLzlajVII2zJd-_BM-">Grant Abbitt: Modelling a Low-Poly Well</a>, Parts 1–2. Tool details are in the <a href="https://docs.blender.org/manual/en/latest/">Blender 5.2 manual</a>.
+</div>
+
+<p class="ask">Ring twisting instead of bending, a notch that won't join, or a menu that differs from Grant's 4.2? Tell me the step and what you see.</p>
+
+<nav class="nav">
+  <span>← <a href="0012-street-lights-night.html">Lesson 12</a> · <a href="0014-well-roof-winch-carrot.html">Lesson 14: Finishing the well</a> →</span>
+  <span>Reference: <a href="../reference/blender-basics.html">Blender basics</a></span>
+</nav>
+
+</main>
+</body>
+</html>

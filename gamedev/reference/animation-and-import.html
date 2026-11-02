@@ -61,6 +61,18 @@ func update_animation(dir: Vector3, sprinting: bool) -> void:
 </section>
 
 <section>
+<h2>Keyframing your own animation (Lesson 11)</h2>
+<table>
+  <tr><td>Reach imported children</td><td>Right-click the glb instance → Editable Children</td></tr>
+  <tr><td>New clip</td><td>AnimationPlayer → Animation panel → Animation → New. Set the length at the top right</td></tr>
+  <tr><td>Keyframe</td><td>Select the node, put the cursor at a time, click the key icon next to the Inspector property</td></tr>
+  <tr><td>RESET track</td><td>Created with the first key. Stores the rest pose</td></tr>
+  <tr><td>Play once</td><td><code>anim.play("open")</code>, guarded by an <code>is_open</code> flag</td></tr>
+</table>
+<p class="aside">Source: <a href="https://docs.godotengine.org/en/stable/tutorials/animation/introduction.html">Introduction to the animation features</a></p>
+</section>
+
+<section>
 <h2>UAL mannequin: useful clips</h2>
 <p><code>Idle</code>, <code>Walk</code>, <code>Jog_Fwd</code>, <code>Sprint</code>, <code>Jump</code> (airborne loop), <code>Jump_Start</code>, <code>Jump_Land</code>, <code>Roll</code>, <code>Crouch_Idle</code>, <code>Crouch_Fwd</code>, <code>Sword_Attack</code>, <code>Punch_Jab</code>, <code>Hit_Chest</code>, <code>Death01</code>, <code>Swim_Fwd</code>, <code>Dance</code>, <code>Interact</code>, <code>PickUp_Table</code>. 1.83 m tall, origin at the feet, faces +Z.</p>
 <p class="aside">Source: <a href="https://quaternius.itch.io/universal-animation-library">Quaternius Universal Animation Library</a> (CC0)</p>
