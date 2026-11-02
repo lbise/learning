@@ -58,6 +58,19 @@ Checked Oct 2026 against Godot 4.7 (docs "stable" = 4.7 branch) and Blender 5.2 
 - [Blender Studio: Blender 2.8 Fundamentals](https://studio.blender.org/training/blender-2-8-fundamentals/)
   Free and official, but the UI is dated. The rest of Blender Studio is paid. Use for: second opinions on fundamentals.
 
+### Grant Abbitt: environment-art path (researched 2 Nov 2026)
+**Paid (GameDev.tv, Black Friday prices until 2 Dec 2026; Udemy ratings via proxy):**
+- [Blender Low Poly Landscapes](https://gamedev.tv/courses/blender-low-poly-landscapes): 6h12, Blender 4.x, **$10** (was $49), Udemy 4.9/5 from 1,720 ratings. Covers triangle and round trees, base, booleans, paving and rocks, grass and plants, colour, lighting, Eevee vs Cycles. Best fit for the mission now.
+- [Blender Texture Painting: Stylised Models](https://gamedev.tv/courses/blender-texture-painting): 6h18, 4.3, $10, Udemy 4.8 (370). A hand-painted stylised turret. Phase B candidate.
+- [Blender Isometric Scenes](https://gamedev.tv/courses/blender-isometric-scene-creation): 8h13, intermediate, $10. Isometric dioramas: fits the later cyberpunk interest.
+- [Blender Environment Artist 5.1](https://gamedev.tv/courses/blender-environment-artist-5): 14h15, $10, Udemy 4.8 (4,541). Leans PBR, sculpting and realistic textures: later, not now.
+- [Black Friday Beginner Blender Artist bundle](https://gamedev.tv/bundles/beginner-blender-black-friday-2026): **$30**. Complete Blender Creator, Isometric, Skill Builder, Texture Painting, Low Poly Landscapes, plus a Substance intro.
+- Live programs (Ultimate 3D Artist $599; Game Asset Creator $499, about 6 h/week): no, too much for 3 h/week.
+- [From Blender to Godot](https://gamedev.tv/courses/blender-to-godot) (Stephen Woods, not Grant), $10. Only if the export side ever needs more.
+
+**Free YouTube, best ~10 for environment art (youtu.be/ID):** mvE_TykzJQU Essential Tips for Low Poly Scenes (12m, 2024); Komry1kruHs Low-Poly Game Optimised Textures (palette, 7m, 2024) + nEUUasLyHIA Master Low Poly Texturing; Y3vcFgutFMI 15 Minutes One Texture (Blender 5, 2026); jdTabPJuqdc Low Poly Trees; 1H2YaRPfpdM Low Poly Rocks; lthQq42f3K0 Low Poly Castle Landscape; RjxIaq8OiQg Simple Trick for Low Poly Landscapes; QE4aiWp5bZk Modular Building tips; Cdh2IZmW5ZQ Game Assets & Packs tips; j1EhPPFrZgk Asset Browser 5.1; EyK1F0BAl5Q Poly Count Explained; DmuZTw3UZ-c Blender 5 UV Unwrapping; 7kSRXnAi7uA Blender 5.1 Texture Painting (21m); F_JK9eaYYTQ Low Poly Animal + 7WYsdzSh5Nc Rigging low-poly animals. Gap: no recent free start-to-finish stylised scene project (the free ones are from 2019-2020, Blender 2.8).
+- Playlists: [Low-Poly Modelling](https://www.youtube.com/playlist?list=PLn3ukorJv4vsPy9J9x4--pat6jaPqNm11) (32 videos, 2019-2026), [Texture Painting](https://www.youtube.com/playlist?list=PLn3ukorJv4vtvjZvdiOeoSA5kBohtnDOF) (30, to 5.1), [UV Unwrapping](https://www.youtube.com/playlist?list=PLn3ukorJv4vve0s-cq8VWS4jRQCdWSU3N) (11, to 2026).
+
 ### Free assets (all CC0: commercial use OK, no attribution needed)
 - [Kenney](https://kenney.nl/assets) ([licence FAQ](https://kenney.nl/support)): stand-in 3D/2D assets.
 - [Quaternius](https://quaternius.com/) ([FAQ](https://quaternius.com/faq.html)): low-poly characters and props, often rigged.

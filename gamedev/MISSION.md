@@ -1,27 +1,26 @@
-# Mission: Making 3D games with Godot and Blender
+# Mission: Stylised environment art in Blender, with a game link
 
 ## Why
-A creative hobby: build small 3D games I can play with my two daughters (4 and 6) and that make them laugh. If one turns out good enough, publishing on Steam would be a bonus. Not a career change. I already work as an embedded software engineer.
+A creative hobby I've fallen for: making stylised (non-realistic) 3D environments in Blender, the kind you'd see in a game. Games are still the context: my scenes and assets should be usable in Godot, and some day become worlds for small games my daughters (4 and 6) can play. Not a career change. I'm an embedded software engineer.
 
-## Current project: the rabbit game
-A small, cheerful 3D game where my daughters play a rabbit collecting carrots in a forest. No way to lose, silly celebrations, lots of feedback.
+## Current project: a stylised forest-clearing scene
+A small game-style environment built piece by piece from my own assets (trees, rocks, foliage, props, my well and campfire), finished as a nice render, and importable into Godot, where it can become the rabbit game's forest.
 
 ## Success looks like
-- **Finish the rabbit game**: one real forest level my daughters can play on their own, with gamepad or keyboard + mouse and a fixed, automatic camera
-- **Design that level properly**: block it out first, guide players with paths and landmarks, then dress it with my own props
-- **Model the game's assets myself** in Blender: low-poly trees and forest props, carrots, a power-up
-- **Model the rabbit, and animate it**: at least a squash-and-stretch hop, ideally a simple rig (body, head, ears, legs) with hop and idle animations driven by my state machine
-- Later: a prototype in the styles I like (third-person survival like Valheim, isometric cyberpunk action), and a game jam entry
-- Someday, maybe: publish a game on Steam or itch.io
+- Model a consistent kit of stylised assets on my own: trees, rocks, bushes, ground pieces, props
+- Give them proper colour and texture (UVs, palette or hand-painted textures) that survives export to Godot
+- Compose them into a finished environment scene with good lighting, and render it to an image I'm proud of
+- Bring the scene into Godot as a playable space (the rabbit game's forest), with me only doing the art and design
+- Later: a living scene (simple animation, a rigged rabbit) and more environments in other styles (Valheim-like, cyberpunk)
 
 ## Constraints
 - About 3 hours per week
-- Already programs in C and Python professionally: no need to teach programming basics. Code is the least interesting part, so reuse it and keep the focus on modelling, level design and animation
-- Modelling skills are still at beginner level: build up gradually, with pictures of every build step
-- Linux (Arch, Hyprland), Godot 4.7, Blender 5.2, no numpad, Swiss French keyboard
-- Keep following Grant Abbitt's Blender tutorials alongside the game (other trusted authors are fine too)
+- Learn mainly from Grant Abbitt (YouTube, possibly a paid course of his). Other trusted authors only to fill gaps
+- Still a modelling beginner: build up gradually, with pictures of every build step
+- Programmer by trade: code is the least interesting part. The teacher handles any Godot code
+- Linux (Arch, Hyprland), Blender 5.2, Godot 4.7, no numpad, Swiss French keyboard
 
-## Out of scope
-- Mobile games
-- Career-level or studio production pipelines
-- Losing, enemies that hurt, timers (the players are 4 and 6)
+## Out of scope (for now)
+- Realistic or photoreal rendering
+- Game programming and level scripting (the rabbit game is on hold, kept working by the teacher)
+- Mobile games, studio pipelines

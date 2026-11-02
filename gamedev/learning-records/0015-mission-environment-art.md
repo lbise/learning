@@ -1,0 +1,5 @@
+# Mission shift: Blender environment art is now the main goal
+
+After Lessons 13-15 he said he's "starting to love Blender" and wants to spend his time on it rather than Godot. Asked what he likes most: "environment art with a game link (not realistic)". Same 3 h/week. Instead of keeping the rabbit game as a side quest, he proposed making an environment scene the side project. Agreed: a stylised forest-clearing scene, which can later become the rabbit game's forest. He wants to keep learning from Grant Abbitt and asked whether to buy one of Grant's courses.
+
+**Implications**: Lessons are Blender-first: Grant video companions plus exercises that build the scene's asset kit, with images and a cheat sheet. Godot work is mine (code). His Godot involvement becomes rare and optional (dropping assets into the forest level). L15 (blockout) and the chest animation stay parked. Environment-art topics come next: kit consistency, UVs/texturing, composition, lighting and rendering. Supersedes LR-0013's emphasis on the game as the main project.
